@@ -41,6 +41,12 @@ def main():
         long_description=long_description,
         license='BSD',
         
+    entry_points={
+                    'console_scripts': [
+                                        'modelr-server = modelr.webserver:main',
+                                        ],
+                    }
+
           )
 
 
