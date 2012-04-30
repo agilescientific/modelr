@@ -1,0 +1,3 @@
+include README.rst license.rst
+recursive-include doc *
+
