@@ -13,7 +13,7 @@ def main():
         
 
     setup(
-        name='modlr',
+        name='modelr',
         version=version_str,
         
         author='Agile Geoscience.',
