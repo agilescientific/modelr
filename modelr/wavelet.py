@@ -1,10 +1,9 @@
 '''
+==============================================================
+modelr.wavelet --- Module Containing wavelet functions.
+==============================================================
 
-Module Containing wavelet functions.
-
-Created on Apr 30, 2012
-
-@author: sean
+TODO: long doc here
 '''
 import numpy as np
 
@@ -12,30 +11,6 @@ def ricker(points, a):
     """
     Also known as the "mexican hat wavelet",
     models the function:
-    A ( 1 - x^2/a^2) exp(-t^2/a^2),
-    where ``A = 2/sqrt(3a)pi^1/3``
-
-    Parameters
-    ----------
-    a: scalar
-        Width parameter of the wavelet.
-    points: int, optional
-        Number of points in `vector`. Default is ``10*a``
-        Will be centered around 0.
-    Returns
-    -----------
-    vector: 1-D ndarray
-        array of length `points` in shape of ricker curve.
-    Examples
-    --------
-    >>> import matplotlib.pyplot as plt
-    >>> points = 100
-    >>> a = 4.0
-    >>> vec2 = ricker(a,points)
-    >>> print len(vec2)
-    100
-    >>> plt.plot(vec2)
-    >>> plt.show()
     """
 
     A = 2 / (np.sqrt(3 * a) * (np.pi ** 0.25))

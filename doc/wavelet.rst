@@ -1,10 +1,16 @@
-=========
-Wavelet
-=========
+============================
+Scientific Code
+============================
+ 
+.. automodule:: modelr.wavelet
+    :members:
 
-This is 
+.. automodule:: modelr.reflectivity
+    :members:
 
-.. autofunction:: modelr.wavelet.klauder
+.. automodule:: modelr.rock_properties
+    :members:
 
-.. autofunction:: modelr.wavelet.ricker
+.. automodule:: modelr.zoep_calc
+    :members:
 

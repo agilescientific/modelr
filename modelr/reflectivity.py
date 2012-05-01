@@ -1,7 +1,9 @@
 '''
-Created on May 1, 2012
+================================================================
+modelr.reflectivity -- TODO short docstring here
+================================================================
 
-@author: sean
+TODO: long doc here 
 '''
 import numpy as np
 from modelr.rock_properties import zoeppritz
