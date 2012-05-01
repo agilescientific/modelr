@@ -69,3 +69,20 @@ def ricker_freq(points, f):
     A = (1 - (2 * pft)) * np.exp(-pft)
       
     return A
+
+def klauder(points, fu, fl):
+    """
+    The autocorrelation of a linearly swept frequency-modulated sinuusoidal signal used in Vibroseis.
+    It is zero-phase, and symmetrical about time t = 0 ms.
+    Requires f_upper and f_lower, and a duration, which we can interpret from points.
+    """
+    
+    T = points * 0.001
+    t = np.linspace(-.1, .1, points)
+    k = (fu + fl) / T
+    f0 = (fu + fl) / 2.0
+    i = (0 + 1j)
+    A = np.real( np.sin(np.pi * k * t * (T - t))/(np.pi * k * t * np.exp(2.0 * np.pi * f0 * t * i)))
+
+    return A
+
