@@ -51,10 +51,15 @@ def ricker_freq(points, f):
     """
     Also known as the "mexican hat wavelet",
     models the function:
+    
     A = (1-2 \pi^2 f^2 t^2) e^{-\pi^2 f^2 t^2}
     
     The amplitude ''A'' of the [[Ricker wavelet]] with peak frequency ''f'' at time ''t'' is computed like so:
     
+    :params points: adsf
+    :params f: asdf 
+    
+    :returns: adf
     
     """
     

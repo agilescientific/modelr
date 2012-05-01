@@ -23,7 +23,6 @@ class Argument(object):
             else:
                 return self.default
         
-        print "self.action", self.action
         arg = args[0]
         if self.action != 'list':
             try:
@@ -36,7 +35,6 @@ class Argument(object):
             new_args = []
             for arg in arg.split(','):
                 try:
-                    print "self.type", self.type, arg
                     value = self.type(arg)
                 except:
                     raise ArgumentError("argument %s: invalid %s value: %r" % (self.name, self.type.__name__, arg))
@@ -120,7 +118,6 @@ def main():
     parser = URLArgumentParser('description')
     
     parser.add_argument('script', required=True, type=str)
-    print parser.parse_ulr(path)
     
     
 if __name__ == '__main__':
