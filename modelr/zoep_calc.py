@@ -12,7 +12,8 @@
 #               Numpy & Matplotlib
 #
 #       Written by: Wes Hamlyn
-#       Last Mod:   May 14, 2011
+#       Modified by: Sean Ross-Ross
+#       Last Mod:   May 1, 2012
 #
 #   Use for whatever you like but at your own risk...
 #
@@ -22,8 +23,11 @@ from numpy import sin, cos, radians, arcsin
 
 
 def zoeppritz(vp1, vs1, rho1, vp0, vs0, rho0, theta1):
+    '''
+    Documentation goes here. 
+    '''
         # Get the input data from the text controls tc*
-    p = sin(radians(float(theta1))) / vp1 # ray parameter
+    p = sin(radians(theta1)) / vp1 # ray parameter
     
     # Calculate reflection & transmission angles for Zoeppritz
     theta1 = radians(theta1)   # Convert theta1 to radians
@@ -54,7 +58,17 @@ def zoeppritz(vp1, vs1, rho1, vp0, vs0, rho0, theta1):
     # This is the important step, calculating coefficients for all modes
     # and rays result is a 4x4 matrix, we want the R[0][0] element for
     # Rpp reflectivity only
-    zoep = np.dot(np.linalg.inv(M), N)[0][0]
+    
+    if M.ndim == 3:
+        zoep = np.zeros([M.shape[-1]])
+        for i in range(M.shape[-1]): 
+            Mi = M[..., i]
+            Ni = N[..., i]
+            dt = np.dot(np.linalg.inv(Mi), Ni)
+            zoep[i] = dt[0][0]
+    else:
+        dt = np.dot(np.linalg.inv(M), N)
+        zoep = dt[0][0]
     
     return zoep
-            
+    

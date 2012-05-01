@@ -64,7 +64,7 @@ class URLArgumentParser(object):
     '''
     Parse a key=value arguments in a url string.
     '''
-
+    
     def __init__(self, description):
         '''
         Constructor

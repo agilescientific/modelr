@@ -1,4 +1,7 @@
 '''
+
+Module Containing wavelet functions.
+
 Created on Apr 30, 2012
 
 @author: sean

@@ -4,29 +4,24 @@ Created on Apr 30, 2012
 @author: sean
 '''
 from argparse import ArgumentParser
-from modelr.zoep_calc import zoeppritz
-from modelr.wavelet import ricker_freq
-
-short_description = 'Create an ...'
-
-#import matplotlib.mlab as mlab
+from modelr.reflectivity import create_wedge
 import matplotlib
-#from matplotlib.pyplot import figure, show
-import numpy as np
-#import matplotlib.transforms as mtransforms
 import matplotlib.pyplot as plt
 import tempfile
 from os import unlink
 from modelr.urlargparse import URLArgumentParser
-#from scipy.signal import ricker
+from modelr.rock_properties import RockProperties
 
+short_description = 'Create an ...'
 
 def create_parser():
     parser = URLArgumentParser('This is the default script')
     
     parser.add_argument('title', default='Plot', type=str, help='The title of the plot')
-    parser.add_argument('xlim', type=float, action='list', help='The range of amplitudes to plot eg. xlim=-1.0,1.0')
-    parser.add_argument('time', default=150, type=int, help='The size in Mili seconds of the plot')
+    parser.add_argument('xlim', type=float, action='list')
+    parser.add_argument('pad', default=50, type=int, help='The time in mili seconds aboe and below the wedge')
+    parser.add_argument('max_thickness', default=50, type=int, help='The maximum thickness of the wedge')
+    parser.add_argument('ntraces', default=300, type=int, help='Number of traces')
     
     parser.add_argument('rho0', type=float, default=.3, help='lower', required=True)
     parser.add_argument('rho1', type=float, default=.3, help='upper', required=True)
@@ -37,45 +32,31 @@ def create_parser():
     parser.add_argument('vs0', type=float, help='lower')
     parser.add_argument('vs1', type=float, help='upper')
     
-    parser.add_argument('theta1', type=float, help='angle of incidence')
+    parser.add_argument('theta', type=float, help='Angle of incidence')
     
     parser.add_argument('f', type=float, help='frequency', default=25)
     return parser
-
 
 def run_script(args):
     
     matplotlib.interactive(False)
     
-    array_amp = np.zeros([args.time])
-    array_time = np.arange(args.time)
+    Rprop0 = RockProperties(args.vp0, args.vs0, args.rho0) 
+    Rprop1 = RockProperties(args.vp1, args.vs1, args.rho1)
     
-    vs0 = args.vs0 if args.vp0 / 2 is None else args.vs0
-    vs1 = args.vs1 if args.vp1 / 2 is None else args.vs1
+    warray_amp = create_wedge(args.ntraces, args.pad, args.max_thickness,
+                              Rprop0, Rprop1, args.theta, args.f)
     
-    Rpp = zoeppritz(args.vp1, vs1, args.rho1, args.vp0, vs0, args.rho0, args.theta1)
-    
-    array_amp[args.time // 2] = Rpp
-    
-    r = ricker_freq(100, args.f)
-    
-    print 'r.shape',r.shape
-    print 'array_amp', array_amp.shape
-    
-    warray_amp = np.convolve(array_amp, r, mode='same')
     fig = plt.figure()
-    
     ax1 = fig.add_subplot(111)
 
-    ax1.plot(warray_amp, array_time)
+    plt.gray()
+    aspect = float(warray_amp.shape[1]) / warray_amp.shape[0]
+    ax1.imshow(warray_amp, aspect=aspect)
     
     plt.title(args.title % locals())
     plt.ylabel('time (ms)')
-    plt.xlabel('amplitude')
-    
-    ax = plt.gca()
-    ax.set_ylim(ax.get_ylim()[::-1])
-    ax.set_xlim(args.xlim)
+    plt.xlabel('trace')
     
     fig_path = tempfile.mktemp('.jpeg')
     plt.savefig(fig_path)
@@ -94,8 +75,5 @@ def main():
     args = parser.parse_args()
     run_script(args)
     
-#    plt.show()
 if __name__ == '__main__':
     main()
-
-    v1

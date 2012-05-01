@@ -25,8 +25,8 @@ def create_parser():
     parser = URLArgumentParser('This is the default script')
     
     parser.add_argument('title', default='Plot', type=str, help='The title of the plot')
-    parser.add_argument('xlim', type=float, action='list', help='The range of amplitudes to plot eg. xlim=-1.0,1.0')
-    parser.add_argument('time', default=150, type=int, help='The size in Mili seconds of the plot')
+    parser.add_argument('xlim', type=float, action='list')
+    parser.add_argument('time', default=150, type=int, help='The size in mili seconds of the plot')
     
     parser.add_argument('rho0', type=float, default=.3, help='lower', required=True)
     parser.add_argument('rho1', type=float, default=.3, help='upper', required=True)
@@ -37,7 +37,7 @@ def create_parser():
     parser.add_argument('vs0', type=float, help='lower')
     parser.add_argument('vs1', type=float, help='upper')
     
-    parser.add_argument('theta1', type=float, help='angle of incidence')
+    parser.add_argument('theta', type=float, action='list', help='Angle of incidence start,stop,step')
     
     parser.add_argument('f', type=float, help='frequency', default=25)
     return parser
@@ -47,35 +47,43 @@ def run_script(args):
     
     matplotlib.interactive(False)
     
-    array_amp = np.zeros([args.time])
-    array_time = np.arange(args.time)
+    thetas = np.arange(args.theta[0], args.theta[1], args.theta[2])
+    
+    array_amp = np.zeros([args.time, thetas.size])
+#    array_time = np.arange(args.time)
     
     vs0 = args.vs0 if args.vp0 / 2 is None else args.vs0
     vs1 = args.vs1 if args.vp1 / 2 is None else args.vs1
     
-    Rpp = zoeppritz(args.vp1, vs1, args.rho1, args.vp0, vs0, args.rho0, args.theta1)
-    
-    array_amp[args.time // 2] = Rpp
+
+    Rpp = zoeppritz(args.vp0, vs0, args.rho0, args.vp1, vs1, args.rho1, thetas)
+
+    array_amp[args.time // 2, :] = Rpp
     
     r = ricker_freq(100, args.f)
     
-    print 'r.shape',r.shape
+    print 'r.shape', r.shape
     print 'array_amp', array_amp.shape
     
-    warray_amp = np.convolve(array_amp, r, mode='same')
+    warray_amp = np.zeros_like(array_amp)
+    for i in range(thetas.size):
+        warray_amp[:, i] = np.convolve(array_amp[:, i], r, mode='same')
     fig = plt.figure()
     
     ax1 = fig.add_subplot(111)
 
-    ax1.plot(warray_amp, array_time)
+    ax1.imshow(warray_amp)
+    print warray_amp.shape
+#    ax1.plot(warray_amp, array_time)
     
     plt.title(args.title % locals())
+    plt.gray()
     plt.ylabel('time (ms)')
     plt.xlabel('amplitude')
     
-    ax = plt.gca()
-    ax.set_ylim(ax.get_ylim()[::-1])
-    ax.set_xlim(args.xlim)
+#    ax = plt.gca()
+#    ax.set_ylim(ax.get_ylim()[::-1])
+#    ax.set_xlim(args.xlim)
     
     fig_path = tempfile.mktemp('.jpeg')
     plt.savefig(fig_path)

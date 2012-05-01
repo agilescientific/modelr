@@ -1,28 +1,40 @@
 '''
+Main program to strat a web server.
+
 Created on Apr 30, 2012
 
 @author: sean
 '''
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from argparse import ArgumentParser
-from os import curdir, sep, listdir
+from os import listdir
 from os.path import isfile, join, dirname
-import string
-import cgi
-import time
 from urlparse import urlparse, parse_qs
 from modelr.urlargparse import SendHelp, ArgumentError
 
-
 class MyHandler(BaseHTTPRequestHandler):
-
+    '''
+    
+    '''
     def do_GET(self):
 
         uri = urlparse(self.path)
         
         parameters = parse_qs(uri.query)
         
-        if uri.path != '/plot':
+        if uri.path == '/terminate':
+            print "terminate requested"
+            
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            self.wfile.write("Shutting down...")
+
+            self.server._BaseServer__shutdown_request = True
+            
+            return
+        
+        if uri.path != '/plot.jpeg':
             self.send_error(404, 'File Not Found: %s' % self.path)
             return
         
@@ -105,14 +117,15 @@ class MyHandler(BaseHTTPRequestHandler):
 
 
 def main():
-    
+    '''
+    Main method starts a server and exits on 
+    '''
     parser = ArgumentParser(description=__doc__)
     
     parser.add_argument('--host', type=str, default='')
     parser.add_argument('-p', '--port', type=int, default=80)
 
     args = parser.parse_args()
-    
     try:
         server = HTTPServer((args.host, args.port), MyHandler)
         print 'started httpserver...'
