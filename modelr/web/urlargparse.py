@@ -1,13 +1,17 @@
 '''
-Created on Apr 30, 2012
+===================
+modelr.web.server
+===================
 
-@author: sean
 '''
 import sys
 from urlparse import urlparse, parse_qs
 from argparse import Namespace
 
 class Argument(object):
+    '''
+    An place holder for an url argument.
+    '''
     def __init__(self, name, required=False, default=None, type=str, action='store', help=''):
         self.name = name
         self.required = required
@@ -23,7 +27,6 @@ class Argument(object):
             else:
                 return self.default
         
-        print "self.action", self.action
         arg = args[0]
         if self.action != 'list':
             try:
@@ -36,7 +39,6 @@ class Argument(object):
             new_args = []
             for arg in arg.split(','):
                 try:
-                    print "self.type", self.type, arg
                     value = self.type(arg)
                 except:
                     raise ArgumentError("argument %s: invalid %s value: %r" % (self.name, self.type.__name__, arg))
@@ -53,9 +55,14 @@ class Argument(object):
         
     
 class ArgumentError(Exception):
-    pass
+    '''
+    Exception to be called when arguments are not as expected by the parser.
+    '''
 
 class SendHelp(Exception):
+    '''
+    Exception to be called when the help argument is found.
+    '''
     def __init__(self, html):
         Exception.__init__(self, html)
         self.html = html
@@ -63,6 +70,8 @@ class SendHelp(Exception):
 class URLArgumentParser(object):
     '''
     Parse a key=value arguments in a url string.
+    
+    Modeled after http://docs.python.org/dev/library/argparse.html
     '''
     
     def __init__(self, description):
@@ -74,10 +83,16 @@ class URLArgumentParser(object):
         self.arguments = {}
         
     def add_argument(self, name, required=False, default=None, type=str, action='store', help=''):
+        '''
+        add an argument
+        '''
         arg = Argument(name, required, default, type, action, help)
         self.arguments[name] = arg
         
     def parse_params(self, params):
+        '''
+        parse the arguments gotten by urlparse.parse_qs
+        '''
         result = dict()
         
         if 'help' in params:
@@ -98,6 +113,10 @@ class URLArgumentParser(object):
         return Namespace(**result)
     
     def parse_ulr(self, path):
+        '''
+        parse a url into its argument. 
+        '''
+
         uri = urlparse(path)
         params = parse_qs(uri.query)
         
@@ -120,7 +139,6 @@ def main():
     parser = URLArgumentParser('description')
     
     parser.add_argument('script', required=True, type=str)
-    print parser.parse_ulr(path)
     
     
 if __name__ == '__main__':

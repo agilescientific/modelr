@@ -9,13 +9,11 @@ import matplotlib
 import matplotlib.pyplot as plt
 import tempfile
 from os import unlink
-from modelr.urlargparse import URLArgumentParser
 from modelr.rock_properties import RockProperties
 
 short_description = 'Create an ...'
 
-def create_parser():
-    parser = URLArgumentParser('This is the default script')
+def add_arguments(parser):
     
     parser.add_argument('title', default='Plot', type=str, help='The title of the plot')
     parser.add_argument('xlim', type=float, action='list')

@@ -1,7 +1,9 @@
 '''
-Created on May 1, 2012
+================================================================
+modelr.rock_properties -- TODO short docstring here
+================================================================
 
-@author: sean
+TODO: long doc here 
 '''
 
 from . import zoep_calc
@@ -24,7 +26,14 @@ class RockProperties(object):
         self.rho = rho
         
 def zoeppritz(Rp0, Rp1, theta1):
+    '''
+    Wrapper around long zoeppritz funcion.
     
+    :param Rp0:
+    :param Rp1:
+    :param theta1:
+     
+    '''
     return zoep_calc.zoeppritz(Rp0.vp, Rp0.vs, Rp0.rho,
                                Rp1.vp, Rp1.vs, Rp1.rho,
                                theta1)    
