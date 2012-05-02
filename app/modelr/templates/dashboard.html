@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Modelr Dashboard</title>
+</head>
+<body>
+
+<img src="{{avatar}}" alt="some_text"/> Hello <em>{{nickname}}</em>! [<a href="{{logout}}">sign out</a>]
+
+Here is the dashboard.
+
+<h3>Rocks</h3>
+
+<ul>
+{% for rock in rocks %}
+
+    <form name="input" action="remove_rock" method="get">
+    <input type="hidden" name="name" value="{{rock.name}}" />
+    <li>Name: {{rock.name}} rho={{rock.rho}} Vp={{rock.vp}} Vs={{rock.vs}} <input type="submit" value="remove" /></li>
+    </form>
+
+{% endfor %}
+</ul>
+
+<h3>Add Rock</h3>
+<form name="input" action="add_rock" method="get">
+<table>
+<tr>
+    <td>Name</td>
+    <td><input type="text" name="name" value="rock" /></td>
+</tr>
+<tr>
+    <td>Description</td>
+    <td><input type="text" name="description" value="" /></td>
+</tr>
+<tr>
+    <td>Rho</td>
+    <td><input type="number" name="rho" value="" /></td>
+</tr>
+
+<tr>
+    <td>Vp</td>
+    <td><input type="number" name="vp" value="" /></td>
+</tr>
+
+<tr>
+    <td>Vs</td>
+    <td><input type="number" name="vs" value="" /></td>
+</tr>
+</table>
+
+<input type="submit" value="add" />
+
+</form>
+</body>
+</html>
+
+
