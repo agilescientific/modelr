@@ -15,6 +15,7 @@ Contents:
 
    getting_started
    web_framework
+   reflectivity
    wavelet
 
 Indices and tables
