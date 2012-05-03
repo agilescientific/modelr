@@ -1,0 +1,75 @@
+{% extends "base_template.html" %} 
+{% block title %}Scenario{% endblock %} 
+
+{% block content %}
+
+<script type="text/javascript">
+<!--
+    
+    var host = 'http://localhost:9999';
+    
+    $(document).ready(function() {
+        
+        server = new PlotServer(host, get_rocks('datalist#list_of_rocks'));
+        
+        server.current_script = function(value){
+            return $('select#select_script').val(value);
+        }
+        
+        
+        console.log(server.current_script());
+        
+	    /*
+	    Update the paragraph containing the link.
+	    */
+	    server.current_link = function(){
+	        var qs = build_form_query_string($('#script_form'));
+	        return server.hostname +'/plot.jpeg' + qs;
+	    }
+	    
+	    server.input_changed = function () {
+	        var url = server.current_link();
+	
+	        console.log("Changed", url);
+	        var p = $('#image_link');
+	        p.text(url);
+	
+	    }
+	    
+        /* This will populate the scripts dropdown with a list of scripts
+        from the plot server.
+        */
+        populate_scripts(server, 'select#select_script');
+
+
+	    
+    });
+    -->
+</script>
+
+<!-- This will expand the list of rocks before google app engine sends this page to the user -->
+<datalist id="list_of_rocks">
+	{% for rock in rocks %}
+	<option data-value="{{rock.vp}},{{rock.rho}},{{rock.vs}}"
+		data-name="{{rock.name}}">{{rock.name}}</option>
+	{% endfor %}
+
+</datalist>
+
+<select id="select_script"
+	onchange="create_form(server, '#script_form')">
+	<option>Please wait ... </option>
+</select>
+
+<button type="button" onclick="populate_scripts(server, 'select#select_script')">refresh</button>
+
+<form id=script_form action=""></form>
+
+<button id='create_image'
+	onclick="create_image(server.hostname + '/plot.jpeg', '#script_form')">Create
+	Image</button>
+
+<p id="image_link">URL</p>
+
+
+{% endblock %}

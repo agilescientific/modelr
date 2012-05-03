@@ -1,14 +1,14 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Modelr Dashboard</title>
-</head>
-<body>
+{% extends "base_template.html" %}
 
-<img src="{{avatar}}" alt="some_text"/> Hello <em>{{nickname}}</em>! [<a href="{{logout}}">sign out</a>]
+{% block title %}Modelr Dashboard{% endblock %}
+{% block content %}
+
 
 Here is the dashboard.
+
+<h3>Create Scenario</h3>
+
+    <a href="scenario">Scenarios</a>
 
 <h3>Rocks</h3>
 
@@ -53,7 +53,6 @@ Here is the dashboard.
 <input type="submit" value="add" />
 
 </form>
-</body>
-</html>
 
 
+{% endblock %}

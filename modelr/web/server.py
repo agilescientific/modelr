@@ -11,8 +11,6 @@ Created on Apr 30, 2012
 '''
 
 from jinja2 import Environment, PackageLoader
-from jinja2 import Template
-
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from argparse import ArgumentParser
 from os import listdir
@@ -20,6 +18,7 @@ from os.path import isfile, join, dirname
 from urlparse import urlparse, parse_qs
 from modelr.web.urlargparse import SendHelp, ArgumentError, URLArgumentParser
 import traceback
+import json
 
 class MyHandler(BaseHTTPRequestHandler):
     '''
@@ -60,10 +59,20 @@ class MyHandler(BaseHTTPRequestHandler):
             
         return namespace
 
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header('Allow', 'GET, OPTIONS')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Headers', 'X-Request, X-Requested-With')
+        self.send_header('Content-Length', '0')
+        self.end_headers()
+
+    
     def do_GET(self):
         '''
         handle a get request.
         '''
+        print "my do GET"
         try:
             uri = urlparse(self.path)
             
@@ -71,6 +80,46 @@ class MyHandler(BaseHTTPRequestHandler):
             
             if uri.path == '/terminate':
                 self.terminate()
+                return
+            
+            if uri.path == '/script_help.json':
+                
+                script = parameters.pop('script', None)
+                namespace = self.eval_script(script)
+                if namespace is None:
+                    self.send_response(400)
+                    self.end_headers()
+
+                self.send_response(200)
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Access-Control-Allow-Headers', 'X-Request, X-Requested-With')
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                
+                script_main = namespace['run_script']
+                add_arguments = namespace['add_arguments']
+                short_description = namespace.get('short_description', 'No description')
+
+                parser = URLArgumentParser(short_description)
+                add_arguments(parser)
+                
+                self.wfile.write(parser.json_data)
+                
+                return
+            
+            if uri.path == '/available_scripts.json':
+                self.send_response(200)
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Access-Control-Allow-Headers', 'X-Request, X-Requested-With')
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                
+                all_scripts = self.get_available_scripts()
+                
+                data = json.dumps(all_scripts)
+                
+                self.wfile.write(data)
+                
                 return
             
             if uri.path != '/plot.jpeg':
@@ -105,6 +154,7 @@ class MyHandler(BaseHTTPRequestHandler):
             self.wfile.write('</div>')
             
             raise
+        
     def run_script(self, script, script_main, add_arguments, short_description, parameters):
         '''
         Run a script 
@@ -116,7 +166,6 @@ class MyHandler(BaseHTTPRequestHandler):
         '''
         parser = URLArgumentParser(short_description)
         add_arguments(parser)
-        print parameters
         try:
             args = parser.parse_params(parameters)
         except SendHelp as helper:
@@ -146,16 +195,8 @@ class MyHandler(BaseHTTPRequestHandler):
         self.end_headers()
             
         self.wfile.write(jpeg_data)
-        
-    def send_script_error(self, msg):
-        '''
-        Send an error related to the script.
-        '''
-        
-        template = self.server.jenv.get_template('ScriptError.html')
-        
-        
-        
+    
+    def get_available_scripts(self):
         scripts_dir = join(dirname(__file__), 'scripts')
 
         available_scripts = []
@@ -175,12 +216,22 @@ class MyHandler(BaseHTTPRequestHandler):
             except:
                 pass
             
+        return available_scripts
+            
+    def send_script_error(self, msg):
+        '''
+        Send an error related to the script.
+        '''
+        
+        template = self.server.jenv.get_template('ScriptError.html')
+        
+            
         
         self.send_response(400)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
         
-        html = template.render(msg=msg, available_scripts=available_scripts)
+        html = template.render(msg=msg, available_scripts=self.get_available_scripts())
         self.wfile.write(html)
         
         

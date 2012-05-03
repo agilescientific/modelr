@@ -14,8 +14,15 @@ handlers:
   static_files: NewFile.html
   upload: NewFile\.html
 
+- url: /js
+  static_dir: static/js
+
+- url: /images
+  static_dir: static/images
+
 - url: .*
   script: main.app
+
 
 libraries:
 - name: webapp2

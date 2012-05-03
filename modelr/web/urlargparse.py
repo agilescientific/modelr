@@ -7,6 +7,13 @@ modelr.web.server
 import sys
 from urlparse import urlparse, parse_qs
 from argparse import Namespace
+import json
+
+def rock_properties_type(str_input):
+    from modelr.rock_properties import RockProperties
+    args = str_input.split(',')
+    assert len(args) == 3
+    return RockProperties(float(args[0]), float(args[1]), float(args[2]))
 
 class Argument(object):
     '''
@@ -48,6 +55,17 @@ class Argument(object):
             return new_args
             
     
+    @property
+    def json_dict(self):
+        return {
+        'name':self.name,
+        'required': self.required,
+        'default': self.default,
+        'type':self.type.__name__,
+        'action':self.action,
+        'help': self.help,
+        }
+
     @property
     def html_help(self):
         return '<li><b>%s</b>: %s</li>\n' % (self.name, self.help)
@@ -123,6 +141,12 @@ class URLArgumentParser(object):
         return self.parse_params(params)
         
         
+    @property
+    def json_data(self):
+        obj = {'description': self.description,
+               'arguments': {k:v.json_dict for (k, v) in self.arguments.items()}}
+        return json.dumps(obj)
+    
     @property
     def help_html(self):
         

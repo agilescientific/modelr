@@ -11,24 +11,19 @@ import tempfile
 from os import unlink
 from modelr.rock_properties import RockProperties, zoeppritz
 import numpy as np
+from modelr.web.urlargparse import rock_properties_type
 
 short_description = 'Create an ...'
 
 def add_arguments(parser):
     
     parser.add_argument('title', default='Plot', type=str, help='The title of the plot')
-    parser.add_argument('xlim', type=float, action='list')
+
     parser.add_argument('pad', default=50, type=int, help='The time in mili seconds aboe and below the wedge')
     parser.add_argument('thickness', default=50, type=int, help='The maximum thickness of the wedge')
     
-    parser.add_argument('rho0', type=float, default=.3, help='lower', required=True)
-    parser.add_argument('rho1', type=float, default=.3, help='upper', required=True)
-
-    parser.add_argument('vp0', type=float, default=.3, help='lower', required=True)
-    parser.add_argument('vp1', type=float, default=.3, help='upper', required=True)
-
-    parser.add_argument('vs0', type=float, help='lower')
-    parser.add_argument('vs1', type=float, help='upper')
+    parser.add_argument('Rpp0', type=rock_properties_type, help='rock properties of upper rock', required=True)
+    parser.add_argument('Rpp1', type=rock_properties_type, help='rock properties of lower rock', required=True)
     
     parser.add_argument('theta', type=float, action='list', help='Angle of incidence')
     
@@ -44,8 +39,8 @@ def run_script(args):
     
     matplotlib.interactive(False)
     
-    Rprop0 = RockProperties(args.vp0, args.vs0, args.rho0) 
-    Rprop1 = RockProperties(args.vp1, args.vs1, args.rho1)
+    Rprop0 = args.Rpp0 
+    Rprop1 = args.Rpp1
     
     theta = np.arange(args.theta[0], args.theta[1], args.theta[2])
     

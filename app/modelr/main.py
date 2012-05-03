@@ -14,18 +14,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import webapp2
+from google.appengine.api import users #@UnresolvedImport
+from google.appengine.ext import db #@UnresolvedImport
+from google.appengine.ext.webapp.util import run_wsgi_app #@UnresolvedImport
+from google.appengine.ext  import webapp as webapp2 #@UnresolvedImport
 import logging
-from google.appengine.api import users
-from google.appengine.ext.webapp.util import run_wsgi_app
-from google.appengine.ext.webapp import template
-from google.appengine.ext import db
-
-# import code for encoding urls and generating md5 hashes
-import urllib, hashlib
-import os
+from os.path import join, dirname
+import urllib
+import hashlib
+from jinja2 import Environment, FileSystemLoader
 
 
+env = Environment(loader=FileSystemLoader(join(dirname(__file__), 'templates')))
+
+#===============================================================================
+# 
+#===============================================================================
 class RockModels(db.Model):
     user = db.UserProperty()
     uri = db.StringProperty(multiline=False)
@@ -40,7 +44,9 @@ class Rock(db.Model):
     vp = db.FloatProperty()
     vs = db.FloatProperty()
     rho = db.FloatProperty()
-
+#===============================================================================
+# 
+#===============================================================================
 
 
 def get_gravatar_url(email, default="http://agilemodelr.appspot.com/default.jpg", size=40):
@@ -51,6 +57,52 @@ def get_gravatar_url(email, default="http://agilemodelr.appspot.com/default.jpg"
     
     return gravatar_url
     
+    
+class ModelrPageRequest(webapp2.RequestHandler):
+    '''
+    Base class for modelr app pages.
+    '''
+    
+    def rocks(self):
+        rocks = Rock.all()
+        rocks.filter("user =", users.get_current_user())
+        
+        return rocks
+
+    def get_base_params(self, user=None, **kwargs):
+        '''
+        get the default parameters used in base_template.html
+        '''
+        params = dict(nickname=user.nickname() if user else '',
+                      logout=users.create_logout_url(self.request.uri),
+                      avatar=get_gravatar_url(user.email()) if user else 'No avatar')
+        
+        params.update(kwargs)
+        
+        return params
+
+    def require_login(self):
+        '''
+        if a user is not logged in then: 
+            Send require_login.html and return None
+        otherwise:
+            return the current user
+        '''
+        user = users.get_current_user()
+        if not user:
+            
+            template = env.get_template('require_login.html')
+            
+            template_params = self.get_base_params()
+            template_params.update(provider_links={name:users.create_login_url(self.request.uri, federated_identity=uri) for (name, uri) in providers.items()})
+            
+            html = template.render(template_params)
+            
+            self.response.out.write(html)
+            
+        return user
+
+
 class MainHandler(webapp2.RequestHandler):
     def get(self):
         self.redirect('/dashboard')
@@ -103,43 +155,51 @@ class RemoveRockHandler(webapp2.RequestHandler):
         self.redirect('/dashboard')
 
 
-class LoginHandler(webapp2.RequestHandler):
+class ScenarioHandler(ModelrPageRequest):
+    def get(self):
+        
+        self.response.headers['Content-Type'] = 'text/html'
+        self.response.headers['Access-Control-Allow-Origin'] = '*'
+        self.response.headers['Access-Control-Allow-Headers'] = 'X-Request, X-Requested-With'
+        
+        user = self.require_login()
+        if not user:
+            return
+
+        template_params = self.get_base_params(user,
+                                               rocks=self.rocks().fetch(100))
+        
+        template = env.get_template('scenario.html')
+        html = template.render(template_params)
+
+        self.response.out.write(html)
+        
+class DashboardHandler(ModelrPageRequest):
     def get(self):
         self.response.headers['Content-Type'] = 'text/html'
         
-        user = users.get_current_user()
+        user = self.require_login()
         if not user:
-            self.response.out.write('Hello world! Sign in at: ')
-            for name, uri in providers.items():
-                self.response.out.write('[<a href="%s">%s</a>]' % (users.create_login_url(self.request.uri, federated_identity=uri), name))
             return
-        
+            
         rocks = Rock.all()
-        
-        logging.info(str([(rock.name, rock.user) for rock in rocks.fetch(100)]))
-        
-        logging.info(str(users.get_current_user()))
-        
         rocks.filter("user =", users.get_current_user())
         rocks.order("-date")
         
-        logging.info(str([(rock.name, rock.user) for rock in rocks.fetch(100)]))
+        template_params = self.get_base_params(user)
+        template_params.update(rocks=rocks.fetch(100))
         
-        gurl = get_gravatar_url(user.email())
-        
-        path = os.path.join(os.path.dirname(__file__), 'templates', 'dashboard.html')
-        template_params = dict(nickname=user.nickname(), logout=users.create_logout_url(self.request.uri), avatar=gurl,
-                               rocks=rocks.fetch(100))
-        
-        html = template.render(path, template_params)
+        template = env.get_template('dashboard.html')
+        html = template.render(template_params)
 
         self.response.out.write(html)
             
 
 app = webapp2.WSGIApplication([('/', MainHandler),
-                               ('/dashboard', LoginHandler),
+                               ('/dashboard', DashboardHandler),
                                ('/add_rock', AddRockHandler),
                                ('/remove_rock', RemoveRockHandler),
+                               ('/scenario', ScenarioHandler),
                                ],
                               debug=True)
 
