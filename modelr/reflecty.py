@@ -24,9 +24,10 @@ from numpy import log, tan, sin, cos, arcsin, arccosh, radians, degrees
 
 def zoeppritz(vp1, vs1, rho1, vp0, vs0, rho0, theta1):
     '''
-    Documentation goes here. 
+    Full Zoeppritz solution, considered the definitive solution. 
     '''
-        # Get the input data from the text controls tc*
+    
+    # Set the ray paramter, p
     p = sin(radians(theta1)) / vp1 # ray parameter
     
     # Calculate reflection & transmission angles for Zoeppritz
@@ -72,9 +73,49 @@ def zoeppritz(vp1, vs1, rho1, vp0, vs0, rho0, theta1):
     
     return zoep
 
-def akirichards(vp2, vs2, rho2, vp1, vs1, rho1, theta1):
+def akirichards(vp1, vs1, rho1, vp2, vs2, rho2, theta1):
     """
-    Doumentation goes here.
+    This is the formulation from Avseth et al., Quantitative seismic interpretation,
+    Cambridge University Press, 2006. Adapted for a 4-term formula. 
+    See http://subsurfwiki.org/wiki/Aki-Richards_equation 
+    """
+
+    # We are not using this for anything, but will
+    # critical_angle = arcsin(vp1/vp2)
+    
+    # Do we need to ensure that we get floats out before computing sines?
+    vp1 = float(vp1)
+
+    theta2 = degrees(arcsin(vp2/vp1*sin(radians(theta1))))
+
+    # Compute the various parameters
+    drho = rho2-rho1
+    dvp = vp2-vp1
+    dvs = vs2-vs1
+    meantheta = (theta1+theta2)/2.0
+    rho = (rho1+rho2)/2.0
+    vp = (vp1+vp2)/2.0
+    vs = (vs1+vs2)/2.0
+
+    # Compute the coefficients 
+    w = 0.5 * drho/rho
+    x = 2 * (vs/vp1)**2 * drho/rho
+    y = 0.5 * (dvp/vp)
+    z = 4 * (vs/vp1)**2 * (dvs/vs)
+
+    # Compute the terms
+    term1 = w
+    term2 = -1 * x * sin(radians(theta1))**2
+    term3 = y / cos(radians(meantheta))**2
+    term4 = -1 * z * sin(radians(theta1))**2
+    
+    return (term1 + term2 + term3 + term4)
+
+def akirichards_alt(vp1, vs1, rho1, vp2, vs2, rho2, theta1):
+    """
+    This is another formulation of the Aki-Richards solution. 
+    I don't know where it is from. 
+    See http://subsurfwiki.org/wiki/Aki-Richards_equation    
     """
 
     # We are not using this for anything, but will
@@ -101,47 +142,110 @@ def akirichards(vp2, vs2, rho2, vp1, vs1, rho1, theta1):
     
     return (term1 + term2 + term3)
 
-def shuey(vp2, vs2, rho2, vp1, vs1, rho1, theta1):
+def fatti(vp1, vs1, rho1, vp2, vs2, rho2, theta1):
     """
-    Compute Shuey approximation.
-    Could use refactoring.
+    Compute reflectivities with Fatti's formulation of the
+    Aki-Richards equation, which does not account for the
+    critical angle. Fatti et al (1994), Geophysics 59 (9).
     """
+    
+    # Do we need to ensure that we get floats out before computing sines?
+    vp1 = float(vp1)
 
-    # Compute some parameters
-    pr1 = ( (vp1/vs1)**2 - 2 )/( 2*((vp1/vs1)**2 - 1) )
-    pr2 = ( (vp2/vs2)**2 - 2 )/( 2*((vp2/vs2)**2 - 1) )
-    dpr = pr2 - pr1
-    pr = (pr1 + pr2) / 2.0
+    # Compute the various parameters
     drho = rho2-rho1
     dvp = vp2-vp1
     dvs = vs2-vs1
     rho = (rho1+rho2)/2.0
     vp = (vp1+vp2)/2.0
     vs = (vs1+vs2)/2.0
-    f = (dvp/vp) / (dvp/vp + drho/rho)
-    e = f - 2.0 * (1.0+f) * (1.0-2.0*pr) / (1.0-pr)
+    dip = (vp2*rho2 - vp1*rho1)/(vp2*rho2 + vp1*rho1)
+    dis = (vs2*rho2 - vs1*rho1)/(vs2*rho2 + vs1*rho1)
+
+    # Compute the three terms
+    term1 = (1 + tan(radians(theta1))**2) * dip
+    term2 = -8 * (vs/vp)**2 * sin(radians(theta1))**2 * dis
+    term3 = -1 * ( 0.5 * tan(radians(theta1))**2 - 2 * (vs/vp)**2 * sin(radians(theta1))**2 ) * drho/rho
+    
+    return (term1 + term2 + term3)
+
+def shuey2(vp1, vs1, rho1, vp2, vs2, rho2, theta1):
+    """
+    Compute Shuey approximation with 2 terms.
+    http://subsurfwiki.org/wiki/Shuey_equation
+    """
+
+    # Compute some parameters
+    drho = rho2-rho1
+    dvp = vp2-vp1
+    dvs = vs2-vs1
+    rho = (rho1+rho2)/2.0
+    vp = (vp1+vp2)/2.0
+    vs = (vs1+vs2)/2.0
 
     # Compute two-term reflectivity
-    
+
     r0 = 0.5 * (dvp/vp + drho/rho)
-    g = (e * r0 + dpr/((1.0-pr)**2))
-    # We are not computing the third term here
-    # but if we were, here it is
-    # c = 0.5 * dvp/vp
+    g  = 0.5 * dvp/vp - 2 * (vs**2/vp**2) * ( drho/rho + 2 * dvs/vs)
 
     return r0 + g * sin(radians(theta1))**2
 
-#def bortfeld(vp2, vs2, rho2, vp1, vs1, rho1, theta1):
-#    """
-#    Documentation for the Bortfeld approximation.
-#    This bit doesn't work, at least not for wide angles.
-#    """
-#    
-#    # Bortfeld only needs one extra parameter
-#    theta2 = degrees(arcsin(vp2/vp1*sin(radians(theta1))))
-#
-#    term1_bf = 0.5 * log( (vp2*rho2*cos(radians(theta1)))/(vp1*rho1*cos(radians(theta2))) )
-#    term2_bf = (sin(radians(theta1))/vp1)**2 * (vs1**2-vs2**2) * (2+log(rho2/rho1)/log(vs2/vs1))
-#
-#    return term1_bf + term2_bf
-#
+def shuey3(vp1, vs1, rho1, vp2, vs2, rho2, theta1):
+    """
+    Compute Shuey approximation with 3 terms.
+    http://subsurfwiki.org/wiki/Shuey_equation
+    """
+
+    # Compute some parameters
+    drho = rho2-rho1
+    dvp = vp2-vp1
+    dvs = vs2-vs1
+    rho = (rho1+rho2)/2.0
+    vp = (vp1+vp2)/2.0
+    vs = (vs1+vs2)/2.0
+
+    # Compute three-term reflectivity
+    
+    r0 = 0.5 * (dvp/vp + drho/rho)
+    g  = 0.5 * dvp/vp - 2 * (vs**2/vp**2) * ( drho/rho + 2 * dvs/vs)
+    f = 0.5 * dvp/vp
+
+    return r0 + g * sin(radians(theta1))**2 + f * (tan(radians(theta1))**2 - sin(radians(theta1))**2)
+
+def bortfeld2(vp1, vs1, rho1, vp2, vs2, rho2, theta1):
+    """
+    The 2-term Bortfeld approximation.
+    """
+    
+    # Bortfeld only needs one extra parameter
+    theta2 = degrees(arcsin(vp2/vp1*sin(radians(theta1))))
+
+    # This breaks if theta = 90 deg
+    term1 = 0.5 * log( (vp2*rho2*cos(radians(theta1)))/(vp1*rho1*cos(radians(theta2))) )
+    term2 = (sin(radians(theta1))/vp1)**2 * (vs1**2-vs2**2) * (2+log(rho2/rho1)/log(vs2/vs1))
+
+    return term1 + term2
+
+def bortfeld3(vp1, vs1, rho1, vp2, vs2, rho2, theta1):
+    """
+    Compute Bortfeld approximation with three terms.
+    http://sepwww.stanford.edu/public/docs/sep111/marie2/paper_html/node2.html
+    """
+
+    # Compute some parameters
+    drho = rho2-rho1
+    dvp = vp2-vp1
+    dvs = vs2-vs1
+    rho = (rho1+rho2)/2.0
+    vp = (vp1+vp2)/2.0
+    vs = (vs1+vs2)/2.0
+    k = (2 * vs/vp)**2
+    rsh = 0.5 * (dvp/vp - k*drho/rho -2*k*dvs/vs)
+
+    # Compute two-term reflectivity
+
+    term1 = 0.5 * (dvp/vp + drho/rho)
+    term2 = rsh * sin(radians(theta1))**2
+    term3 = 0.5 * dvp/vp * tan(radians(theta1))**2 * sin(radians(theta1))**2
+
+    return term1 + term2 + term3
