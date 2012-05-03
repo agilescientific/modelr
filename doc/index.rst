@@ -17,6 +17,7 @@ Contents:
    web_framework
    reflectivity
    wavelet
+   api.rst
 
 Indices and tables
 ==================

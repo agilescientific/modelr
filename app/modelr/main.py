@@ -15,27 +15,34 @@
 # limitations under the License.
 #
 from google.appengine.api import users #@UnresolvedImport
+from google.appengine.ext import webapp as webapp2 #@UnresolvedImport
 from google.appengine.ext import db #@UnresolvedImport
 from google.appengine.ext.webapp.util import run_wsgi_app #@UnresolvedImport
-from google.appengine.ext  import webapp as webapp2 #@UnresolvedImport
-import logging
-from os.path import join, dirname
-import urllib
-import hashlib
 from jinja2 import Environment, FileSystemLoader
+from os.path import join, dirname
+import hashlib
+import logging
+import urllib
 
-
+# Jinja2 environment to load templates
 env = Environment(loader=FileSystemLoader(join(dirname(__file__), 'templates')))
 
 #===============================================================================
 # 
 #===============================================================================
-class RockModels(db.Model):
+class Scenario(db.Model):
+    '''
+    Database of Scenarios 
+    '''
     user = db.UserProperty()
-    uri = db.StringProperty(multiline=False)
+    name = db.StringProperty(multiline=False)
+    data = db.BlobProperty()
+    date = db.DateTimeProperty(auto_now_add=True)
 
 class Rock(db.Model):
-    """Models an individual Rock"""
+    """
+    Database of Rocks
+    """
     user = db.UserProperty()
     name = db.StringProperty(multiline=False)
     description = db.StringProperty(multiline=True)
@@ -44,16 +51,22 @@ class Rock(db.Model):
     vp = db.FloatProperty()
     vs = db.FloatProperty()
     rho = db.FloatProperty()
+    
 #===============================================================================
 # 
 #===============================================================================
 
 
-def get_gravatar_url(email, default="http://agilemodelr.appspot.com/default.jpg", size=40):
-
+def get_gravatar_url(email, default=None, size=40):
+    '''
+    Get the url of this users gravatar 
+    '''
     # construct the url
     gravatar_url = "http://www.gravatar.com/avatar/" + hashlib.md5(email.lower()).hexdigest() + "?"
-    gravatar_url += urllib.urlencode({'s':str(size)})
+    if default:
+        gravatar_url += urllib.urlencode({'s':str(size), 'd':default})
+    else:
+        gravatar_url += urllib.urlencode({'s':str(size)})
     
     return gravatar_url
     
@@ -64,6 +77,9 @@ class ModelrPageRequest(webapp2.RequestHandler):
     '''
     
     def rocks(self):
+        '''
+        return all the rocks this user has saved
+        '''
         rocks = Rock.all()
         rocks.filter("user =", users.get_current_user())
         
@@ -104,6 +120,9 @@ class ModelrPageRequest(webapp2.RequestHandler):
 
 
 class MainHandler(webapp2.RequestHandler):
+    '''
+    main page
+    '''
     def get(self):
         self.redirect('/dashboard')
 
@@ -116,7 +135,77 @@ providers = {
     # add more here
 }
 
+class RemoveScenarioHandler(webapp2.RequestHandler):
+    '''
+    remove a scenario from a users db
+    '''
+    def get(self):
+        name = self.request.get('name')
+        
+        scenarios = Scenario.all()
+        scenarios.filter("user =", users.get_current_user())
+        scenarios.filter("name =", name)
+        scenarios = scenarios.fetch(100)
+        
+        for scenario in scenarios:
+            scenario.delete()
+            
+        self.redirect('/dashboard')
+
+    
+class ModifyScenarioHandler(webapp2.RequestHandler):
+    '''
+    fetch or update a scenario.
+    '''
+
+    def get(self):
+        self.response.headers['Content-Type'] = 'application/json'
+        name = self.request.get('name')
+        
+        scenarios = Scenario.all()
+        scenarios.filter("user =", users.get_current_user())
+        scenarios.filter("name =", name)
+        scenarios = scenarios.fetch(1)
+        
+        logging.info(scenarios[0])
+        logging.info(scenarios[0].data)
+        if scenarios:
+            scenario = scenarios[0]
+            self.response.out.write(scenario.data)
+        else:
+            self.response.out.write('null')
+            
+        return 
+        
+    def post(self):
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write('All OK!!')
+
+        name = self.request.get('name')
+        
+        logging.info(('name', name))
+        data = self.request.get('json')
+        user = users.get_current_user()
+        
+        logging.info(data)
+        scenarios = Scenario.all()
+        scenarios.filter("user =", user)
+        scenarios.filter("name =", name)
+        scenarios = scenarios.fetch(1)
+        if scenarios:
+            scenario = scenarios[0]
+        else:
+            scenario = Scenario()
+            scenario.user = user
+            scenario.name = name
+            
+        scenario.data = data.encode()
+        scenario.put()
+
 class AddRockHandler(webapp2.RequestHandler):
+    '''
+    add a rock 
+    '''
     def get(self):
         name = self.request.get('name')
         
@@ -141,6 +230,9 @@ class AddRockHandler(webapp2.RequestHandler):
         self.redirect('/dashboard')
 
 class RemoveRockHandler(webapp2.RequestHandler):
+    '''
+    remove a rock by name.
+    '''
     def get(self):
         name = self.request.get('name')
         
@@ -156,6 +248,9 @@ class RemoveRockHandler(webapp2.RequestHandler):
 
 
 class ScenarioHandler(ModelrPageRequest):
+    '''
+    Display the scenario page (uses scenario.html template)
+    '''
     def get(self):
         
         self.response.headers['Content-Type'] = 'text/html'
@@ -175,6 +270,10 @@ class ScenarioHandler(ModelrPageRequest):
         self.response.out.write(html)
         
 class DashboardHandler(ModelrPageRequest):
+    '''
+    Display the dashboard page (uses dashboard.html template)
+    '''
+
     def get(self):
         self.response.headers['Content-Type'] = 'text/html'
         
@@ -183,23 +282,34 @@ class DashboardHandler(ModelrPageRequest):
             return
             
         rocks = Rock.all()
-        rocks.filter("user =", users.get_current_user())
+        rocks.filter("user =", user)
         rocks.order("-date")
+
+        scenarios = Scenario.all()
+        scenarios.filter("user =", user)
+        scenarios.order("-date")
         
+        for s in scenarios.fetch(100):
+            logging.info((s.name, s))
+            
         template_params = self.get_base_params(user)
-        template_params.update(rocks=rocks.fetch(100))
+        template_params.update(rocks=rocks.fetch(100),
+                               scenarios=scenarios.fetch(100))
+        
         
         template = env.get_template('dashboard.html')
         html = template.render(template_params)
 
         self.response.out.write(html)
             
-
+#Create the web app
 app = webapp2.WSGIApplication([('/', MainHandler),
                                ('/dashboard', DashboardHandler),
                                ('/add_rock', AddRockHandler),
                                ('/remove_rock', RemoveRockHandler),
                                ('/scenario', ScenarioHandler),
+                               ('/save_scenario', ModifyScenarioHandler),
+                               ('/remove_scenario', RemoveScenarioHandler),
                                ],
                               debug=True)
 

@@ -6,12 +6,28 @@
 
 Here is the dashboard.
 
-<h3>Create Scenario</h3>
+<h3>Scenarios</h3>
 
-    <a href="scenario">Scenarios</a>
+<!-- List of scenarios -->
+<ul>
+{% for scenario in scenarios %}
+
+    <form name="input" action="remove_scenario" method="get">
+    <input type="hidden" name="name" value="{{scenario.name}}" />
+    <li><a href='/scenario#{{scenario.name}}'>{{scenario.name}}</a> <input type="submit" value="remove" /></li>
+    </form>
+
+{% endfor %}
+</ul>
+
+<!-- Add a new scenario -->
+<a href="scenario">new scenario</a>
+
+
 
 <h3>Rocks</h3>
 
+<!--  List of rocks. -->
 <ul>
 {% for rock in rocks %}
 

@@ -21,3 +21,9 @@ indexes:
   - name: user
   - name: date
     direction: desc
+
+- kind: Scenario
+  properties:
+  - name: user
+  - name: date
+    direction: desc

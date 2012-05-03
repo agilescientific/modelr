@@ -15,7 +15,7 @@
 </head>
 <body>
     <div id="header">{% block header %}
-        <img src="{{avatar}}" alt="some_text"/> Hello <em>{{nickname}}</em> [<a href="{{logout}}">sign out</a>]
+        <img src="{{avatar}}" alt="some_text"/> Hello <em>{{nickname}}</em> [<a href="/dashboard">dashboard</a>][<a href="{{logout}}">sign out</a>]
     {% endblock %}</div>
     
     <div id="content">{% block content %}Content Should go here{% endblock %}</div>

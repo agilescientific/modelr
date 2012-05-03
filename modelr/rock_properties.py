@@ -25,6 +25,9 @@ class RockProperties(object):
             self.vs = vs
         self.rho = rho
         
+    def __repr__(self):
+        return 'RockProperties(vp=%r, rho=%r, vs=%r)' % (self.vp, self.rho, self.vs)
+        
 def zoeppritz(Rp0, Rp1, theta1):
     '''
     Wrapper around long zoeppritz funcion.

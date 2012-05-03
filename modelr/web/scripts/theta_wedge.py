@@ -5,15 +5,14 @@ Created on Apr 30, 2012
 '''
 from argparse import ArgumentParser
 from modelr.reflectivity import create_theta
+from modelr.rock_properties import zoeppritz
+from modelr.web.urlargparse import rock_properties_type
+from modelr.web.util import return_current_figure
 import matplotlib
 import matplotlib.pyplot as plt
-import tempfile
-from os import unlink
-from modelr.rock_properties import RockProperties, zoeppritz
 import numpy as np
-from modelr.web.urlargparse import rock_properties_type
 
-short_description = 'Create an ...'
+short_description = 'Create an wedge model ...'
 
 def add_arguments(parser):
     
@@ -60,16 +59,7 @@ def run_script(args):
     plt.ylabel('time (ms)')
     plt.xlabel('trace')
     
-    fig_path = tempfile.mktemp('.jpeg')
-    plt.savefig(fig_path)
-    
-    with open(fig_path, 'rb') as fd:
-        data = fd.read()
-        
-    unlink(fig_path)
-        
-    return data
-    
+    return return_current_figure()    
     
 def main():
     parser = ArgumentParser(usage=short_description, description=__doc__)
