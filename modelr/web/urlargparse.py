@@ -45,7 +45,7 @@ class Argument(object):
         self.choices = choices
     
     def parse_arg(self, args):
-        if args is None:
+        if not args or not args[0] or args[0] == 'null':
             if self.required:
                 raise ArgumentError("missing argument %r" % (self.name,))
             else:
