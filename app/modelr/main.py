@@ -76,6 +76,10 @@ class ModelrPageRequest(webapp2.RequestHandler):
     Base class for modelr app pages.
     '''
     
+    #For the plot server
+    # Ideally this should be settable by an admin console.
+    HOSTNAME = 'http://localhost:9999'
+    
     def rocks(self):
         '''
         return all the rocks this user has saved
@@ -91,7 +95,8 @@ class ModelrPageRequest(webapp2.RequestHandler):
         '''
         params = dict(nickname=user.nickname() if user else '',
                       logout=users.create_logout_url(self.request.uri),
-                      avatar=get_gravatar_url(user.email()) if user else 'No avatar')
+                      avatar=get_gravatar_url(user.email()) if user else 'No avatar',
+                      HOSTNAME=self.HOSTNAME)
         
         params.update(kwargs)
         
