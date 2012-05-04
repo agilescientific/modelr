@@ -28,6 +28,7 @@ def add_arguments(parser):
     parser.add_argument('theta1', type=float, help='angle of incidence')
     
     parser.add_argument('f', type=float, help='frequency', default=25)
+    parser.add_argument('reflectivity_model', type=str, help='... ', default='zoeppritz', choices=['zoeppritz', 'foo'])
     return parser
 
 

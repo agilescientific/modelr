@@ -1,8 +1,9 @@
 '''
-===================
-modelr.web.server
-===================
+====================
+modelr.web.urlparse
+====================
 
+.. seealso:: http://docs.python.org/dev/library/argparse.html
 '''
 import sys
 from urlparse import urlparse, parse_qs
@@ -19,13 +20,14 @@ class Argument(object):
     '''
     An place holder for an url argument.
     '''
-    def __init__(self, name, required=False, default=None, type=str, action='store', help=''):
+    def __init__(self, name, required=False, default=None, type=str, action='store', help='', choices=None):
         self.name = name
         self.required = required
         self.default = default
         self.type = type
         self.action = action
         self.help = help
+        self.choices = choices
     
     def parse_arg(self, args):
         if args is None:
@@ -36,6 +38,8 @@ class Argument(object):
         
         arg = args[0]
         if self.action != 'list':
+            if self.choices is not None and arg not in self.choices:
+                raise ArgumentError("argument %s is invalid: must be one of %r (got %r)" % (self.name, self.choices, arg))
             try:
                 arg = self.type(arg)
             except:
@@ -64,6 +68,7 @@ class Argument(object):
         'type':self.type.__name__,
         'action':self.action,
         'help': self.help,
+        'choices': self.choices,
         }
 
     @property
@@ -100,11 +105,11 @@ class URLArgumentParser(object):
 #        self.arguments = {'help': Argument('help')}
         self.arguments = {}
         
-    def add_argument(self, name, required=False, default=None, type=str, action='store', help=''):
+    def add_argument(self, name, required=False, default=None, type=str, action='store', help='', choices=None):
         '''
         add an argument
         '''
-        arg = Argument(name, required, default, type, action, help)
+        arg = Argument(name, required, default, type, action, help, choices)
         self.arguments[name] = arg
         
     def parse_params(self, params):

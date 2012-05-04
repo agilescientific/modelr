@@ -213,10 +213,27 @@ function display_form(sel) {
 
         form_text += '<td>' + arg + ':</td>';
         form_text += '<td>' + args[arg]['help'] + ':</td>';
+
         if (args[arg]['type'] == 'rock_properties_type') {
             form_text += '<td><select name="'
                     + arg
                     + '" class="script_form rock_selector"><option>Rocks</option><option>==========</option></select></td>';
+        } else if (args[arg]['choices'] != null) {
+
+            form_text += '<td><select name="' + arg + '" class="script_form choices_selector">'
+
+            for (idx in args[arg]['choices']) {
+                console.log('DEF', args[arg]['choices'][idx], deflt, args[arg]['choices'][idx] == deflt);
+                if (args[arg]['choices'][idx] == deflt) {
+                    form_text += '<option selected>' + args[arg]['choices'][idx] + '</option>';
+                } else{
+                    
+                    form_text += '<option>' + args[arg]['choices'][idx] + '</option>';
+                }
+                
+            }
+            form_text += '</select></td>';
+
         } else {
             form_text += '<td><input class="script_form" type="text" name="' + arg + '" value="' + deflt
                     + '"></input></td>';
