@@ -1,0 +1,74 @@
+{% extends "base_template.html" %}
+
+{% block title %}Modelr Dashboard{% endblock %}
+{% block content %}
+
+
+Here is the dashboard.
+
+<h3>Scenarios</h3>
+
+<!-- List of scenarios -->
+<ul>
+{% for scenario in scenarios %}
+
+    <form name="input" action="remove_scenario" method="get">
+    <input type="hidden" name="name" value="{{scenario.name}}" />
+    <li><a href='/scenario#{{scenario.name}}'>{{scenario.name}}</a> <input type="submit" value="remove" /></li>
+    </form>
+
+{% endfor %}
+</ul>
+
+<!-- Add a new scenario -->
+<a href="scenario">new scenario</a>
+
+
+
+<h3>Rocks</h3>
+
+<!--  List of rocks. -->
+<ul>
+{% for rock in rocks %}
+
+    <form name="input" action="remove_rock" method="get">
+    <input type="hidden" name="name" value="{{rock.name}}" />
+    <li>Name: {{rock.name}} rho={{rock.rho}} Vp={{rock.vp}} Vs={{rock.vs}} <input type="submit" value="remove" /></li>
+    </form>
+
+{% endfor %}
+</ul>
+
+<h3>Add Rock</h3>
+<form name="input" action="add_rock" method="get">
+<table>
+<tr>
+    <td>Name</td>
+    <td><input type="text" name="name" value="rock" /></td>
+</tr>
+<tr>
+    <td>Description</td>
+    <td><input type="text" name="description" value="" /></td>
+</tr>
+<tr>
+    <td>Rho</td>
+    <td><input type="number" name="rho" value="" /></td>
+</tr>
+
+<tr>
+    <td>Vp</td>
+    <td><input type="number" name="vp" value="" /></td>
+</tr>
+
+<tr>
+    <td>Vs</td>
+    <td><input type="number" name="vs" value="" /></td>
+</tr>
+</table>
+
+<input type="submit" value="add" />
+
+</form>
+
+
+{% endblock %}

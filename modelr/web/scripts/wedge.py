@@ -7,15 +7,12 @@ from argparse import ArgumentParser
 from modelr.reflectivity import create_wedge
 import matplotlib
 import matplotlib.pyplot as plt
-import tempfile
-from os import unlink
-from modelr.urlargparse import URLArgumentParser
-from modelr.rock_properties import RockProperties
+from modelr.web.urlargparse import rock_properties_type
+from modelr.web.util import return_current_figure
 
 short_description = 'Create an ...'
 
-def create_parser():
-    parser = URLArgumentParser('This is the default script')
+def add_arguments(parser):
     
     parser.add_argument('title', default='Plot', type=str, help='The title of the plot')
     parser.add_argument('xlim', type=float, action='list')
@@ -23,14 +20,8 @@ def create_parser():
     parser.add_argument('max_thickness', default=50, type=int, help='The maximum thickness of the wedge')
     parser.add_argument('ntraces', default=300, type=int, help='Number of traces')
     
-    parser.add_argument('rho0', type=float, default=.3, help='lower', required=True)
-    parser.add_argument('rho1', type=float, default=.3, help='upper', required=True)
-
-    parser.add_argument('vp0', type=float, default=.3, help='lower', required=True)
-    parser.add_argument('vp1', type=float, default=.3, help='upper', required=True)
-
-    parser.add_argument('vs0', type=float, help='lower')
-    parser.add_argument('vs1', type=float, help='upper')
+    parser.add_argument('Rpp0', type=rock_properties_type, help='rock properties of upper rock', required=True)
+    parser.add_argument('Rpp1', type=rock_properties_type, help='rock properties of lower rock', required=True)
     
     parser.add_argument('theta', type=float, help='Angle of incidence')
     
@@ -41,8 +32,8 @@ def run_script(args):
     
     matplotlib.interactive(False)
     
-    Rprop0 = RockProperties(args.vp0, args.vs0, args.rho0) 
-    Rprop1 = RockProperties(args.vp1, args.vs1, args.rho1)
+    Rprop0 = args.Rpp0 
+    Rprop1 = args.Rpp1
     
     warray_amp = create_wedge(args.ntraces, args.pad, args.max_thickness,
                               Rprop0, Rprop1, args.theta, args.f)
@@ -58,15 +49,7 @@ def run_script(args):
     plt.ylabel('time (ms)')
     plt.xlabel('trace')
     
-    fig_path = tempfile.mktemp('.jpeg')
-    plt.savefig(fig_path)
-    
-    with open(fig_path, 'rb') as fd:
-        data = fd.read()
-        
-    unlink(fig_path)
-        
-    return data
+    return return_current_figure()
     
     
 def main():

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+
+	<b>Error</b>: {{ msg }} <br>
+	
+	<ul>
+		{% for script, doc in available_scripts%}
+	    <li>
+			<form name="input" action="plot.jpeg"
+				method="get">
+				<input type="hidden" name="script" value="{{script}}" /> <input
+					type="hidden" name="help" value="1" /> <input type="submit"
+					value="{{ script[:-2].title() }}" />
+					 -- {{ doc }}
+			</form>
+	    </li>
+		   
+		   </br>
+		
+		{% endfor %}
+	</ul>
+
+</body>
+</html>

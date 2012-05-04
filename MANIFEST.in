@@ -1,3 +1,4 @@
 include README.rst license.rst
 recursive-include doc *
+recursive-include modelr/web/static *
 

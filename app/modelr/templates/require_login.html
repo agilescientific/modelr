@@ -1,0 +1,18 @@
+{% extends "base_template.html" %}
+
+{% block header %}
+Please log in with OpenID!
+{% endblock %}
+
+{% block title %}Login Required{% endblock %}
+
+{% block content %}
+
+{% for name, uri in provider_links.items() %}
+    
+    [<a href="{{uri}}">{{name}}</a>]</br>
+    
+{% endfor %}
+
+{% endblock %}
+
