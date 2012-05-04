@@ -12,12 +12,6 @@ indexes:
 
 - kind: Rock
   properties:
-  - name: author
-  - name: date
-    direction: desc
-
-- kind: Rock
-  properties:
   - name: user
   - name: date
     direction: desc
