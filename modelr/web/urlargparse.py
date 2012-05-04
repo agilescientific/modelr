@@ -16,6 +16,21 @@ def rock_properties_type(str_input):
     assert len(args) == 3
     return RockProperties(float(args[0]), float(args[1]), float(args[2]))
 
+def reflectivity_type(str_input):
+    '''
+    To be used as the 'type' value in an Argument. 
+    
+    
+    Takes a string as input and returns an arbitrary value.
+    
+    Example::
+        
+        parser.add_argument('reflectivity_model', type=reflectivity_type, help='... ', default='zoeppritz', choices=MODELS.keys())
+     
+    '''
+    from modelr.rock_properties import MODELS
+    return MODELS[str_input]
+    
 class Argument(object):
     '''
     An place holder for an url argument.
