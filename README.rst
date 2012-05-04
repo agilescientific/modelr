@@ -21,7 +21,7 @@ Prerequisites
 Links:
 +++++++++++
 
-* `Agile Geoscience <agilegeoscience.com>`_
+* `Agile Geoscience <http://www.agilegeoscience.com>`_
 * `Homepage <http://agile-geoscience.github.com/modelr/>`_
 * `Issue Tracker <https://github.com/agile-geoscience/modelr/issues/>`_
 
