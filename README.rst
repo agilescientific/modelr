@@ -11,3 +11,27 @@ example:
 Or to get help just run:
 
 * `agilegeoscience.com:9999/plot.jpeg`
+
+Prerequisites
+++++++++++++++++
+
+* Google App Engine  API `<https://developers.google.com/appengine/>`_
+* Enthought Python Distribution `<http://www.enthought.com/products/epd_free.php>`_
+
+Links:
++++++++++++
+
+* `Agile Geoscience <agilegeoscience.com>`_
+* `Homepage <http://agile-geoscience.github.com/modelr/>`_
+* `Issue Tracker <https://github.com/agile-geoscience/modelr/issues/>`_
+
+
+* `PyPi <http://pypi.python.org/pypi/modelr/>`_
+* `Github <https://github.com/agile-geoscience/modelr>`_
+
+
+Authors:
+++++++++++++++++
+
+* Matt Hall @ Agile Geoscience.
+* `Sean Ross-Ross <https://github.com/srossross>`_ @ `Enthought Inc. <enthought.com>`_ 
