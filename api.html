@@ -1,0 +1,192 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Web API. &mdash; modelr 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="modelr 0.0.0 documentation" href="index.html" />
+    <link rel="prev" title="Scientific Code" href="wavelet.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="wavelet.html" title="Scientific Code"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">modelr 0.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="web-api">
+<h1>Web API.<a class="headerlink" href="#web-api" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="available-scripts-json-get-the-available-scripts">
+<h2>/available_scripts.json &#8212; Get the available scripts<a class="headerlink" href="#available-scripts-json-get-the-available-scripts" title="Permalink to this headline">¶</a></h2>
+<p>Response returned in JSON format.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">returns:</th><td class="field-body">a list of [name, shor_doc] pairs</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="script-help-json-get-info-and-help-for-a-script">
+<h2>/script_help.json &#8212; Get info and help for a script<a class="headerlink" href="#script-help-json-get-info-and-help-for-a-script" title="Permalink to this headline">¶</a></h2>
+<p>Response returned in JSON format.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param script:</th><td class="field-body">The script name.</td>
+</tr>
+</tbody>
+</table>
+<p>example:</p>
+<div class="highlight-python"><pre>server.com/script_help.json?name=one_spike.py</pre>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">returns:</th><td class="field-body">a dict {&#8220;description&#8221;: description, &#8220;arguments&#8221;: { arg0 : info0, ... argN :infoN }}</td>
+</tr>
+</tbody>
+</table>
+<p>info0 is a dict with the fowlwing keys:</p>
+<dl class="docutils">
+<dt>name:</dt>
+<dd>The name of the argument.</dd>
+<dt>required:</dt>
+<dd>if the argument is required.</dd>
+<dt>default:</dt>
+<dd>the default value.</dd>
+<dt>type:</dt>
+<dd>the type of the argument as a string.</dd>
+<dt>action:</dt>
+<dd>... additional type specifyer.</dd>
+<dt>help:</dt>
+<dd>help for the parameter.</dd>
+</dl>
+</div>
+<div class="section" id="plot-jpeg-create-a-plot">
+<h2>/plot.jpeg &#8212; Create a plot<a class="headerlink" href="#plot-jpeg-create-a-plot" title="Permalink to this headline">¶</a></h2>
+<p>Response returned in jpeg image format.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param script:</th><td class="field-body">The script name.</td>
+</tr>
+</tbody>
+</table>
+<p>All other parameters are dependent on the script.</p>
+<p>example:</p>
+<div class="highlight-python"><pre>server.com/plot.jpeg?script=one_spike.py&amp;theta1=0&amp;xlim=-1%2C1&amp;f=25&amp;title=Plot&amp;Rpp0=3240.0%2C2340.0%2C1620.0&amp;Rpp1=2590.0%2C2210.0%2C1060.0&amp;time=150</pre>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">returns:</th><td class="field-body">An image blob</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Web API.</a><ul>
+<li><a class="reference internal" href="#available-scripts-json-get-the-available-scripts">/available_scripts.json &#8212; Get the available scripts</a></li>
+<li><a class="reference internal" href="#script-help-json-get-info-and-help-for-a-script">/script_help.json &#8212; Get info and help for a script</a></li>
+<li><a class="reference internal" href="#plot-jpeg-create-a-plot">/plot.jpeg &#8212; Create a plot</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="wavelet.html"
+                        title="previous chapter">Scientific Code</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/api.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="wavelet.html" title="Scientific Code"
+             >previous</a> |</li>
+        <li><a href="index.html">modelr 0.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Agile Geoscience.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>
