@@ -21,6 +21,7 @@ def main():
         url='https://github.com/agile-geoscience/modelr',
         
         packages=find_packages(),
+        package_data={'modelr.web': ['static/*', 'templates/*']},
             
         classifiers=[c.strip() for c in """\
             Development Status :: 5 - Production/Stable
