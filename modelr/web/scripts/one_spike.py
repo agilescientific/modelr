@@ -5,13 +5,13 @@ Created on Apr 30, 2012
 '''
 from argparse import ArgumentParser
 from modelr.wavelet import ricker_freq
-from modelr.rock_properties import zoeppritz
+from modelr.rock_properties import MODELS
 from os import unlink
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import tempfile
-from modelr.web.urlargparse import rock_properties_type
+from modelr.web.urlargparse import rock_properties_type, reflectivity_type
 from modelr.web.util import return_current_figure
 
 short_description = 'Create an ...'
@@ -28,7 +28,7 @@ def add_arguments(parser):
     parser.add_argument('theta1', type=float, help='angle of incidence')
     
     parser.add_argument('f', type=float, help='frequency', default=25)
-    parser.add_argument('reflectivity_model', type=str, help='... ', default='zoeppritz', choices=['zoeppritz', 'foo'])
+    parser.add_argument('reflectivity_model', type=reflectivity_type, help='... ', default='zoeppritz', choices=MODELS.keys())
     return parser
 
 
@@ -39,7 +39,7 @@ def run_script(args):
     array_amp = np.zeros([args.time])
     array_time = np.arange(args.time)
     
-    Rpp = zoeppritz(args.Rpp0, args.Rpp1, args.theta1)
+    Rpp = args.reflectivity_model(args.Rpp0, args.Rpp1, args.theta1)
     
     array_amp[args.time // 2] = Rpp
     
