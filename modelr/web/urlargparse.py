@@ -16,6 +16,10 @@ def rock_properties_type(str_input):
     assert len(args) == 3
     return RockProperties(float(args[0]), float(args[1]), float(args[2]))
 
+def reflectivity_type(str_input):
+    from modelr.rock_properties import MODELS
+    return MODELS[str_input]
+    
 class Argument(object):
     '''
     An place holder for an url argument.
