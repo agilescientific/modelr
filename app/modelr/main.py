@@ -78,7 +78,7 @@ class ModelrPageRequest(webapp2.RequestHandler):
     
     #For the plot server
     # Ideally this should be settable by an admin console.
-    HOSTNAME = 'http://localhost:9999'
+    HOSTNAME = 'http://server.modelr.org:8080'
     
     def rocks(self):
         '''
