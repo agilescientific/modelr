@@ -1,0 +1,137 @@
+{% extends "base_template.html" %} 
+{% block title %}Scenario{% endblock %} 
+
+{% block content %}
+<script type="text/javascript">
+<!-- 
+var host = '{{HOSTNAME}}';
+-->
+</script>
+
+<script type="text/javascript">
+<!--
+    
+    
+    
+    
+    $(document).ready(function() {
+        
+        server = new PlotServer(host, get_rocks('datalist#list_of_rocks'));
+        scenario = new Scenario(name, null, {}, server.rocks);
+        
+        // This is specific to this page. will create a form.
+        scenario.display = display_form;
+        
+        // This is specific to this page.
+        // Used by the script select element + the get method of Scenario.
+        scenario.set_current_script = function(value, argumentss){
+
+            scenario.script = value;
+            
+            console.log('server.current_script');
+            
+            server.get_script_info(value, function(data){
+                scenario.info = data;
+                scenario.default_args(argumentss);
+                
+                console.log('div#scenario_place');
+                
+                // This will Create a form see above
+                scenario.display('div#scenario_place');
+                
+                scenario.on_change();
+            })
+            
+            // Select the script in the 'select' element of this page.  
+            $("select#select_script option").filter(function() {
+                //may want to use $.trim in here
+                return $(this).val() == value; 
+            }).attr('selected', true);
+            
+            
+
+            
+        }
+        
+        // This is Specific to this display.
+	    server.update_img = function(scenario){
+	        
+            var qs = scenario.qs();
+	        var url = server.hostname +'/plot.jpeg' + qs;
+            var img = $('img#plot_image');
+            img.attr('src', url);
+            
+	    }
+        
+        scenario.on_change = function update_link(){
+            
+            var qs = scenario.qs();
+	        var url = server.hostname +'/plot.jpeg' + qs;
+	        
+            var p = $('p#image_link');
+            p.text(url);
+        }
+	    
+        /* This will populate the scripts dropdown with a list of scripts
+        from the plot server.
+        */
+        populate_scripts(server, 'select#select_script');
+
+        /*
+        This grabs the data after the '#' in the url and updates the current
+        scenario.
+        */
+        var hash = window.location.hash.substring(1);
+        
+        if (hash != ''){
+            scenario.name = hash;
+            
+            // Get the scenario from google app engine.
+            scenario.get();
+            $('input#scenario_name').val(hash);
+        }
+	    
+    });
+    -->
+</script>
+
+<!-- This will expand the list of rocks before google app engine sends this page to the user -->
+<!-- This list is used by javascript and not directly seen by the user -->
+<datalist id="list_of_rocks">
+	{% for rock in rocks %}
+	<option data-value="{{rock.vp}},{{rock.rho}},{{rock.vs}}"
+		data-name="{{rock.name}}">{{rock.name}}</option>
+	{% endfor %}
+
+</datalist>
+<h3>Scenario</h3>
+
+<!-- Text box to put  the scenario name. -->
+Scenario Name: <input id='scenario_name' onchange="scenario.name = this.value;"></input><button onclick="scenario.put()">Save</button><button onclick="scenario.get()">Load</button>
+</br>
+</br>
+
+
+<!-- Drop box of scripts -->
+<select id="select_script"
+	onchange="scenario.set_current_script($(this).val(), scenario.arguments)">
+	<option>Please wait ... </option>
+</select>
+
+<!-- Refresh the drop box -->
+<button type="button" onclick="populate_scripts(server, 'select#select_script')">refresh</button>
+
+<!-- Div to place the form into see Scenario.display and display_form functions-->
+<div id="scenario_place"></div>
+
+<!-- Create and display the image / see the user defined server.update_img -->
+<button id='create_image' onclick="server.update_img(scenario)">Create Image</button>
+
+
+<p id="image_link">URL</p>
+
+<!-- Updated by the  create_image button above-->
+<img id="plot_image" href="does_not_exist.jpeg" alt="Plot image"></img>
+
+
+{% endblock %}

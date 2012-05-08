@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Help for script {{ script[:-3].title() }}</title>
+</head>
+<body>
+
+<h1> Help for script {{ script[:-3].title() }} </h1>
+
+
+<form name="input" action="plot.jpeg" method="get">
+
+    <input type="hidden" name="script" value="{{script}}"/>
+    
+    
+    <table>
+    
+    {% for name,arg in parser.arguments.items() %}
+    
+    <tr>
+    <td>{{name.title()}}:</td>
+    
+    <td><input type="text" name="{{name}}" value="{{arg.default if arg.default is not none else parameters.get(name,[''])[0] }}"/></td>
+    </tr>
+    
+    {% endfor %}
+    
+    </table>
+
+    <input type="submit" value="Submit" />
+</form>
+ 
+
+</body>
+</html>

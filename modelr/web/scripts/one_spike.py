@@ -4,42 +4,31 @@ Created on Apr 30, 2012
 @author: sean
 '''
 from argparse import ArgumentParser
-from modelr.zoep_calc import zoeppritz
 from modelr.wavelet import ricker_freq
+from modelr.rock_properties import MODELS
+from os import unlink
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
+import tempfile
+from modelr.web.urlargparse import rock_properties_type, reflectivity_type
+from modelr.web.util import return_current_figure
 
 short_description = 'Create an ...'
 
-#import matplotlib.mlab as mlab
-import matplotlib
-#from matplotlib.pyplot import figure, show
-import numpy as np
-#import matplotlib.transforms as mtransforms
-import matplotlib.pyplot as plt
-import tempfile
-from os import unlink
-from modelr.urlargparse import URLArgumentParser
-#from scipy.signal import ricker
-
-
-def create_parser():
-    parser = URLArgumentParser('This is the default script')
+def add_arguments(parser):
     
     parser.add_argument('title', default='Plot', type=str, help='The title of the plot')
     parser.add_argument('xlim', type=float, action='list', help='The range of amplitudes to plot eg. xlim=-1.0,1.0')
     parser.add_argument('time', default=150, type=int, help='The size in Mili seconds of the plot')
     
-    parser.add_argument('rho0', type=float, default=.3, help='lower', required=True)
-    parser.add_argument('rho1', type=float, default=.3, help='upper', required=True)
-
-    parser.add_argument('vp0', type=float, default=.3, help='lower', required=True)
-    parser.add_argument('vp1', type=float, default=.3, help='upper', required=True)
-
-    parser.add_argument('vs0', type=float, help='lower')
-    parser.add_argument('vs1', type=float, help='upper')
+    parser.add_argument('Rpp0', type=rock_properties_type, help='rock properties of upper rock', required=True)
+    parser.add_argument('Rpp1', type=rock_properties_type, help='rock properties of lower rock', required=True)
     
     parser.add_argument('theta1', type=float, help='angle of incidence')
     
     parser.add_argument('f', type=float, help='frequency', default=25)
+    parser.add_argument('reflectivity_model', type=reflectivity_type, help='... ', default='zoeppritz', choices=MODELS.keys())
     return parser
 
 
@@ -50,19 +39,14 @@ def run_script(args):
     array_amp = np.zeros([args.time])
     array_time = np.arange(args.time)
     
-    vs0 = args.vs0 if args.vp0 / 2 is None else args.vs0
-    vs1 = args.vs1 if args.vp1 / 2 is None else args.vs1
-    
-    Rpp = zoeppritz(args.vp1, vs1, args.rho1, args.vp0, vs0, args.rho0, args.theta1)
+    Rpp = args.reflectivity_model(args.Rpp0, args.Rpp1, args.theta1)
     
     array_amp[args.time // 2] = Rpp
     
     r = ricker_freq(100, args.f)
     
-    print 'r.shape',r.shape
-    print 'array_amp', array_amp.shape
-    
     warray_amp = np.convolve(array_amp, r, mode='same')
+    
     fig = plt.figure()
     
     ax1 = fig.add_subplot(111)
@@ -77,15 +61,7 @@ def run_script(args):
     ax.set_ylim(ax.get_ylim()[::-1])
     ax.set_xlim(args.xlim)
     
-    fig_path = tempfile.mktemp('.jpeg')
-    plt.savefig(fig_path)
-    
-    with open(fig_path, 'rb') as fd:
-        data = fd.read()
-        
-    unlink(fig_path)
-        
-    return data
+    return return_current_figure()
     
     
 def main():
@@ -98,4 +74,3 @@ def main():
 if __name__ == '__main__':
     main()
 
-    v1

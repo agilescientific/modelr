@@ -43,7 +43,7 @@ def main():
         
     entry_points={
                     'console_scripts': [
-                                        'modelr-server = modelr.webserver:main',
+                                        'modelr-server = modelr.web.server:main',
                                         ],
                     }
 

@@ -1,31 +1,60 @@
 '''
-Created on Apr 30, 2012
+====================
+modelr.web.urlparse
+====================
 
-@author: sean
+.. seealso:: http://docs.python.org/dev/library/argparse.html
 '''
 import sys
 from urlparse import urlparse, parse_qs
 from argparse import Namespace
+import json
 
+def rock_properties_type(str_input):
+    from modelr.rock_properties import RockProperties
+    args = str_input.split(',')
+    assert len(args) == 3
+    return RockProperties(float(args[0]), float(args[1]), float(args[2]))
+
+def reflectivity_type(str_input):
+    '''
+    To be used as the 'type' value in an Argument. 
+    
+    
+    Takes a string as input and returns an arbitrary value.
+    
+    Example::
+        
+        parser.add_argument('reflectivity_model', type=reflectivity_type, help='... ', default='zoeppritz', choices=MODELS.keys())
+     
+    '''
+    from modelr.rock_properties import MODELS
+    return MODELS[str_input]
+    
 class Argument(object):
-    def __init__(self, name, required=False, default=None, type=str, action='store', help=''):
+    '''
+    An place holder for an url argument.
+    '''
+    def __init__(self, name, required=False, default=None, type=str, action='store', help='', choices=None):
         self.name = name
         self.required = required
         self.default = default
         self.type = type
         self.action = action
         self.help = help
+        self.choices = choices
     
     def parse_arg(self, args):
-        if args is None:
+        if not args or not args[0] or args[0] == 'null':
             if self.required:
                 raise ArgumentError("missing argument %r" % (self.name,))
             else:
                 return self.default
         
-        print "self.action", self.action
         arg = args[0]
         if self.action != 'list':
+            if self.choices is not None and arg not in self.choices:
+                raise ArgumentError("argument %s is invalid: must be one of %r (got %r)" % (self.name, self.choices, arg))
             try:
                 arg = self.type(arg)
             except:
@@ -36,7 +65,6 @@ class Argument(object):
             new_args = []
             for arg in arg.split(','):
                 try:
-                    print "self.type", self.type, arg
                     value = self.type(arg)
                 except:
                     raise ArgumentError("argument %s: invalid %s value: %r" % (self.name, self.type.__name__, arg))
@@ -47,15 +75,32 @@ class Argument(object):
             
     
     @property
+    def json_dict(self):
+        return {
+        'name':self.name,
+        'required': self.required,
+        'default': self.default,
+        'type':self.type.__name__,
+        'action':self.action,
+        'help': self.help,
+        'choices': self.choices,
+        }
+
+    @property
     def html_help(self):
         return '<li><b>%s</b>: %s</li>\n' % (self.name, self.help)
         
         
     
 class ArgumentError(Exception):
-    pass
+    '''
+    Exception to be called when arguments are not as expected by the parser.
+    '''
 
 class SendHelp(Exception):
+    '''
+    Exception to be called when the help argument is found.
+    '''
     def __init__(self, html):
         Exception.__init__(self, html)
         self.html = html
@@ -63,6 +108,8 @@ class SendHelp(Exception):
 class URLArgumentParser(object):
     '''
     Parse a key=value arguments in a url string.
+    
+    Modeled after http://docs.python.org/dev/library/argparse.html
     '''
     
     def __init__(self, description):
@@ -73,11 +120,17 @@ class URLArgumentParser(object):
 #        self.arguments = {'help': Argument('help')}
         self.arguments = {}
         
-    def add_argument(self, name, required=False, default=None, type=str, action='store', help=''):
-        arg = Argument(name, required, default, type, action, help)
+    def add_argument(self, name, required=False, default=None, type=str, action='store', help='', choices=None):
+        '''
+        add an argument
+        '''
+        arg = Argument(name, required, default, type, action, help, choices)
         self.arguments[name] = arg
         
     def parse_params(self, params):
+        '''
+        parse the arguments gotten by urlparse.parse_qs
+        '''
         result = dict()
         
         if 'help' in params:
@@ -98,12 +151,22 @@ class URLArgumentParser(object):
         return Namespace(**result)
     
     def parse_ulr(self, path):
+        '''
+        parse a url into its argument. 
+        '''
+
         uri = urlparse(path)
         params = parse_qs(uri.query)
         
         return self.parse_params(params)
         
         
+    @property
+    def json_data(self):
+        obj = {'description': self.description,
+               'arguments': {k:v.json_dict for (k, v) in self.arguments.items()}}
+        return json.dumps(obj)
+    
     @property
     def help_html(self):
         
@@ -120,7 +183,6 @@ def main():
     parser = URLArgumentParser('description')
     
     parser.add_argument('script', required=True, type=str)
-    print parser.parse_ulr(path)
     
     
 if __name__ == '__main__':
