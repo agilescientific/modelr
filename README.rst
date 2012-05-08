@@ -1,10 +1,9 @@
-
 Welcome to modelr's documentation!
 ==================================
 
-Google charts like API for Geoscience!
+Google charts like API for geophysics! Submit tasks via a script-plus-parameters, or via a URL. 
 
-example: 
+Example: 
 
 * `agilegeoscience.com:9999/plot.jpeg?script=one_spike.py&title=Ricker%20R=%25(Rpp)s&vp0=3240&vp1=2590&vs0=1620&vs1=1060&rho0=2340&rho1=2210&theta1=45`
 
@@ -18,7 +17,7 @@ Prerequisites
 * Google App Engine  API `<https://developers.google.com/appengine/>`_
 * Enthought Python Distribution `<http://www.enthought.com/products/epd_free.php>`_
 
-Links:
+Links
 +++++++++++
 
 * `Agile Geoscience <http://www.agilegeoscience.com>`_
@@ -30,8 +29,8 @@ Links:
 * `Github <https://github.com/agile-geoscience/modelr>`_
 
 
-Authors:
+Authors
 ++++++++++++++++
 
-* Matt Hall @ Agile Geoscience.
-* `Sean Ross-Ross <https://github.com/srossross>`_ @ `Enthought Inc. <enthought.com>`_ 
+* `Matt Hall <https://github.com/kwinkunks>`_ @ `Agile Geoscience <http://www.agilegeoscience.com>`_
+* `Sean Ross-Ross <https://github.com/srossross>`_ @ `Enthought Inc. <http://www.enthought.com>`_ 
