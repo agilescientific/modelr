@@ -5,11 +5,11 @@ Google charts like API for geophysics! Submit tasks via a script-plus-parameters
 
 Example: 
 
-* `agilegeoscience.com:9999/plot.jpeg?script=one_spike.py&title=Ricker%20R=%25(Rpp)s&vp0=3240&vp1=2590&vs0=1620&vs1=1060&rho0=2340&rho1=2210&theta1=45`
+* `<http://server.modelr.org:8080/plot.jpeg?script=one_spike.py&title=Ricker%20R=%25(Rpp)s&vp0=3240&vp1=2590&vs0=1620&vs1=1060&rho0=2340&rho1=2210&theta1=45>`_
 
 Or to get help just run:
 
-* `agilegeoscience.com:9999/plot.jpeg`
+* `<http://server.modelr.org:8080/plot.jpeg>`_
 
 Prerequisites
 ++++++++++++++++
