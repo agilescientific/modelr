@@ -76,3 +76,30 @@ def create_theta(pad, thickness, prop0, prop1, theta, f, points, reflectivity_me
         
     return np.array(warray_amp)
 
+def create_theta_spike(pad, prop0, prop1, theta, f, points, reflectivity_method):
+    '''
+    Create a 2D array where the first dimension is time and the second is angle.
+
+    :param pad: pad the array top and bottom in ms
+    :param prop0: rock properties 1
+    :param prop1: rock properties 1
+    :param theta: array of angles
+    :param f: the frequency for the wavelet
+    '''
+
+    nsamples = (2 * pad)
+
+    array_amp = np.zeros([nsamples, theta.size])
+
+    Rp = reflectivity_method(prop0, prop1, theta)
+    array_amp[pad, :] += Rp
+
+    r = ricker_freq(points, f)
+
+    warray_amp = np.zeros([max(array_amp.shape[0], r.shape[0]), array_amp.shape[1]])
+
+    for i in range(theta.size):
+        warray_amp[:, i] = np.convolve(array_amp[:, i], r, mode='same')
+
+    return np.array(warray_amp)
+
