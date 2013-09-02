@@ -5,7 +5,7 @@ Google charts like API for geophysics! Submit tasks via a script-plus-parameters
 
 Example: 
 
-* `<http://server.modelr.org:8080/plot.jpeg?script=one_spike.py&title=Ricker%20R=%25(Rpp)s&vp0=3240&vp1=2590&vs0=1620&vs1=1060&rho0=2340&rho1=2210&theta1=45>`_
+* `<http://server.modelr.org:8080/plot.jpeg?script=one_spike.py&title=Ricker&f=25&reflectivity_model=zoeppritz&Rpp0=2350,2350,1200&Rpp1=2670,2560,1300&theta1=45>`_
 
 Or to get help just run:
 
