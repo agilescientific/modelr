@@ -42,10 +42,13 @@ class MyHandler(BaseHTTPRequestHandler):
         '''
         Evaluate a script in the scripts directory.
         '''
+        
+        # If no script was passed, then tell the user
         if not script or len(script) != 1:
-            self.send_script_error("argument 'script' was ommitted or malformed (got %r)" % (script))
+            self.send_script_error("argument 'script' was omitted or malformed (got %r)" % (script))
             return
         
+        # Otherwise, run the script
         dirn = dirname(__file__)
         script_path = join(dirn, 'scripts', script[0])
         
@@ -197,6 +200,9 @@ class MyHandler(BaseHTTPRequestHandler):
         self.wfile.write(jpeg_data)
     
     def get_available_scripts(self):
+        '''
+        Returns a list of all the scripts in the scripts directory.
+        '''
         scripts_dir = join(dirname(__file__), 'scripts')
 
         available_scripts = []
