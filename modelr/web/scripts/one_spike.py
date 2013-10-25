@@ -14,7 +14,7 @@ import tempfile
 from modelr.web.urlargparse import rock_properties_type, reflectivity_type
 from modelr.web.util import return_current_figure
 
-short_description = 'Create an ...'
+short_description = '1D model of single spike at any offset.'
 
 def add_arguments(parser):
     
