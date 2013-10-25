@@ -6,7 +6,7 @@ modelr.rock_properties -- TODO short docstring here
 TODO: long doc here 
 '''
 
-from agilegeo import reflection
+from agilegeo import avo as reflection
     
 class RockProperties(object):
     '''
