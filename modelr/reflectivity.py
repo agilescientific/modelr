@@ -7,7 +7,7 @@ TODO: long doc here
 '''
 import numpy as np
 from modelr.rock_properties import zoeppritz
-from modelr.wavelet import ricker_freq
+from agilegeo.wavelet import ricker_alg
 
 def create_wedge(ntraces, pad, max_thickness, prop0, prop1, theta, f):
     '''
@@ -25,7 +25,8 @@ def create_wedge(ntraces, pad, max_thickness, prop0, prop1, theta, f):
     nsamples = (2 * pad + max_thickness) * scale
       
     array_amp = np.zeros([nsamples, ntraces])
-    fwedge = np.floor(np.linspace(pad * scale, (pad + max_thickness) * scale, ntraces, endpoint=False))
+    fwedge = np.floor(np.linspace(pad * scale, (pad + max_thickness) * scale,
+                      ntraces, endpoint=False))
     wedge = np.array(fwedge, dtype=int)
     
      
@@ -35,7 +36,7 @@ def create_wedge(ntraces, pad, max_thickness, prop0, prop1, theta, f):
     array_amp[pad * scale, :] += Rp0
     array_amp[wedge, np.arange(ntraces)] += Rp1
     
-    r = ricker_freq(100 * scale, f)
+    r = ricker_alg(0.2, 100 * scale, f)
     
     warray_amp = np.zeros([max(array_amp.shape[0], r.shape[0]), array_amp.shape[1]])
     
@@ -67,7 +68,7 @@ def create_theta(pad, thickness, prop0, prop1, theta, f, points, reflectivity_me
     array_amp[pad, :] += Rp0
     array_amp[pad + thickness, :] += Rp1
     
-    r = ricker_freq(points, f)
+    r = ricker_alg(.2,points, f)
     
     warray_amp = np.zeros([max(array_amp.shape[0], r.shape[0]), array_amp.shape[1]])
     
@@ -94,7 +95,7 @@ def create_theta_spike(pad, prop0, prop1, theta, f, points, reflectivity_method)
     Rp = reflectivity_method(prop0, prop1, theta)
     array_amp[pad, :] += Rp
 
-    r = ricker_freq(points, f)
+    r = ricker_alg(.2,points, f)
 
     warray_amp = np.zeros([max(array_amp.shape[0], r.shape[0]), array_amp.shape[1]])
 
