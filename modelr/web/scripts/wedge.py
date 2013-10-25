@@ -28,6 +28,7 @@ def add_arguments(parser):
     parser.add_argument('theta', type=float, help='Angle of incidence')
     
     parser.add_argument('f', type=float, help='frequency', default=25)
+    parser.add_argument('color', type=str, help='Matplotlib colormap', default='Grey')
     return parser
 
 def run_script(args):
@@ -43,9 +44,8 @@ def run_script(args):
     fig = plt.figure()
     ax1 = fig.add_subplot(111)
 
-    plt.gray()
     aspect = float(warray_amp.shape[1]) / warray_amp.shape[0]
-    ax1.imshow(warray_amp, aspect=aspect)
+    ax1.imshow( warray_amp, aspect=aspect, cmap=args.color)
     
     plt.title(args.title % locals())
     plt.ylabel('time (ms)')
