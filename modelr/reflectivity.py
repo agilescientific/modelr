@@ -3,13 +3,14 @@
 modelr.reflectivity -- TODO short docstring here
 ================================================================
 
-TODO: long doc here 
+Basic methods for creating models.
+
 '''
 import numpy as np
 from modelr.rock_properties import zoeppritz
 from agilegeo.wavelet import ricker_alg
 
-def create_wedge(ntraces, pad, max_thickness, prop0, prop1, theta, f):
+def create_wedge(ntraces, pad, max_thickness, prop0, prop1, theta, f, reflectivity_method):
     '''
     Create a wedge model.
     
@@ -30,8 +31,8 @@ def create_wedge(ntraces, pad, max_thickness, prop0, prop1, theta, f):
     wedge = np.array(fwedge, dtype=int)
     
      
-    Rp0 = zoeppritz(prop0, prop1, theta)
-    Rp1 = zoeppritz(prop1, prop0, theta)
+    Rp0 = reflectivity_method(prop0, prop1, theta)
+    Rp1 = reflectivity_method(prop1, prop0, theta)
     
     array_amp[pad * scale, :] += Rp0
     array_amp[wedge, np.arange(ntraces)] += Rp1

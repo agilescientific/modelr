@@ -1,13 +1,14 @@
 '''
 Created on Apr 30, 2012
 
-@author: sean
+@author: Sean Ross-Ross, Matt Hall, Evan Bianco
 '''
 from argparse import ArgumentParser
 from modelr.reflectivity import create_wedge
 import matplotlib
 import matplotlib.pyplot as plt
-from modelr.web.urlargparse import rock_properties_type
+from modelr.web.urlargparse import rock_properties_type, reflectivity_type
+from modelr.rock_properties import MODELS
 from modelr.web.util import return_current_figure
 
 short_description = 'Create a simple wedge model.'
@@ -15,7 +16,6 @@ short_description = 'Create a simple wedge model.'
 def add_arguments(parser):
     
     parser.add_argument('title', default='Plot', type=str, help='The title of the plot')
-#    parser.add_argument('xlim', type=float, action='list')
     parser.add_argument('pad', default=50, type=int, help='The time in milliseconds aboe and below the wedge')
     parser.add_argument('max_thickness', default=50, type=int, help='The maximum thickness of the wedge')
     parser.add_argument('ntraces', default=300, type=int, help='Number of traces')
@@ -25,10 +25,9 @@ def add_arguments(parser):
     parser.add_argument('Rpp1', type=rock_properties_type, 
                         help='rock properties of lower rock', required=True)
     
+    parser.add_argument('reflectivity_method', type=reflectivity_type, help='Algorithm for calculating reflectivity', default='zoeppritz', choices=MODELS.keys())    
     parser.add_argument('theta', type=float, help='Angle of incidence', default='0')
-    
-    parser.add_argument('f', type=float, help='frequency', default=25)
-
+    parser.add_argument('f', type=float, help='Frequency of wavelet', default=25)
     parser.add_argument('colour', type=str, help='Matplotlib colourmap', default='Greys')
 
     return parser
@@ -41,7 +40,7 @@ def run_script(args):
     Rprop1 = args.Rpp1
     
     warray_amp = create_wedge(args.ntraces, args.pad, args.max_thickness,
-                              Rprop0, Rprop1, args.theta, args.f)
+                              Rprop0, Rprop1, args.theta, args.f, args.reflectivity_method)
     
     fig = plt.figure()
     ax1 = fig.add_subplot(111)

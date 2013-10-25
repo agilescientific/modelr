@@ -1,7 +1,7 @@
 '''
 Created on Apr 30, 2012
 
-@author: sean
+@author: Sean Ross-Ross, Matt Hall
 '''
 from argparse import ArgumentParser
 from modelr.reflectivity import create_theta
@@ -26,10 +26,9 @@ def add_arguments(parser):
     
     parser.add_argument('theta', type=float, action='list', help='Angle of incidence', default='0,60,1')
     
-    parser.add_argument('f', type=float, help='frequency', default=25)
-    parser.add_argument('points', type=int, help='choose ... ', default=100)
-    parser.add_argument('reflectivity_method', type=reflectivity_type, help='... ', default='zoeppritz', choices=MODELS.keys())
-
+    parser.add_argument('f', type=float, help='Frequency of wavelet', default=25)
+    parser.add_argument('points', type=int, help='Length of wavelet in samples', default=100)
+    parser.add_argument('reflectivity_method', type=reflectivity_type, help='Algorithm for calculating reflectivity', default='zoeppritz', choices=MODELS.keys())
     parser.add_argument('colour', type=str, help='Matplotlib colourmap', default='Greys')
 
     return parser

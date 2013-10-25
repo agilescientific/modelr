@@ -38,11 +38,7 @@ def zoeppritz(Rp0, Rp1, theta1):
     :param theta1:
      
     '''
-    return reflection.zoeppritz(Rp0.vp, Rp0.vs, Rp0.rho,
-                     Rp1.vp, Rp1.vs, Rp1.rho,
-                               theta1)    
-
-
+    return reflection.zoeppritz(Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp, Rp1.vs, Rp1.rho, theta1)    
 
 def akirichards(Rp0, Rp1, theta1):
     reflection.akirichards(Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp, Rp1.vs, Rp1.rho, theta1)

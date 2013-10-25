@@ -19,10 +19,23 @@
     {% for name,arg in parser.arguments.items() %}
     
     <tr>
-    <td>{{name.title()}}:</td>
-    
-    <td><input type="text" name="{{name}}" value="{{arg.default if arg.default is not none else parameters.get(name,[''])[0] }}"/></td>
-    <td><font color="#aaaaaa">{{arg.help}}</font></td>
+    <td>
+      {{ name.title() }}:
+    </td>
+
+    <td>
+      {% if arg.choices %}
+        <select name="{{name}}">
+          {% for c in arg.choices %}
+            <option {% if arg.default is not none %}selected{% endif %} value={{ c }}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      {% else %}
+        <input type="text" name="{{name}}" value="{{arg.default if arg.default is not none else parameters.get(name,[''])[0] }}"/>
+      {% endif %}
+    </td>
+    <td>
+      <font color="#aaaaaa">{{arg.help}}</font></td>
     </tr>
     
     {% endfor %}
