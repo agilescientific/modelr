@@ -20,8 +20,10 @@ def add_arguments(parser):
     parser.add_argument('max_thickness', default=50, type=int, help='The maximum thickness of the wedge')
     parser.add_argument('ntraces', default=300, type=int, help='Number of traces')
     
-    parser.add_argument('Rpp0', type=rock_properties_type, help='rock properties of upper rock', required=True)
-    parser.add_argument('Rpp1', type=rock_properties_type, help='rock properties of lower rock', required=True)
+    parser.add_argument('Rpp0', type=rock_properties_type, 
+                        help='rock properties of upper rock', required=True)
+    parser.add_argument('Rpp1', type=rock_properties_type, 
+                        help='rock properties of lower rock', required=True)
     
     parser.add_argument('theta', type=float, help='Angle of incidence')
     
@@ -54,7 +56,8 @@ def run_script(args):
     
 def main():
     parser = ArgumentParser(usage=short_description, description=__doc__)
-    parser.add_argument('time', default=150, type=int, help='The size in mili seconds of the plot')
+    parser.add_argument('time', default=150, type=int, 
+                        help='The size in mili seconds of the plot')
     args = parser.parse_args()
     run_script(args)
     
