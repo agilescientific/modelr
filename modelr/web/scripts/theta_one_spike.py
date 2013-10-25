@@ -25,14 +25,17 @@ def add_arguments(parser):
     parser.add_argument('xlim', type=float, action='list')
     parser.add_argument('pad', default=50, type=int, help='The time in milliseconds above and below the wedge')
     
-    parser.add_argument('rho2', type=float, default=.3, help='lower', required=True)
-    parser.add_argument('rho1', type=float, default=.3, help='upper', required=True)
+#    parser.add_argument('rho2', type=float, default=.3, help='lower', required=True)
+#    parser.add_argument('rho1', type=float, default=.3, help='upper', required=True)
+#
+#    parser.add_argument('vp2', type=float, default=.3, help='lower', required=True)
+#    parser.add_argument('vp1', type=float, default=.3, help='upper', required=True)
+#
+#    parser.add_argument('vs2', type=float, help='lower')
+#    parser.add_argument('vs1', type=float, help='upper')
 
-    parser.add_argument('vp2', type=float, default=.3, help='lower', required=True)
-    parser.add_argument('vp1', type=float, default=.3, help='upper', required=True)
-
-    parser.add_argument('vs2', type=float, help='lower')
-    parser.add_argument('vs1', type=float, help='upper')
+    parser.add_argument('Rpp0', type=rock_properties_type, help='rock properties of upper rock', required=True)
+    parser.add_argument('Rpp1', type=rock_properties_type, help='rock properties of lower rock', required=True)
     
     parser.add_argument('theta', type=float, action='list', help='Angle of incidence')
     

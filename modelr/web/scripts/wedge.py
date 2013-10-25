@@ -57,7 +57,7 @@ def run_script(args):
 def main():
     parser = ArgumentParser(usage=short_description, description=__doc__)
     parser.add_argument('time', default=150, type=int, 
-                        help='The size in mili seconds of the plot')
+                        help='The size in milliseconds of the plot')
     args = parser.parse_args()
     run_script(args)
     

@@ -12,7 +12,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
-short_description = 'Create an wedge model ...'
+short_description = 'Create an wedge model...'
 
 def add_arguments(parser):
     

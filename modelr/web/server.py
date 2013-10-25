@@ -217,10 +217,10 @@ class MyHandler(BaseHTTPRequestHandler):
                 with open(join(scripts_dir, script), 'r') as fd:
                     exec fd.read() in namespace
                 short_doc = namespace.get('short_description', 'No doc')
-                
+                print script, namespace
                 available_scripts.append((script, short_doc))
-            except:
-                pass
+            except Exception, e:
+                print script, e
             
         return available_scripts
             
