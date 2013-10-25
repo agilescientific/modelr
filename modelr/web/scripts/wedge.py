@@ -28,7 +28,7 @@ def add_arguments(parser):
     parser.add_argument('theta', type=float, help='Angle of incidence')
     
     parser.add_argument('f', type=float, help='frequency', default=25)
-    parser.add_argument('color', type=str, help='Matplotlib colormap', default='Grey')
+    parser.add_argument('colour', type=str, help='Matplotlib colourmap', default='Grey')
     return parser
 
 def run_script(args):
