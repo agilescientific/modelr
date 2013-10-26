@@ -6,11 +6,13 @@ Created on Apr 30, 2012
 from argparse import ArgumentParser
 from modelr.reflectivity import create_wedge
 import matplotlib
+matplotlib.use('TkAgg' )
 import matplotlib.pyplot as plt
-from modelr.web.urlargparse import rock_properties_type, reflectivity_type
+from modelr.web.urlargparse import rock_properties_type,\
+     reflectivity_type
 from modelr.rock_properties import MODELS
 from modelr.web.util import return_current_figure
-
+import numpy as np
 short_description = 'Create a simple wedge model.'
 
 def add_arguments(parser):
@@ -35,19 +37,21 @@ def add_arguments(parser):
 def run_script(args):
     
     matplotlib.interactive(False)
-    
+ 
     Rprop0 = args.Rpp0 
     Rprop1 = args.Rpp1
     
-    warray_amp = create_wedge(args.ntraces, args.pad, args.max_thickness,
-                              Rprop0, Rprop1, args.theta, args.f, args.reflectivity_method)
+    warray_amp = create_wedge(args.ntraces, args.pad,
+                              args.max_thickness,
+                              Rprop0, Rprop1, args.theta, args.f,
+                              args.reflectivity_method)
     
     fig = plt.figure()
     ax1 = fig.add_subplot(111)
 
     aspect = float(warray_amp.shape[1]) / warray_amp.shape[0]
     ax1.imshow( warray_amp, aspect=aspect, cmap=args.colour)
-    
+   
     plt.title(args.title % locals())
     plt.ylabel('time (ms)')
     plt.xlabel('trace')
