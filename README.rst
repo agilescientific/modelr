@@ -13,8 +13,8 @@ Or to get help just run:
 
 Prerequisites
 ++++++++++++++++
+EPD is no longer supported; we will come up with a replacement distribution, such as IPython or Enthought Canopy. In a nutshell, you need NumPy, SciPy, and Matplotlib.
 
-* Google App Engine  API `<https://developers.google.com/appengine/>`_
 * Enthought Python Distribution `<http://www.enthought.com/products/epd_free.php>`_
 
 Links
@@ -33,4 +33,7 @@ Authors
 ++++++++++++++++
 
 * `Matt Hall <https://github.com/kwinkunks>`_ @ `Agile Geoscience <http://www.agilegeoscience.com>`_
-* `Sean Ross-Ross <https://github.com/srossross>`_ @ `Enthought Inc. <http://www.enthought.com>`_ 
+* `Sean Ross-Ross <https://github.com/srossross>`_ @ now at `Continuum`
+* `Evan Bianco <https://github.com/EvanBianco>`_ @ `Agile Geoscience <http://www.agilegeoscience.com>`_
+* `Ben Bougher <https://github.com/ben-bougher>`_
+
