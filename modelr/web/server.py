@@ -257,7 +257,8 @@ def main():
     args = parser.parse_args()
     try:
         server = HTTPServer((args.host, args.port), MyHandler)
-        server.jenv = Environment(loader=PackageLoader('modelr', 'web/templates'))
+        server.jenv = Environment(loader=PackageLoader('modelr',
+                                                    'web/templates'))
         
         print 'started httpserver...'
         server.serve_forever()
