@@ -18,16 +18,21 @@ class RockProperties(object):
     
     '''
     
-    def __init__(self, vp, rho, vs=None):
+    def __init__(self, vp, rho, vs=None, vp_sig=0, vs_sig=0,
+                 rho_sig=0):
         self.vp = vp
         if vs is None:
             self.vs = vp / 2.0
         else:
             self.vs = vs
         self.rho = rho
-        
+
+        self.vp_sig = vp_sig
+        self.vs_sig = vs_sig
+        self.rho_sig = rho_sig
     def __repr__(self):
-        return 'RockProperties(vp=%r, rho=%r, vs=%r)' % (self.vp, self.rho, self.vs)
+        return 'RockProperties(vp=%r, rho=%r, vs=%r)' % \
+          (self.vp, self.rho, self.vs)
         
 def zoeppritz(Rp0, Rp1, theta1):
     '''
@@ -71,3 +76,11 @@ MODELS = {
           'bortfeld2': bortfeld2,
           'bortfeld3': bortfeld3,
           }
+
+FUNCTIONS = {
+          'zoeppritz': reflection.zoeppritz,
+          'akirichards': reflection.akirichards,
+          'akirichards_alt': reflection.akirichards_alt,
+          'fatti': reflection.fatti,
+          'shuey2': reflection.shuey2,
+          'shuey3': reflection.shuey3 }
