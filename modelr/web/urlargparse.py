@@ -39,23 +39,12 @@ def reflectivity_type(str_input):
     return MODELS[str_input]
 
 def reflectivity_func(str_input):
-    '''
-    To be used as the 'type' value in an Argument. 
-    
-    
-    Takes a string as input and returns an arbitrary value.
-    
-    Example::
-        
-        parser.add_argument('reflectivity_model', type=reflectivity_type, help='... ', default='zoeppritz', choices=MODELS.keys())
-     
-    '''
     from modelr.rock_properties import FUNCTIONS
     return FUNCTIONS[str_input]
-
+    
 class Argument(object):
     '''
-    An place holder for an url argument.
+    A place holder for a url argument.
     '''
     def __init__(self, name, required=False, default=None, type=str, action='store', help='', choices=None):
         self.name = name
