@@ -10,24 +10,27 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import tempfile
-from modelr.web.urlargparse import rock_properties_type, reflectivity_type
+from modelr.web.urlargparse import rock_properties_type, reflectivity_type, wavelet_type
+from modelr.web.urlargparse import WAVELETS
 from modelr.web.util import return_current_figure
-from agilegeo.wavelet import ricker_alg
+from agilegeo.wavelet import *
 
 short_description = '1D model of single spike at any offset.'
 
 def add_arguments(parser):
     
     parser.add_argument('title', default='Plot', type=str, help='The title of the plot')
-    parser.add_argument('xlim', type=float, action='list', help='The range of amplitudes to plot eg. xlim=-1.0,1.0')
+    parser.add_argument('xlim', type=float, action='list', default='-0.2,0.2', help='The range of amplitudes to plot.')
     parser.add_argument('time', default=150, type=int, help='The size in milliseconds of the plot')
     
     parser.add_argument('Rpp0', type=rock_properties_type, help='rock properties of upper rock', required=True)
     parser.add_argument('Rpp1', type=rock_properties_type, help='rock properties of lower rock', required=True)
     
-    parser.add_argument('theta1', type=float, help='angle of incidence')
+    parser.add_argument('theta1', type=float, help='angle of incidence', default=0)
     
-    parser.add_argument('f', type=float, help='frequency', default=25)
+    parser.add_argument('wavelet', type=wavelet_type, help='wavelet', default="ricker", choices=WAVELETS.keys())
+    
+    parser.add_argument('f', type=float, action='list', help='frequencies', default=25)
     parser.add_argument('reflectivity_model', type=reflectivity_type, help='Algorithm for calculating reflectivity', default='zoeppritz', choices=MODELS.keys())
     return parser
 
@@ -43,8 +46,19 @@ def run_script(args):
     
     array_amp[args.time // 2] = Rpp
     
-    r = ricker_alg(1,128, args.f)
+    #################
+    # Wavelet frequency
+    # Not very nice because different wavelets expect different inputs... need to make them all the same
+    #
+    f = args.f
     
+    # This will only handle Ormsby or Ricker
+    if len(f) > 1:
+        r = args.wavelet(0.2,100, f[0],f[1],f[2],f[3])
+    else:
+        r = args.wavelet(0.2,100, f)
+    
+    # Do the convolution
     warray_amp = np.convolve(array_amp, r, mode='same')
     
     fig = plt.figure()
@@ -66,7 +80,6 @@ def run_script(args):
     
 def main():
     parser = ArgumentParser(usage=short_description, description=__doc__)
-    parser.add_argument('time', default=150, type=int, help='The size in mili seconds of the plot')
     args = parser.parse_args()
     run_script(args)
     

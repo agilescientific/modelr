@@ -10,6 +10,8 @@ from urlparse import urlparse, parse_qs
 from argparse import Namespace
 import json
 
+from agilegeo.wavelet import *
+
 def rock_properties_type(str_input):
     from modelr.rock_properties import RockProperties
     args = str_input.split(',')
@@ -22,6 +24,17 @@ def rock_properties_type(str_input):
                           float(args[1]), float(args[2]),
                           float(args[3]), float(args[4]),
                           float(args[5]))
+
+WAVELETS = {
+    'ricker': ricker_alg,
+    'ormsby': ormsby_alg,
+#    'klauder': klauder,    # Don't know why this isn't working
+    'lfm': lfm
+    }
+          
+def wavelet_type(str_input):
+    
+    return WAVELETS[str_input]
 
 def reflectivity_type(str_input):
     '''

@@ -30,6 +30,7 @@ class RockProperties(object):
         self.vp_sig = vp_sig
         self.vs_sig = vs_sig
         self.rho_sig = rho_sig
+        
     def __repr__(self):
         return 'RockProperties(vp=%r, rho=%r, vs=%r)' % \
           (self.vp, self.rho, self.vs)
