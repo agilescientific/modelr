@@ -73,6 +73,7 @@ def run_script(args):
     plt.ylabel('reflectivity')
     plt.ylim(-1,1)
     plt.xlabel('offset (degrees)')
+    plt.grid()
     
     return return_current_figure()
     
