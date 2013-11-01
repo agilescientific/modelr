@@ -20,18 +20,23 @@ short_description = '1D model of single spike at any offset.'
 def add_arguments(parser):
     
     parser.add_argument('title', default='Plot', type=str, help='The title of the plot')
+    
     parser.add_argument('xlim', type=float, action='list', default='-0.2,0.2', help='The range of amplitudes to plot.')
+    
     parser.add_argument('time', default=150, type=int, help='The size in milliseconds of the plot')
     
-    parser.add_argument('Rpp0', type=rock_properties_type, help='rock properties of upper rock', required=True)
-    parser.add_argument('Rpp1', type=rock_properties_type, help='rock properties of lower rock', required=True)
+    parser.add_argument('Rock1', type=rock_properties_type, help='rock properties of upper rock', required=True)
     
+    parser.add_argument('Rock2', type=rock_properties_type, help='rock properties of lower rock', required=True)
+
     parser.add_argument('theta1', type=float, help='angle of incidence', default=0)
     
     parser.add_argument('wavelet', type=wavelet_type, help='wavelet', default="ricker", choices=WAVELETS.keys())
     
     parser.add_argument('f', type=float, action='list', help='frequencies', default=25)
+    
     parser.add_argument('reflectivity_model', type=reflectivity_type, help='Algorithm for calculating reflectivity', default='zoeppritz', choices=MODELS.keys())
+    
     return parser
 
 
@@ -42,7 +47,7 @@ def run_script(args):
     array_amp = np.zeros([args.time])
     array_time = np.arange(args.time)
     
-    Rpp = args.reflectivity_model(args.Rpp0, args.Rpp1, args.theta1)
+    Rpp = args.reflectivity_model(args.Rock1, args.Rock2, args.theta1)
     
     array_amp[args.time // 2] = Rpp
     
@@ -53,13 +58,10 @@ def run_script(args):
     f = args.f
     
     # This will only handle Ormsby or Ricker
-    if len(f) > 1:
-        r = args.wavelet(0.2,100, f[0],f[1],f[2],f[3])
-    else:
-        r = args.wavelet(0.2,100, f)
+    w = args.wavelet(args.time, dt, f)
     
     # Do the convolution
-    warray_amp = np.convolve(array_amp, r, mode='same')
+    warray_amp = np.convolve(array_amp, w, mode='same')
     
     fig = plt.figure()
     

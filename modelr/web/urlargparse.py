@@ -26,10 +26,9 @@ def rock_properties_type(str_input):
                           float(args[5]))
 
 WAVELETS = {
-    'ricker': ricker_alg,
-    'ormsby': ormsby_alg,
-#    'klauder': klauder,    # Don't know why this isn't working
-    'lfm': lfm
+    'ricker': ricker,
+    'ormsby': ormsby,
+    'sweep': sweep,    
     }
           
 def wavelet_type(str_input):

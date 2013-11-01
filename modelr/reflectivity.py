@@ -8,10 +8,10 @@ Basic methods for creating models.
 '''
 import numpy as np
 from modelr.rock_properties import zoeppritz
-from agilegeo.wavelet import ricker_alg
+from agilegeo.wavelet import ricker
 
-def do_convolve(ntraces,f,points,array_amp,type=None):
-    r = ricker_alg(.2,points, f)
+def do_convolve(ntraces,f,duration,array_amp,type=None):
+    r = ricker(.2,duration, f)
     
     warray_amp = np.zeros([max(array_amp.shape[0], r.shape[0]), array_amp.shape[1]])
     
@@ -23,7 +23,7 @@ def do_convolve(ntraces,f,points,array_amp,type=None):
     if not type:
         return np.array(warray_amp)
     else:
-        scale = points / 100
+        scale = duration / 100
         return np.array(warray_amp[::scale, :])
     
 def create_wedge(ntraces, pad, max_thickness, prop0, prop1, theta, f, reflectivity_method):
@@ -58,7 +58,7 @@ def create_wedge(ntraces, pad, max_thickness, prop0, prop1, theta, f, reflectivi
     
     return result
 
-def create_theta(pad, thickness, prop0, prop1, theta, f, points, reflectivity_method):
+def create_theta(pad, thickness, prop0, prop1, theta, f, duration, reflectivity_method):
     '''
     Create a 2D array where the first dimension is time and the second is angle.
 
@@ -82,12 +82,12 @@ def create_theta(pad, thickness, prop0, prop1, theta, f, points, reflectivity_me
     
     print "sending now"
     
-    result = do_convolve(theta.size,f,points,array_amp)
+    result = do_convolve(theta.size,f,duration,array_amp)
     
     return result
 
     
-def create_theta_spike(pad, prop0, prop1, theta, f, points, reflectivity_method):
+def create_theta_spike(pad, prop0, prop1, theta, f, duration, reflectivity_method):
     '''
     Create a 2D array where the first dimension is time and the second is angle.
 
@@ -105,6 +105,6 @@ def create_theta_spike(pad, prop0, prop1, theta, f, points, reflectivity_method)
     Rp = reflectivity_method(prop0, prop1, theta)
     array_amp[pad, :] += Rp
 
-    result = do_convolve(theta.size,f,points,array_amp)
+    result = do_convolve(theta.size,f,duration,array_amp)
     
     return result
