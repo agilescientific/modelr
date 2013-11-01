@@ -6,7 +6,6 @@ Created on Apr 30, 2012
 from argparse import ArgumentParser
 from modelr.reflectivity import create_wedge
 import matplotlib
-matplotlib.use('TkAgg' )
 import matplotlib.pyplot as plt
 from modelr.web.urlargparse import rock_properties_type,\
      reflectivity_type

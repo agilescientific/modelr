@@ -7,7 +7,6 @@ Created on May 3, 2012
 import tempfile
 from os import unlink
 import matplotlib
-matplotlib.use( 'TkAgg' )
 import matplotlib.pyplot as plt
 
 def return_current_figure():

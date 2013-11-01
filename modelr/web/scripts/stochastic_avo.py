@@ -1,6 +1,5 @@
 from argparse import ArgumentParser
 import matplotlib
-matplotlib.use('TkAgg' )
 import matplotlib.pyplot as plt
 from modelr.web.urlargparse import rock_properties_type,\
      reflectivity_func
