@@ -64,6 +64,7 @@ def run_script(args):
                                             theta )
 
         plt.plot( theta, reflect ,color = 'red', alpha = 0.02)
+        plt.ylim((-1,1))
         data += np.nan_to_num( reflect )
 
     data /= args.iterations
