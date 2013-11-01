@@ -56,7 +56,7 @@ def run_script(args):
     # Not very nice because different wavelets expect different inputs... need to make them all the same
     #
     f = args.f
-    
+    dt = 0.001
     # This will only handle Ormsby or Ricker
     w = args.wavelet(args.time, dt, f)
     
