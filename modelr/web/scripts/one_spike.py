@@ -10,35 +10,46 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import tempfile
-from modelr.web.urlargparse import rock_properties_type, \
-     reflectivity_type
+from modelr.web.urlargparse import rock_properties_type,\
+     reflectivity_type, wavelet_type
+from modelr.web.urlargparse import WAVELETS
 from modelr.web.util import return_current_figure
-from agilegeo.wavelet import ricker_alg
+from agilegeo.wavelet import *
 
 short_description = '1D model of single spike at any offset.'
 
 def add_arguments(parser):
     
     parser.add_argument('title', default='Plot', type=str,
-                        help='The title of the plot')
+                        help='The title of the plot')<<<<<<< HEAD
+
     parser.add_argument('xlim', type=float, action='list',
-            help='The range of amplitudes to plot eg. xlim=-1.0,1.0')
+                        default='-0.2,0.2',
+                        help='The range of amplitudes to plot.')
+    
     parser.add_argument('time', default=150, type=int,
                         help='The size in milliseconds of the plot')
     
-    parser.add_argument('Rpp0', type=rock_properties_type,
+    parser.add_argument('Rock1', type=rock_properties_type,
                         help='rock properties of upper rock',
                         required=True)
-    parser.add_argument('Rpp1', type=rock_properties_type,
+    
+    parser.add_argument('Rock2', type=rock_properties_type,
                         help='rock properties of lower rock',
                         required=True)
+
+    parser.add_argument('theta1', type=float,
+                        help='angle of incidence', default=0)
     
-    parser.add_argument('theta1', type=float, help='angle of incidence')
+    parser.add_argument('wavelet', type=wavelet_type, help='wavelet',
+                        default="ricker", choices=WAVELETS.keys())
     
+
     parser.add_argument('f', type=float, help='frequency', default=25)
     parser.add_argument('reflectivity_model', type=reflectivity_type,
                         help='Algorithm for calculating reflectivity',
                         default='zoeppritz', choices=MODELS.keys())
+
     return parser
 
 
@@ -49,18 +60,22 @@ def run_script(args):
     array_amp = np.zeros([args.time])
     array_time = np.arange(args.time)
     
-    Rpp = args.reflectivity_model(args.Rpp0, args.Rpp1, args.theta1)
+    Rpp = args.reflectivity_model(args.Rock1, args.Rock2, args.theta1)
     
     array_amp[args.time // 2] = Rpp
     
-    r = ricker_alg(1,128, args.f)
+    #################
+    # Wavelet frequency
+    f = args.f
+    dt = 0.001
+    w = args.wavelet(0.2, dt, f )
     
-    warray_amp = np.convolve(array_amp, r, mode='same')
+    # Do the convolution
+    warray_amp = np.convolve(array_amp, w, mode='same')
     
     fig = plt.figure()
     
     ax1 = fig.add_subplot(111)
-
     ax1.plot(warray_amp, array_time)
     
     plt.title(args.title % locals())
@@ -75,8 +90,8 @@ def run_script(args):
     
     
 def main():
-    parser = ArgumentParser(usage=short_description, description=__doc__)
-    parser.add_argument('time', default=150, type=int, help='The size in mili seconds of the plot')
+    parser = ArgumentParser(usage=short_description,
+                            description=__doc__)
     args = parser.parse_args()
     run_script(args)
     

@@ -1,6 +1,5 @@
 from argparse import ArgumentParser
 import matplotlib
-matplotlib.use('TkAgg' )
 import matplotlib.pyplot as plt
 from modelr.web.urlargparse import rock_properties_type,\
      reflectivity_func
@@ -73,7 +72,9 @@ def run_script(args):
     
     plt.title(args.title % locals())
     plt.ylabel('reflectivity')
+    plt.ylim(-1,1)
     plt.xlabel('offset (degrees)')
+    plt.grid()
     
     return return_current_figure()
     
