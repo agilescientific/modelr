@@ -18,17 +18,26 @@ short_description = '1D model of single spike at any offset.'
 
 def add_arguments(parser):
     
-    parser.add_argument('title', default='Plot', type=str, help='The title of the plot')
-    parser.add_argument('xlim', type=float, action='list', help='The range of amplitudes to plot eg. xlim=-1.0,1.0')
-    parser.add_argument('time', default=150, type=int, help='The size in milliseconds of the plot')
+    parser.add_argument('title', default='Plot', type=str,
+                        help='The title of the plot')
+    parser.add_argument('xlim', type=float, action='list',
+            help='The range of amplitudes to plot eg. xlim=-1.0,1.0')
+    parser.add_argument('time', default=150, type=int,
+                        help='The size in milliseconds of the plot')
     
-    parser.add_argument('Rpp0', type=rock_properties_type, help='rock properties of upper rock', required=True)
-    parser.add_argument('Rpp1', type=rock_properties_type, help='rock properties of lower rock', required=True)
+    parser.add_argument('Rpp0', type=rock_properties_type,
+                        help='rock properties of upper rock',
+                        required=True)
+    parser.add_argument('Rpp1', type=rock_properties_type,
+                        help='rock properties of lower rock',
+                        required=True)
     
     parser.add_argument('theta1', type=float, help='angle of incidence')
     
     parser.add_argument('f', type=float, help='frequency', default=25)
-    parser.add_argument('reflectivity_model', type=reflectivity_type, help='Algorithm for calculating reflectivity', default='zoeppritz', choices=MODELS.keys())
+    parser.add_argument('reflectivity_model', type=reflectivity_type,
+                        help='Algorithm for calculating reflectivity',
+                        default='zoeppritz', choices=MODELS.keys())
     return parser
 
 
