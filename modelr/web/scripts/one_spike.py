@@ -10,7 +10,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import tempfile
-from modelr.web.urlargparse import rock_properties_type, reflectivity_type
+from modelr.web.urlargparse import rock_properties_type, \
+     reflectivity_type
 from modelr.web.util import return_current_figure
 from agilegeo.wavelet import ricker_alg
 
