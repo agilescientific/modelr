@@ -45,7 +45,7 @@ def add_arguments(parser):
                         help='Matplotlib colourmap', default='Greys')
     
     parser.add_argument('display', type=str,
-                        help='wiggle or image', default='image')
+                        help='wiggle, image, or both', default='image')
 
     return parser
 
@@ -70,7 +70,10 @@ def run_script(args):
         wiggle(warray_amp,1)       
     else:
         ax1.imshow( warray_amp, aspect=aspect, cmap=args.colour)
-   
+    if args.display == 'both':
+        wiggle(warray_amp,1)
+        plt.gca().invert_yaxis()
+        
     plt.title(args.title % locals())
     plt.ylabel('time (ms)')
     plt.xlabel('trace')
