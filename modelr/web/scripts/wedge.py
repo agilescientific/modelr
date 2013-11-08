@@ -12,6 +12,8 @@ from modelr.web.urlargparse import rock_properties_type,\
 from modelr.rock_properties import MODELS
 from modelr.web.util import return_current_figure
 import numpy as np
+from modelr.web.scripts.wiggle import wiggle
+
 short_description = 'Create a simple wedge model.'
 
 def add_arguments(parser):
@@ -19,7 +21,7 @@ def add_arguments(parser):
     parser.add_argument('title', default='Plot', type=str,
                         help='The title of the plot')
     parser.add_argument('pad', default=50, type=int,
-            help='The time in milliseconds aboe and below the wedge')
+            help='The time in milliseconds above and below the wedge')
     parser.add_argument('max_thickness', default=50, type=int,
                         help='The maximum thickness of the wedge')
     parser.add_argument('ntraces', default=300, type=int,
@@ -30,7 +32,7 @@ def add_arguments(parser):
                         required=True, default='2000,1500,800')
     parser.add_argument('Rock2', type=rock_properties_type, 
             help='Rock properties of lower rock [Vp, Rho, Vs]',
-                        required=True, default='2000,1500,800')
+                        required=True, default='2200,1600,1000')
     
     parser.add_argument('reflectivity_method', type=reflectivity_type,
                         help='Algorithm for calculating reflectivity',
@@ -41,6 +43,9 @@ def add_arguments(parser):
                         default=25)
     parser.add_argument('colour', type=str,
                         help='Matplotlib colourmap', default='Greys')
+    
+    parser.add_argument('display', type=str,
+                        help='wiggle or image', default='image')
 
     return parser
 
@@ -60,7 +65,11 @@ def run_script(args):
     ax1 = fig.add_subplot(111)
 
     aspect = float(warray_amp.shape[1]) / warray_amp.shape[0]
-    ax1.imshow( warray_amp, aspect=aspect, cmap=args.colour)
+    
+    if args.display == 'wiggle':        
+        wiggle(warray_amp,1)       
+    else:
+        ax1.imshow( warray_amp, aspect=aspect, cmap=args.colour)
    
     plt.title(args.title % locals())
     plt.ylabel('time (ms)')

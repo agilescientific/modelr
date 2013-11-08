@@ -10,8 +10,9 @@ import numpy as np
 from modelr.rock_properties import zoeppritz
 from agilegeo.wavelet import ricker
 
-def do_convolve(ntraces,f,duration,array_amp,type=None):
-    r = ricker(.2,duration, f)
+def do_convolve(ntraces,f,dt,array_amp,type=None):
+    duration = 0.2
+    r = ricker(duration,dt, f)
     
     warray_amp = np.zeros([max(array_amp.shape[0], r.shape[0]), array_amp.shape[1]])
     
@@ -20,11 +21,8 @@ def do_convolve(ntraces,f,duration,array_amp,type=None):
     
     print "all done convolving"
         
-    if not type:
-        return np.array(warray_amp)
-    else:
-        scale = duration / 100
-        return np.array(warray_amp[::scale, :])
+    return np.array(warray_amp)
+
     
 def create_wedge(ntraces, pad, max_thickness, prop0, prop1, theta, f, reflectivity_method):
     '''
@@ -54,7 +52,7 @@ def create_wedge(ntraces, pad, max_thickness, prop0, prop1, theta, f, reflectivi
     
     print "sending now"
         
-    result = do_convolve(ntraces,f,100*scale,array_amp,type='wedge')
+    result = do_convolve(ntraces,f,0.001,array_amp,type='wedge')
     
     return result
 

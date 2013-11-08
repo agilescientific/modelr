@@ -13,7 +13,7 @@ def return_current_figure():
     '''
     Return the current plot as a binary blob. 
     '''
-    fig_path = tempfile.mktemp('.png')
+    fig_path = tempfile.mktemp('.jpg')
     plt.savefig(fig_path) 
     with open(fig_path, 'rb') as fd:
         data = fd.read()
