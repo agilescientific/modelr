@@ -11,6 +11,8 @@ from modelr.web.util import return_current_figure
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+from modelr.web.util import wiggle
+
 
 short_description = 'Create a gather for a block model.'
 
@@ -31,6 +33,12 @@ def add_arguments(parser):
     parser.add_argument('reflectivity_method', type=reflectivity_type, help='Algorithm for calculating reflectivity', default='zoeppritz', choices=MODELS.keys())
     parser.add_argument('colour', type=str, help='Matplotlib colourmap', default='Greys')
 
+    parser.add_argument('display',
+                        type=str,
+                        help='wiggle, image, or both',
+                        default='image'
+                        )
+
     return parser
 
 def run_script(args):
@@ -50,7 +58,16 @@ def run_script(args):
 
     plt.gray()
     aspect = float(warray_amp.shape[1]) / warray_amp.shape[0]
-    ax1.imshow(warray_amp, aspect=aspect, cmap=args.colour)
+    
+    if args.display == 'wiggle':        
+        wiggle(warray_amp,1)       
+    else:
+        ax1.imshow( warray_amp, aspect=aspect, cmap=args.colour)
+        
+    if args.display == 'both':
+        wiggle(warray_amp,1)
+        plt.gca().invert_yaxis()
+        
     
     plt.title(args.title % locals())
     plt.ylabel('time (ms)')

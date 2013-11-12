@@ -21,7 +21,7 @@ short_description = '1D model of single spike at any offset.'
 def add_arguments(parser):
     
     parser.add_argument('title', default='Plot', type=str,
-                        help='The title of the plot')<<<<<<< HEAD
+                        help='The title of the plot')
 
     parser.add_argument('xlim', type=float, action='list',
                         default='-0.2,0.2',

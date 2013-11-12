@@ -24,6 +24,7 @@ def add_arguments(parser):
     parser.add_argument('Rpp1', type=rock_properties_type, 
                         help='rock properties of lower rock',
                         required=True)
+                        
     parser.add_argument( 'iterations', type=int, default=1000,
                          help='number of monte carlo simulations' )
     
