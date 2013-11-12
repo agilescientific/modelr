@@ -24,9 +24,10 @@ def do_convolve(ntraces,f,dt,array_amp,type=None):
     return np.array(warray_amp)
 
     
-def create_wedge(ntraces, pad, max_thickness, prop0, prop1, theta, f, reflectivity_method):
+def create_wedge_old(ntraces, pad, max_thickness, prop0, prop1, theta, f, reflectivity_method):
     '''
     Create a wedge model.
+    This can probably be deleted.
     
     :param ntraces: number of traces
     :param pad: pad the array top and bottom in ms
@@ -46,6 +47,42 @@ def create_wedge(ntraces, pad, max_thickness, prop0, prop1, theta, f, reflectivi
 
     Rp0 = reflectivity_method(prop0, prop1, theta)
     Rp1 = reflectivity_method(prop1, prop0, theta)
+    
+    array_amp[pad * scale, :] += Rp0
+    array_amp[wedge, np.arange(ntraces)] += Rp1
+    
+    print "sending now"
+        
+    result = do_convolve(ntraces,f,0.001,array_amp,type='wedge')
+    
+    return result
+
+def create_wedge(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0, f=25, reflectivity_method='zoeppritz'):
+    '''
+    Create a 3-wedge model.
+    
+    :param ntraces: number of traces
+    :param pad: pad the array top and bottom in ms
+    :param max_thickness: The thickest part of the wedge
+    :param prop0: rock properties 1
+    :param prop1: rock properties 1
+    :param theta: angle of incidence
+    :param f: the frequency for the wavelet
+    '''
+    
+    if prop2 == None or prop2=='':
+        prop2 = prop0
+    
+    scale = 10
+    nsamples = (2 * pad + max_thickness) * scale
+      
+    array_amp = np.zeros([nsamples, ntraces])
+    fwedge = np.floor(np.linspace(pad * scale, (pad + max_thickness) * scale,
+                      ntraces, endpoint=False))
+    wedge = np.array(fwedge, dtype=int)
+
+    Rp0 = reflectivity_method(prop0, prop1, theta)
+    Rp1 = reflectivity_method(prop1, prop2, theta)
     
     array_amp[pad * scale, :] += Rp0
     array_amp[wedge, np.arange(ntraces)] += Rp1
