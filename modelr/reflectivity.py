@@ -107,6 +107,46 @@ def create_tilted(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0
     
     return result
 
+def get_reflectivity(data, colourmap, theta=0, f=25, reflectivity_method='zoeppritz'):
+    '''
+    Create reflectivities from model.
+    
+    :param model: the physical model to use
+    :param theta: angle of incidence
+    :param f: the frequency for the wavelet
+    :param reflectivity_method: the reflectivity algorithm to use
+    '''
+
+    model = []
+
+    for row in range(data.shape[0]):
+        model.append([])
+        for col in range(data.shape[1]):
+            model[row].append(colourmap[data[row,col]])
+    
+    # Transpose the model so we can work on columns (traces) not rows
+    #model = map(list,zip(*model))
+    
+    # Search nd replace for dict items
+    # Use the colourmap to put rocks in the array
+    # Doesn't works because different types
+    #for key, value in colourmap.iteritems():
+    #    model[data==key] = value
+         
+    output = np.zeros( data.shape )
+
+    for trace in range(len(model[0])):
+        for sample in range(len(model) - 1):
+            output[sample,trace] = reflectivity_method(model[sample][trace], model[sample+1][trace], theta)
+            
+    array_amp = output    
+    
+    traces = data.shape[0]
+            
+    result = do_convolve(traces,f,0.001,array_amp)
+    
+    return result
+
 def create_theta(pad, thickness, prop0, prop1, theta, f, duration, reflectivity_method):
     '''
     Create a 2D array where the first dimension is time and the second is angle.

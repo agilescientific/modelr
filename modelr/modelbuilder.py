@@ -32,13 +32,13 @@ def png2array(png_file):
     # Use RGB triplets... could encode as Vp, Vs, rho
     #im_color = np.array(Image.open(infile))
 
-    im = np.array(Image.open(infile).convert('P',palette=Image.ADAPTIVE, colors=64),'f')
+    im = np.array(Image.open(infile).convert('P',palette=Image.ADAPTIVE, colors=4),'f')
     return np.array(im,dtype=np.uint8)
    
-def wedge_svg(pad, thickness, traces, rocks):
+def wedge_svg(pad, thickness, traces, layers):
     """
     Makes a wedge.
-    Give it pad, thickness, traces, and an iterable of rocks.
+    Give it pad, thickness, traces, and an iterable of layers.
     Returns an array.
     """    
     
@@ -50,7 +50,7 @@ def wedge_svg(pad, thickness, traces, rocks):
     dwg = svgwrite.Drawing(outfile_name, size=(width,height), profile='tiny')
     
     # If we have 3 layers, draw the background
-    if len(rocks) > 2:
+    if len(layers) > 2:
         subwedge = svgwrite.shapes.Rect(insert=(0,pad), size=(width,height-pad)).fill('blue')
         dwg.add(subwedge)
     
@@ -66,10 +66,10 @@ def wedge_svg(pad, thickness, traces, rocks):
     
     return outfile_name
     
-def tilted_svg(pad, thickness, traces, rocks, fluid=None):
+def tilted_svg(pad, thickness, traces, layers, fluid=None):
     """
     Makes a tilted block.
-    Give it pad, thickness, traces, and an iterable of rocks.
+    Give it pad, thickness, traces, and an iterable of layers.
     Returns an array.
     """    
     
@@ -105,7 +105,7 @@ def tilted_svg(pad, thickness, traces, rocks, fluid=None):
     dwg.add(toplayer)
         
     # Draw the bottom layer
-    if len(rocks) > 2:
+    if len(filter(None,layers)) > 2:
         background_colour = bottom_colour
     points = [p4, p3, (width,height), (0,height)]
     bottomlayer = svgwrite.shapes.Polygon(points).fill(background_colour)
@@ -125,7 +125,7 @@ def tilted_svg(pad, thickness, traces, rocks, fluid=None):
     
     return outfile_name
     
-def svg2png(svg_file):
+def svg2png(svg_file, colours):
     """
     Convert SVG file to PNG file.
     Give it the file path.
@@ -148,7 +148,7 @@ def svg2png(svg_file):
     
     # Use ImageMagick to do the conversion
     convert = '/opt/local/bin/convert'
-    command = [convert, infile_name, outfile_name]
+    command = [convert, '-colors', str(colours), infile_name, outfile_name]
     
     subprocess.call(command)
         
@@ -157,12 +157,16 @@ def svg2png(svg_file):
 
     return outfile_name
 
-def wedge(pad, thickness, traces, rocks):
-    return png2array(svg2png(wedge_svg(pad,thickness,traces,rocks)))
+def wedge(pad, thickness, traces, layers):
+    return png2array(svg2png(wedge_svg(pad,thickness,traces,layers)))
     
-def tilted(pad, thickness, traces, rocks, fluid):
-    return png2array(svg2png(tilted_svg(pad,thickness,traces,rocks, fluid)))
+def tilted(pad, thickness, traces, layers, fluid=None):
+    colours = len(layers)
+    if fluid:
+        colours += 1
+    return png2array(svg2png(tilted_svg(pad,thickness,traces,layers,fluid),colours))
     
 if __name__ == '__main__':
-    wparray =  tilted(20,50,200,['rock1','rock2', 'rock3'], fluid='oil')
+    wparray =  tilted(20,50,200,['rock1','rock2', 'rock3'])
     print wparray
+    print np.unique(wparray)
