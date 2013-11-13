@@ -1,5 +1,10 @@
 *.py[co]
 
+# image files
+*.png
+*.jpg
+*.svg
+
 # Log files
 *.log
 
