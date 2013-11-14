@@ -26,7 +26,7 @@ def do_convolve(wavelet,f,array_amp,dt=0.001,traces=None):
         
     return np.array(warray_amp)
 
-def create_wedge(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0, f=25, reflectivity_method='zoeppritz', dt=0.001):
+def create_wedge(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0, wavelet='ricker', f=25, reflectivity_method='zoeppritz', dt=0.001):
     '''
     Create a wedge model.
     
@@ -57,7 +57,7 @@ def create_wedge(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0,
     array_amp[pad * scale, :] += Rp0
     array_amp[wedge, np.arange(ntraces)] += Rp1
             
-    result = do_convolve(f,dt,array_amp)
+    result = do_convolve(wavelet, f,array_amp, dt)
     
     return result
 

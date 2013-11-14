@@ -3,16 +3,21 @@ Created on Apr 30, 2012
 
 @author: Sean Ross-Ross, Matt Hall, Evan Bianco
 '''
-from argparse import ArgumentParser
-from modelr.reflectivity import create_wedge
+import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-from modelr.web.urlargparse import rock_properties_type,\
-     reflectivity_type
+
+from argparse import ArgumentParser
+
+from modelr.reflectivity import get_reflectivity, create_wedge
+from modelr.web.urlargparse import rock_properties_type, reflectivity_type, wavelet_type
+from modelr.web.urlargparse import WAVELETS
+
 from modelr.rock_properties import MODELS
+
 from modelr.web.util import return_current_figure
-import numpy as np
 from modelr.web.util import wiggle
+
 
 short_description = 'Create a simple wedge model.'
 
@@ -78,6 +83,7 @@ def add_arguments(parser):
                         
     parser.add_argument('f',
                         type=float,
+                        action=list,
                         help='Frequency of wavelet',
                         default=25
                         )
@@ -92,6 +98,13 @@ def add_arguments(parser):
                         type=str,
                         help='wiggle, image, or both',
                         default='image'
+                        )
+                        
+    parser.add_argument('wavelet',
+                        type=wavelet_type,
+                        help='ricker, ormsby, sweep',
+                        default='ricker',
+                        choices=WAVELETS.keys()
                         )
 
     return parser
@@ -115,6 +128,7 @@ def run_script(args):
                               prop1 = Rprop1,
                               prop2 = Rprop2,
                               theta = args.theta,
+                              wavelet=args.wavelet,
                               f = args.f,
                               reflectivity_method = args.reflectivity_method
                               )
