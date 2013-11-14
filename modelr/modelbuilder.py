@@ -26,30 +26,33 @@ import subprocess
 ###########################################
 # Image converters
 
-def png2array(png_file):
+def png2array(infile=None):
     """
     Turns a PNG into a numpy array.
     """
     
-    infile = 'tmp/model.png'
+    if infile == None:
+        infile = 'tmp/model.png'
     
     # Use RGB triplets... could encode as Vp, Vs, rho
     #im_color = np.array(Image.open(infile))
 
-    im = np.array(Image.open(infile).convert('P',palette=Image.ADAPTIVE, colors=4),'f')
+    im = np.array(Image.open(infile).convert('P',palette=Image.ADAPTIVE, colors=8),'f')
     return np.array(im,dtype=np.uint8)
    
-def svg2png(svg_file, colours):
+def svg2png(infile=None, colours=2):
     """
     Convert SVG file to PNG file.
     Give it the file path.
     Get back a file path to a PNG.
     """
 
+    if infile == None:
+        infile = 'tmp/model.svg'
+    
     # Write the PNG output
     # Testing: we will eventually just return the PNG
-    infile_name = 'tmp/model.svg'
-    outfile_name = 'tmp/model.png'
+    outfile = 'tmp/model.png'
     
     # To read an SVG file from disk
     #infile = open(infile_name,'r')
@@ -62,14 +65,14 @@ def svg2png(svg_file, colours):
     
     # Use ImageMagick to do the conversion
     convert = '/opt/local/bin/convert'
-    command = [convert, '-colors', str(colours), infile_name, outfile_name]
+    command = [convert, '-colors', str(colours), infile, outfile]
     
     subprocess.call(command)
         
     # Only need to close file if we're writing with cairosvg
     #outfile.close()
 
-    return outfile_name
+    return outfile
 
 ###########################################
 # Code to generate geometries
