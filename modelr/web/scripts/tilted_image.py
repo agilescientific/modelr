@@ -3,17 +3,24 @@ Created on Apr 30, 2012
 
 @author: Sean Ross-Ross, Matt Hall, Evan Bianco
 '''
-from argparse import ArgumentParser
-from modelr.reflectivity import get_reflectivity
-from modelr.modelbuilder import tilted
+import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-from modelr.web.urlargparse import rock_properties_type,\
-     reflectivity_type
+
+from argparse import ArgumentParser
+
+from modelr.reflectivity import get_reflectivity, do_convolve
+
+import modelr.modelbuilder as mb
+
+from modelr.web.urlargparse import rock_properties_type, reflectivity_type, wavelet_type
+from modelr.web.urlargparse import WAVELETS
+
 from modelr.rock_properties import MODELS
+
 from modelr.web.util import return_current_figure
-import numpy as np
 from modelr.web.util import wiggle
+
 
 short_description = 'Create a simple tilted model.'
 
@@ -47,21 +54,21 @@ def add_arguments(parser):
                         type=rock_properties_type, 
                         help='Rock properties of upper rock [Vp,Vs, rho]',
                         required=True,
-                        default='2000,1000,2200'
+                        default='2350,1150,2400'
                         )
                         
     parser.add_argument('Rock1',
                         type=rock_properties_type, 
                         help='Rock properties of middle rock [Vp, Vs, rho]',
                         required=True,
-                        default='2200,1100,2300'
+                        default='2150,1050,2300'
                         )
     
     parser.add_argument('Rock2',
                         type=rock_properties_type, 
                         help='Rock properties of lower rock [Vp, Vs, rho]',
                         required=False,
-                        default='2500,1200,2600'
+                        default='2500,1250,2600'
                         )
     
     parser.add_argument('reflectivity_method',
@@ -79,6 +86,7 @@ def add_arguments(parser):
                         
     parser.add_argument('f',
                         type=float,
+                        action='list',
                         help='Frequency of wavelet',
                         default=25
                         )
@@ -95,6 +103,13 @@ def add_arguments(parser):
                         default='image'
                         )
 
+    parser.add_argument('wavelet',
+                        type=wavelet_type,
+                        help='Wavelet type',
+                        default='ricker',
+                        choices=WAVELETS.keys()
+                        )
+
     return parser
 
 
@@ -109,7 +124,7 @@ def run_script(args):
     if isinstance(Rprop2, str):
         Rprop2 = None
     
-    model = tilted(traces = args.ntraces,
+    model = mb.tilted(traces = args.ntraces,
                    pad = args.pad,
                    thickness = args.thickness,
                    layers = (Rprop0,Rprop1,Rprop2)
@@ -124,7 +139,7 @@ def run_script(args):
                                     reflectivity_method = args.reflectivity_method
                                     )
     
-    warray_amp = reflectivity
+    warray_amp = do_convolve(args.wavelet, args.f, reflectivity)
     
     fig = plt.figure()
     ax1 = fig.add_subplot(111)

@@ -10,7 +10,7 @@ from urlparse import urlparse, parse_qs
 from argparse import Namespace
 import json
 
-from agilegeo.wavelet import *
+from agilegeo.wavelet import ricker, ormsby, sweep
 
 def rock_properties_type(str_input):
     from modelr.rock_properties import RockProperties
@@ -32,13 +32,22 @@ WAVELETS = {
     }
           
 def wavelet_type(str_input):
+    '''
+    To be used as the 'type' value in an Argument. 
+    
+    Takes a string as input and returns an arbitrary value.
+    
+    Example::
+        
+        parser.add_argument('wavelet', type=wavelet_type, help='... ', default='ricker', choices=WAVELETS.keys())
+     
+    '''
     
     return WAVELETS[str_input]
 
 def reflectivity_type(str_input):
     '''
     To be used as the 'type' value in an Argument. 
-    
     
     Takes a string as input and returns an arbitrary value.
     

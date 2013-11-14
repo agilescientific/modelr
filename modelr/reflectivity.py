@@ -7,8 +7,7 @@ Basic methods for creating models.
 
 '''
 import numpy as np
-#from modelr.rock_properties import zoeppritz
-from agilegeo.wavelet import *
+#from agilegeo.wavelet import *
 
 def do_convolve(wavelet,f,array_amp,dt=0.001,traces=None):
     

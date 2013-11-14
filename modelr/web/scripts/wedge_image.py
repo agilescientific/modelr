@@ -3,16 +3,24 @@ Created on Apr 30, 2012
 
 @author: Sean Ross-Ross, Matt Hall, Evan Bianco
 '''
-from argparse import ArgumentParser
-from modelr.reflectivity import get_reflectivity, do_convolve
-from modelr.modelbuilder import wedge
+import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+
+from argparse import ArgumentParser
+
+from modelr.reflectivity import get_reflectivity, do_convolve
+
+import modelr.modelbuilder as mb
+
 from modelr.web.urlargparse import rock_properties_type, reflectivity_type, wavelet_type
+from modelr.web.urlargparse import WAVELETS
+
 from modelr.rock_properties import MODELS
+
 from modelr.web.util import return_current_figure
-import numpy as np
 from modelr.web.util import wiggle
+
 
 short_description = 'Create a simple wedge model.'
 
@@ -96,8 +104,9 @@ def add_arguments(parser):
 
     parser.add_argument('wavelet',
                         type=wavelet_type,
-                        help='ricker, ormsby, sweep',
-                        default='ricker'
+                        help='Wavelet type',
+                        default='ricker',
+                        choices=WAVELETS.keys()
                         )
 
     return parser
@@ -108,7 +117,7 @@ def run_script(args):
     matplotlib.interactive(False)
 
     # Get the physical model (an array of rocks)    
-    model = wedge(traces = args.ntraces,
+    model = mb.wedge(traces = args.ntraces,
                    pad = args.pad,
                    thickness = args.thickness,
                    layers = (args.Rock0,args.Rock1,args.Rock2)

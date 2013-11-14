@@ -12,10 +12,16 @@ installed with pip.
 from PIL import Image
 import numpy as np
 import svgwrite
-import os, subprocess
+import subprocess
 
 # Try cairosvg again on EC2 server
 #import cairosvg
+
+# TODO
+# Add os.path for files
+# fix cairosvg
+# make 'body' generic
+# make adding fluids easy, by intersecting with body?
 
 ###########################################
 # Image converters
