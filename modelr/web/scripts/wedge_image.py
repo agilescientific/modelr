@@ -4,11 +4,11 @@ Created on Apr 30, 2012
 @author: Sean Ross-Ross, Matt Hall, Evan Bianco
 '''
 from argparse import ArgumentParser
-from modelr.reflectivity import create_wedge
+from modelr.reflectivity import get_reflectivity, do_convolve
+from modelr.modelbuilder import wedge
 import matplotlib
 import matplotlib.pyplot as plt
-from modelr.web.urlargparse import rock_properties_type,\
-     reflectivity_type
+from modelr.web.urlargparse import rock_properties_type, reflectivity_type, wavelet_type
 from modelr.rock_properties import MODELS
 from modelr.web.util import return_current_figure
 import numpy as np
@@ -30,7 +30,7 @@ def add_arguments(parser):
                         help='The time in milliseconds above and below the wedge'
                         )
                         
-    parser.add_argument('max_thickness',
+    parser.add_argument('thickness',
                         default=50,
                         type=int,
                         help='The maximum thickness of the wedge'
@@ -94,31 +94,39 @@ def add_arguments(parser):
                         default='image'
                         )
 
+    parser.add_argument('wavelet',
+                        type=wavelet_type,
+                        help='ricker, ormsby, sweep',
+                        default='ricker'
+                        )
+
     return parser
 
 
 def run_script(args):
     
     matplotlib.interactive(False)
- 
-    Rprop0 = args.Rock0 
-    Rprop1 = args.Rock1
-    Rprop2 = args.Rock2
+
+    # Get the physical model (an array of rocks)    
+    model = wedge(traces = args.ntraces,
+                   pad = args.pad,
+                   thickness = args.thickness,
+                   layers = (args.Rock0,args.Rock1,args.Rock2)
+                   )
+
+    colourmap = { 0: args.Rock0, 1: args.Rock1 }
+    if not isinstance(args.Rock2, str):
+        colourmap[2] = args.Rock2
     
-    if isinstance(Rprop2, str):
-        Rprop2 = None
+    reflectivity = get_reflectivity(data=model,
+                                    colourmap = colourmap,
+                                    theta = args.theta,
+                                    f = args.f,
+                                    reflectivity_method = args.reflectivity_method
+                                    )
     
-    warray_amp = create_wedge(ntraces = args.ntraces,
-                              pad = args.pad,
-                              max_thickness = args.max_thickness,
-                              prop0 = Rprop0,
-                              prop1 = Rprop1,
-                              prop2 = Rprop2,
-                              theta = args.theta,
-                              f = args.f,
-                              reflectivity_method = args.reflectivity_method
-                              )
-        
+    warray_amp = do_convolve(args.wavelet, args.f, reflectivity)
+                        
     fig = plt.figure()
     ax1 = fig.add_subplot(111)
 

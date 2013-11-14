@@ -7,23 +7,27 @@ Basic methods for creating models.
 
 '''
 import numpy as np
-from modelr.rock_properties import zoeppritz
-from agilegeo.wavelet import ricker
+#from modelr.rock_properties import zoeppritz
+from agilegeo.wavelet import *
 
-def do_convolve(ntraces,f,dt,array_amp,type=None):
+def do_convolve(wavelet,f,array_amp,dt=0.001,traces=None):
+    
+    if traces == None:
+        traces = array_amp.shape[1]
+    
     duration = 0.2
-    r = ricker(duration,dt, f)
+    w = wavelet(duration,dt, f)
     
-    warray_amp = np.zeros([max(array_amp.shape[0], r.shape[0]), array_amp.shape[1]])
+    samples = max(array_amp.shape[0], w.shape[0])
     
-    for i in range(ntraces):
-        warray_amp[:, i] = np.convolve(array_amp[:, i], r, mode='same')
+    warray_amp = np.zeros([samples, traces])
     
-    print "all done convolving"
+    for i in range(traces):
+        warray_amp[:, i] = np.convolve(array_amp[:, i], w, mode='same')
         
     return np.array(warray_amp)
 
-def create_wedge(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0, f=25, reflectivity_method='zoeppritz'):
+def create_wedge(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0, f=25, reflectivity_method='zoeppritz', dt=0.001):
     '''
     Create a wedge model.
     
@@ -54,11 +58,11 @@ def create_wedge(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0,
     array_amp[pad * scale, :] += Rp0
     array_amp[wedge, np.arange(ntraces)] += Rp1
             
-    result = do_convolve(ntraces,f,0.001,array_amp,type='wedge')
+    result = do_convolve(f,dt,array_amp)
     
     return result
 
-def create_tilted(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0, f=25, reflectivity_method='zoeppritz'):
+def create_tilted(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0, f=25, reflectivity_method='zoeppritz', dt=0.001):
     '''
     Create a tilted model.
     
@@ -103,11 +107,11 @@ def create_tilted(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0
     array_amp[ twedge, np.arange(ntraces)] += Rp0
     array_amp[ bwedge, np.arange(ntraces)] += Rp1
             
-    result = do_convolve(ntraces,f,0.001,array_amp,type='wedge')
+    result = do_convolve(f,dt,array_amp)
     
     return result
 
-def get_reflectivity(data, colourmap, theta=0, f=25, reflectivity_method='zoeppritz'):
+def get_reflectivity(data, colourmap, theta=0, f=25, reflectivity_method='zoeppritz', dt=0.001):
     '''
     Create reflectivities from model.
     
@@ -118,34 +122,18 @@ def get_reflectivity(data, colourmap, theta=0, f=25, reflectivity_method='zoeppr
     '''
 
     model = []
+    array_amp = np.zeros( data.shape )
 
     for row in range(data.shape[0]):
         model.append([])
         for col in range(data.shape[1]):
             model[row].append(colourmap[data[row,col]])
     
-    # Transpose the model so we can work on columns (traces) not rows
-    #model = map(list,zip(*model))
-    
-    # Search nd replace for dict items
-    # Use the colourmap to put rocks in the array
-    # Doesn't works because different types
-    #for key, value in colourmap.iteritems():
-    #    model[data==key] = value
-         
-    output = np.zeros( data.shape )
-
     for trace in range(len(model[0])):
         for sample in range(len(model) - 1):
-            output[sample,trace] = reflectivity_method(model[sample][trace], model[sample+1][trace], theta)
-            
-    array_amp = output    
-    
-    traces = data.shape[0]
-            
-    result = do_convolve(traces,f,0.001,array_amp)
-    
-    return result
+            array_amp[sample,trace] = reflectivity_method(model[sample][trace], model[sample+1][trace], theta)
+
+    return array_amp
 
 def create_theta(pad, thickness, prop0, prop1, theta, f, duration, reflectivity_method):
     '''
@@ -171,10 +159,9 @@ def create_theta(pad, thickness, prop0, prop1, theta, f, duration, reflectivity_
     
     print "sending now"
     
-    result = do_convolve(theta.size,f,duration,array_amp)
+    result = do_convolve(f,duration,array_amp,traces=theta.size)
     
     return result
-
     
 def create_theta_spike(pad, prop0, prop1, theta, f, duration, reflectivity_method):
     '''
@@ -194,6 +181,6 @@ def create_theta_spike(pad, prop0, prop1, theta, f, duration, reflectivity_metho
     Rp = reflectivity_method(prop0, prop1, theta)
     array_amp[pad, :] += Rp
 
-    result = do_convolve(theta.size,f,duration,array_amp)
+    result = do_convolve(f,duration,array_amp,traces=theta.size)
     
     return result
