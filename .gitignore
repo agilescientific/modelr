@@ -1,9 +1,9 @@
 *.py[co]
 
 # image files
-*.png
+#*.png Needed for some models
 *.jpg
-*.svg
+#*.svg Testing with some models
 
 # Log files
 *.log

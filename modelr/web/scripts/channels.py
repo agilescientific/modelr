@@ -22,35 +22,42 @@ from modelr.web.util import return_current_figure
 from modelr.web.util import wiggle
 
 
-short_description = 'The Agile logo!'
+short_description = 'Some channels. Hand-drawn SVG.'
 
 def add_arguments(parser):
     
     parser.add_argument('title', 
-                        default='Agile*',
+                        default='Channels',
                         type=str,
                         help='The title of the plot'
                         )
                         
     parser.add_argument('Rock0',
                         type=rock_properties_type, 
-                        help='Rock properties of background [Vp,Vs, rho]',
+                        help='Rock properties [Vp,Vs, rho]',
                         required=True,
                         default='2350,1150,2400'
                         )
                         
     parser.add_argument('Rock1',
                         type=rock_properties_type, 
-                        help='Rock properties of star [Vp, Vs, rho]',
+                        help='Rock properties [Vp, Vs, rho]',
                         required=True,
                         default='2150,1050,2300'
                         )
     
     parser.add_argument('Rock2',
                         type=rock_properties_type, 
-                        help='Rock properties of Agile [Vp, Vs, rho]',
+                        help='Rock properties [Vp, Vs, rho]',
                         required=False,
                         default='2500,1250,2600'
+                        )
+    
+    parser.add_argument('Rock3',
+                        type=rock_properties_type, 
+                        help='Rock properties [Vp, Vs, rho]',
+                        required=False,
+                        default='2600,1350,2700'
                         )
     
     parser.add_argument('reflectivity_method',
@@ -99,16 +106,13 @@ def run_script(args):
     
     matplotlib.interactive(False)
  
-    Rprop0 = args.Rock0 
-    Rprop1 = args.Rock1
-    Rprop2 = args.Rock2
-    
-    if isinstance(Rprop2, str):
-        Rprop2 = None
-    
-    model = mb.png2array('tmp/agile_logo_blue.png')
+    model = mb.png2array('tmp/channels.png')
 
-    colourmap = { 0: Rprop0, 1: Rprop1, 2: Rprop2 }
+    colourmap = {0: args.Rock0,
+                 1: args.Rock1,
+                 2: args.Rock2,
+                 3: args.Rock3
+                }
         
     reflectivity = get_reflectivity(data=model,
                                     colourmap = colourmap,
