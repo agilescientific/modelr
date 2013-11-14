@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 from argparse import ArgumentParser
 
-from modelr.reflectivity import get_reflectivity, create_wedge
+from modelr.reflectivity import create_wedge
 from modelr.web.urlargparse import rock_properties_type, reflectivity_type, wavelet_type
 from modelr.web.urlargparse import WAVELETS
 

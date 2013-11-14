@@ -9,6 +9,33 @@ Basic methods for creating models.
 import numpy as np
 #from agilegeo.wavelet import *
 
+###################
+# New style functions
+
+def get_reflectivity(data, colourmap, theta=0, f=25, reflectivity_method='zoeppritz', dt=0.001):
+    '''
+    Create reflectivities from model.
+    
+    :param model: the physical model to use
+    :param theta: angle of incidence
+    :param f: the frequency for the wavelet
+    :param reflectivity_method: the reflectivity algorithm to use
+    '''
+
+    model = []
+    array_amp = np.zeros( data.shape )
+
+    for row in range(data.shape[0]):
+        model.append([])
+        for col in range(data.shape[1]):
+            model[row].append(colourmap[data[row,col]])
+    
+    for trace in range(len(model[0])):
+        for sample in range(len(model) - 1):
+            array_amp[sample,trace] = reflectivity_method(model[sample][trace], model[sample+1][trace], theta)
+
+    return array_amp
+
 def do_convolve(wavelet,f,array_amp,dt=0.001,traces=None):
     
     if traces == None:
@@ -25,6 +52,9 @@ def do_convolve(wavelet,f,array_amp,dt=0.001,traces=None):
         warray_amp[:, i] = np.convolve(array_amp[:, i], w, mode='same')
         
     return np.array(warray_amp)
+
+####################
+# Old model-building functions
 
 def create_wedge(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0, wavelet='ricker', f=25, reflectivity_method='zoeppritz', dt=0.001):
     '''
@@ -61,7 +91,7 @@ def create_wedge(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0,
     
     return result
 
-def create_tilted(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0, f=25, reflectivity_method='zoeppritz', dt=0.001):
+def create_tilted(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0, wavelet='ricker', f=25, reflectivity_method='zoeppritz', dt=0.001):
     '''
     Create a tilted model.
     
@@ -106,35 +136,11 @@ def create_tilted(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0
     array_amp[ twedge, np.arange(ntraces)] += Rp0
     array_amp[ bwedge, np.arange(ntraces)] += Rp1
             
-    result = do_convolve(f,dt,array_amp)
+    result = do_convolve(wavelet, f, array_amp, dt)
     
     return result
 
-def get_reflectivity(data, colourmap, theta=0, f=25, reflectivity_method='zoeppritz', dt=0.001):
-    '''
-    Create reflectivities from model.
-    
-    :param model: the physical model to use
-    :param theta: angle of incidence
-    :param f: the frequency for the wavelet
-    :param reflectivity_method: the reflectivity algorithm to use
-    '''
-
-    model = []
-    array_amp = np.zeros( data.shape )
-
-    for row in range(data.shape[0]):
-        model.append([])
-        for col in range(data.shape[1]):
-            model[row].append(colourmap[data[row,col]])
-    
-    for trace in range(len(model[0])):
-        for sample in range(len(model) - 1):
-            array_amp[sample,trace] = reflectivity_method(model[sample][trace], model[sample+1][trace], theta)
-
-    return array_amp
-
-def create_theta(pad, thickness, prop0, prop1, theta, f, duration, reflectivity_method):
+def create_theta(pad, thickness, prop0, prop1, theta, wavelet='ricker', f=25, dt=0.001, reflectivity_method='zoeppritz'):
     '''
     Create a 2D array where the first dimension is time and the second is angle.
 
@@ -158,7 +164,7 @@ def create_theta(pad, thickness, prop0, prop1, theta, f, duration, reflectivity_
     
     print "sending now"
     
-    result = do_convolve(f,duration,array_amp,traces=theta.size)
+    result = do_convolve(wavelet, f, array_amp, dt, traces=theta.size)
     
     return result
     
