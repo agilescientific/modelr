@@ -22,17 +22,11 @@ def get_reflectivity(data, colourmap, theta=0, f=25, reflectivity_method='zoeppr
     :param reflectivity_method: the reflectivity algorithm to use
     '''
 
-    model = []
     array_amp = np.zeros( data.shape )
 
-    for row in range(data.shape[0]):
-        model.append([])
-        for col in range(data.shape[1]):
-            model[row].append(colourmap[data[row,col]])
-    
-    for trace in range(len(model[0])):
-        for sample in range(len(model) - 1):
-            array_amp[sample,trace] = reflectivity_method(model[sample][trace], model[sample+1][trace], theta)
+    for trace in range(data.shape[1]):
+        for sample in range(data.shape[0] - 1):
+            array_amp[sample,trace] = reflectivity_method(colourmap[data[sample,trace]], colourmap[data[sample+1,trace]], theta)
 
     return array_amp
 
