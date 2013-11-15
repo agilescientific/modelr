@@ -13,7 +13,8 @@ from modelr.reflectivity import get_reflectivity, do_convolve
 
 import modelr.modelbuilder as mb
 
-from modelr.web.urlargparse import rock_properties_type, reflectivity_type, wavelet_type
+from modelr.web.urlargparse import rock_properties_type, \
+     reflectivity_type, wavelet_type
 from modelr.web.urlargparse import WAVELETS
 
 from modelr.rock_properties import MODELS
@@ -35,7 +36,7 @@ def add_arguments(parser):
     parser.add_argument('pad',
                         default=50,
                         type=int,
-                        help='The time in milliseconds above and below the wedge'
+                help='Ttime in milliseconds above and below the wedge'
                         )
                         
     parser.add_argument('thickness',
@@ -52,21 +53,21 @@ def add_arguments(parser):
     
     parser.add_argument('Rock0',
                         type=rock_properties_type, 
-                        help='Rock properties of upper rock [Vp,Vs, rho]',
+                help='Rock properties of upper rock [Vp,Vs, rho]',
                         required=True,
                         default='2350,1150,2400'
                         )
                         
     parser.add_argument('Rock1',
                         type=rock_properties_type, 
-                        help='Rock properties of middle rock [Vp, Vs, rho]',
+                help='Rock properties of middle rock [Vp, Vs, rho]',
                         required=True,
                         default='2150,1050,2300'
                         )
     
     parser.add_argument('Rock2',
                         type=rock_properties_type, 
-                        help='Rock properties of lower rock [Vp, Vs, rho]',
+                help='Rock properties of lower rock [Vp, Vs, rho]',
                         required=False,
                         default='2500,1250,2600'
                         )
@@ -136,7 +137,8 @@ def run_script(args):
                                     colourmap = colourmap,
                                     theta = args.theta,
                                     f = args.f,
-                                    reflectivity_method = args.reflectivity_method
+                                    reflectivity_method =
+                                      args.reflectivity_method
                                     )
     
     warray_amp = do_convolve(args.wavelet, args.f, reflectivity)

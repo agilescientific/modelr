@@ -13,7 +13,8 @@ from modelr.reflectivity import get_reflectivity, do_convolve
 
 import modelr.modelbuilder as mb
 
-from modelr.web.urlargparse import rock_properties_type, reflectivity_type, wavelet_type
+from modelr.web.urlargparse import rock_properties_type, \
+     reflectivity_type, wavelet_type
 from modelr.web.urlargparse import WAVELETS
 
 from modelr.rock_properties import MODELS
@@ -114,7 +115,8 @@ def run_script(args):
                                     colourmap = colourmap,
                                     theta = args.theta,
                                     f = args.f,
-                                    reflectivity_method = args.reflectivity_method
+                                    reflectivity_method = \
+                                      args.reflectivity_method
                                     )
     
     warray_amp = do_convolve(args.wavelet, args.f, reflectivity)

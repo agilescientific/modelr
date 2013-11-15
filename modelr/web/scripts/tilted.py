@@ -27,7 +27,7 @@ def add_arguments(parser):
     parser.add_argument('pad',
                         default=50,
                         type=int,
-                        help='The time in milliseconds above and below the wedge'
+            help='The time in milliseconds above and below the wedge'
                         )
                         
     parser.add_argument('max_thickness',
@@ -44,21 +44,21 @@ def add_arguments(parser):
     
     parser.add_argument('Rock0',
                         type=rock_properties_type, 
-                        help='Rock properties of upper rock [Vp,Vs, rho]',
+                    help='Rock properties of upper rock [Vp,Vs, rho]',
                         required=True,
                         default='2000,1000,2200'
                         )
                         
     parser.add_argument('Rock1',
                         type=rock_properties_type, 
-                        help='Rock properties of middle rock [Vp, Vs, rho]',
+                help='Rock properties of middle rock [Vp, Vs, rho]',
                         required=True,
                         default='2200,1100,2300'
                         )
     
     parser.add_argument('Rock2',
                         type=rock_properties_type, 
-                        help='Rock properties of lower rock [Vp, Vs, rho]',
+                help='Rock properties of lower rock [Vp, Vs, rho]',
                         required=False,
                         default='2500,1200,2600'
                         )
@@ -116,7 +116,8 @@ def run_script(args):
                               prop2 = Rprop2,
                               theta = args.theta,
                               f = args.f,
-                              reflectivity_method = args.reflectivity_method
+                              reflectivity_method =
+                                args.reflectivity_method
                               )
         
     fig = plt.figure()
