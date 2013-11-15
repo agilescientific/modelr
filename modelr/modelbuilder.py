@@ -37,7 +37,9 @@ def png2array(infile=None):
     # Use RGB triplets... could encode as Vp, Vs, rho
     #im_color = np.array(Image.open(infile))
 
-    im = np.array(Image.open(infile).convert('P',palette=Image.ADAPTIVE, colors=8),'f')
+    im = \
+       np.array(Image.open(infile).convert('P',
+        palette=Image.ADAPTIVE, colors=8),'f')
     return np.array(im,dtype=np.uint8)
    
 def svg2png(infile=None, colours=2):
@@ -94,18 +96,24 @@ def channel_svg(pad, thickness, traces, layers,fluid):
     width = traces
     height = 2*pad + thickness
     
-    dwg = svgwrite.Drawing(outfile_name, size=(width,height), profile='tiny')
+    dwg = svgwrite.Drawing(outfile_name, size=(width,height),
+                           profile='tiny')
     
     # Draw the bottom layer
-    bottom_layer = svgwrite.shapes.Rect(insert=(0,0), size=(width,height)).fill(bottom_colour)
+    bottom_layer = \
+      svgwrite.shapes.Rect(insert=(0,0),
+                           size=(width,height)).fill(bottom_colour)
     dwg.add(bottom_layer)
     
     # Draw the body
-    body = svgwrite.shapes.Ellipse(center=(width/2,pad/2), r=(0.3*width,pad+thickness)).fill(body_colour)
+    body = \
+      svgwrite.shapes.Ellipse(center=(width/2,pad/2),
+                        r=(0.3*width,pad+thickness)).fill(body_colour)
     dwg.add(body)
 
     # Draw the top layer
-    top_layer = svgwrite.shapes.Rect(insert=(0,0), size=(width,pad)).fill(top_colour)
+    top_layer = svgwrite.shapes.Rect(insert=(0,0),
+                                    size=(width,pad)).fill(top_colour)
     dwg.add(top_layer)
 
     # Do this for a string
@@ -128,11 +136,14 @@ def wedge_svg(pad, thickness, traces, layers,fluid):
     width = traces
     height = 2 * pad + thickness
     
-    dwg = svgwrite.Drawing(outfile_name, size=(width,height), profile='tiny')
+    dwg = svgwrite.Drawing(outfile_name, size=(width,height),
+                           profile='tiny')
     
     # If we have 3 layers, draw the background
     if len(layers) > 2:
-        subwedge = svgwrite.shapes.Rect(insert=(0,pad), size=(width,height-pad)).fill('blue')
+        subwedge = \
+           svgwrite.shapes.Rect(insert=(0,pad),
+                                size=(width,height-pad)).fill('blue')
         dwg.add(subwedge)
     
     points = [(0, pad), (traces, pad), (traces, height - pad)]
@@ -164,20 +175,26 @@ def tilted_svg(pad, thickness, traces, layers, fluid):
     width = traces
     height = 2 * pad + 2.5 * thickness
     
-    dwg = svgwrite.Drawing(outfile_name, size=(width,height), profile='tiny')
+    dwg = svgwrite.Drawing(outfile_name,
+                           size=(width,height), profile='tiny')
     
     p1 = (0, pad)
     p2 = (width, height - pad - thickness)
     p3 = (width, height - pad)
     p4 = (0, pad + thickness)
 
-    # Draw the background, will become the slab as we overlay the upper and lower layers
-    slab = svgwrite.shapes.Rect(insert=(0,0), size=(width,height)).fill(slab_colour)
+    # Draw the background, will become the slab as we overlay the
+    # upper and lower layers
+    slab = \
+       svgwrite.shapes.Rect(insert=(0,0),
+                            size=(width,height)).fill(slab_colour)
     dwg.add(slab)
     
     # Add fluid, if any
     if fluid:
-        fluid = svgwrite.shapes.Rect(insert=(0,0), size=(width,height/2)).fill(fluid_colour)
+        fluid = \
+          svgwrite.shapes.Rect(insert=(0,0),
+                        size=(width,height/2)).fill(fluid_colour)
         dwg.add(fluid)
     
     # Draw the top layer
@@ -189,7 +206,8 @@ def tilted_svg(pad, thickness, traces, layers, fluid):
     if len(filter(None,layers)) > 2:
         background_colour = bottom_colour
     points = [p4, p3, (width,height), (0,height)]
-    bottomlayer = svgwrite.shapes.Polygon(points).fill(background_colour)
+    bottomlayer = \
+      svgwrite.shapes.Polygon(points).fill(background_colour)
     dwg.add(bottomlayer)
     
     # Draw the slab
@@ -214,19 +232,22 @@ def wedge(pad, thickness, traces, layers, fluid=None):
     colours = len(layers)
     if fluid:
         colours += 1
-    return png2array(svg2png(wedge_svg(pad,thickness,traces,layers,fluid),colours))
+    return png2array(svg2png(wedge_svg(pad,thickness,traces,
+                                       layers,fluid),colours))
     
 def channel(pad, thickness, traces, layers, fluid=None):
     colours = len(layers)
     if fluid:
         colours += 1
-    return png2array(svg2png(channel_svg(pad,thickness,traces,layers,fluid),colours))
+    return png2array(svg2png(channel_svg(pad,thickness,traces,
+                                         layers,fluid),colours))
     
 def tilted(pad, thickness, traces, layers, fluid=None):
     colours = len(layers)
     if fluid:
         colours += 1
-    return png2array(svg2png(tilted_svg(pad,thickness,traces,layers,fluid),colours))
+    return png2array(svg2png(tilted_svg(pad,thickness,traces,
+                                        layers,fluid),colours))
     
     
 ###########################################

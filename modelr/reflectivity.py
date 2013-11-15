@@ -12,7 +12,9 @@ import numpy as np
 ###################
 # New style functions
 
-def get_reflectivity(data, colourmap, theta=0, f=25, reflectivity_method='zoeppritz', dt=0.001):
+def get_reflectivity(data, colourmap, theta=0, f=25,
+                     reflectivity_method='zoeppritz',
+                     dt=0.001):
     '''
     Create reflectivities from model.
     
@@ -32,7 +34,9 @@ def get_reflectivity(data, colourmap, theta=0, f=25, reflectivity_method='zoeppr
     
     for trace in range(len(model[0])):
         for sample in range(len(model) - 1):
-            array_amp[sample,trace] = reflectivity_method(model[sample][trace], model[sample+1][trace], theta)
+            array_amp[sample,trace] = \
+              reflectivity_method(model[sample][trace],
+                                  model[sample+1][trace], theta)
 
     return array_amp
 
@@ -49,14 +53,17 @@ def do_convolve(wavelet,f,array_amp,dt=0.001,traces=None):
     warray_amp = np.zeros([samples, traces])
     
     for i in range(traces):
-        warray_amp[:, i] = np.convolve(array_amp[:, i], w, mode='same')
+        warray_amp[:, i] = np.convolve(array_amp[:, i], w,
+                                       mode='same')
         
     return np.array(warray_amp)
 
 ####################
 # Old model-building functions
 
-def create_wedge(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0, wavelet='ricker', f=25, reflectivity_method='zoeppritz', dt=0.001):
+def create_wedge(ntraces, pad, max_thickness, prop0, prop1,
+                 prop2=None, theta=0, wavelet='ricker', f=25,
+                 reflectivity_method='zoeppritz', dt=0.001):
     '''
     Create a wedge model.
     
@@ -77,7 +84,8 @@ def create_wedge(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0,
     nsamples = (2 * pad + max_thickness) * scale
       
     array_amp = np.zeros([nsamples, ntraces])
-    fwedge = np.floor(np.linspace(pad * scale, (pad + max_thickness) * scale,
+    fwedge = np.floor(np.linspace(pad * scale,
+                                  (pad + max_thickness) * scale,
                       ntraces, endpoint=False))
     wedge = np.array(fwedge, dtype=int)
 
@@ -91,7 +99,9 @@ def create_wedge(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0,
     
     return result
 
-def create_tilted(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0, wavelet='ricker', f=25, reflectivity_method='zoeppritz', dt=0.001):
+def create_tilted(ntraces, pad, max_thickness, prop0, prop1,
+                  prop2=None, theta=0, wavelet='ricker', f=25,
+                  reflectivity_method='zoeppritz', dt=0.001):
     '''
     Create a tilted model.
     
@@ -140,9 +150,12 @@ def create_tilted(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0
     
     return result
 
-def create_theta(pad, thickness, prop0, prop1, theta, wavelet='ricker', f=25, dt=0.001, reflectivity_method='zoeppritz'):
+def create_theta(pad, thickness, prop0, prop1, theta,
+                 wavelet='ricker', f=25, dt=0.001,
+                 reflectivity_method='zoeppritz'):
     '''
-    Create a 2D array where the first dimension is time and the second is angle.
+    Create a 2D array where the first dimension is time and the
+    second is angle.
 
     :param pad: pad the array top and bottom in ms
     :param thickness: the distanc between the two interfaces
@@ -168,9 +181,11 @@ def create_theta(pad, thickness, prop0, prop1, theta, wavelet='ricker', f=25, dt
     
     return result
     
-def create_theta_spike(pad, prop0, prop1, theta, f, duration, reflectivity_method):
+def create_theta_spike(pad, prop0, prop1, theta, f, duration,
+                       reflectivity_method):
     '''
-    Create a 2D array where the first dimension is time and the second is angle.
+    Create a 2D array where the first dimension is time and the
+    second is angle.
 
     :param pad: pad the array top and bottom in ms
     :param prop0: rock properties 1
