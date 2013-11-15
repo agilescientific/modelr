@@ -80,12 +80,14 @@ def add_arguments(parser):
                          
     parser.add_argument('theta',
                         type=float,
+                        action='list',
                         help='Angle of incidence',
                         default='0'
                         )
                         
     parser.add_argument('f',
                         type=float,
+                        action='list',
                         help='Frequency of wavelet',
                         default=25
                         )
@@ -107,6 +109,13 @@ def add_arguments(parser):
                         help='Wavelet type',
                         default='ricker',
                         choices=WAVELETS.keys()
+                        )
+
+    parser.add_argument('selection',
+                        type=str,
+                        help='Slice to return',
+                        default='thickness',
+                        choices='thickness, offset, frequency'
                         )
 
     return parser

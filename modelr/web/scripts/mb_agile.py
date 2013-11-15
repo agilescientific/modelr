@@ -23,7 +23,7 @@ from modelr.web.util import return_current_figure
 from modelr.web.util import wiggle
 
 
-short_description = 'Create a simple tilted model.'
+short_description = 'The Agile logo!'
 
 def add_arguments(parser):
     
