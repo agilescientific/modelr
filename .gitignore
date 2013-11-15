@@ -1,5 +1,8 @@
 *.py[co]
 
+# test stuff
+test_*.py
+
 # image files
 #*.png Needed for some models
 *.jpg
