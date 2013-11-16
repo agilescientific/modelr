@@ -25,7 +25,6 @@ def add_arguments(parser):
     
     default_parser_list = ['ntraces',
                            'pad',
-                           'colour',
                            'reflectivity_method',
                            'title',
                            'theta',
