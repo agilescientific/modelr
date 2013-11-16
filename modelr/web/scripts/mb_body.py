@@ -171,6 +171,16 @@ def run_script(args):
     if args.panels == 'both':
         fig = plt.figure(figsize = (10,3))
         ax1 = fig.add_subplot(121)
+        ax2 = fig.add_subplot(122)  
+    elif args.panels == 'earth-model':
+        fig = plt.figure()
+        ax1 = fig.add_subplot(111)
+    else:
+        fig = plt.figure()
+        ax2 = fig.add_subplot(111)
+    
+    if args.panels == ('both' or 'earth-model'):
+        # ax1 is for the earth model
         ax1.imshow( model,aspect=aspect, cmap=plt.get_cmap('gist_earth'),vmin=np.amin(model)-np.amax(model)/2,vmax= np.amax(model)+np.amax(model)/2)
         
         if args.model_wiggle == 'True':
@@ -179,17 +189,16 @@ def run_script(args):
         
         ax1.set_xlabel('trace')
         ax1.set_ylabel('time [ms]')
-        #put colorbar here
-        
-        ax2 = fig.add_subplot(122)
-        
+        ax1.set_title(args.title % locals())
+    
+    if args.panels == ('both' or 'seismic'):
+        # ax2 is for the seismic display    
         if args.display == 'wiggle':        
             wiggle(warray_amp, dt=1, skipt = args.wiggle_skips, gain = args.wiggle_skips+1 )
             ax2.set_xlabel('trace')
             ax2.set_ylabel('time [ms]')
-                   
+                    
         else:
-            ax2 = fig.add_subplot(122)
             ax2.imshow( warray_amp, aspect=aspect, cmap=args.colour)
             ax2.set_ylim(max(ax2.set_ylim()),min(ax2.set_ylim()))
         
@@ -200,42 +209,6 @@ def run_script(args):
             ax2.set_ylim(max(ax2.set_ylim()),min(ax2.set_ylim()))
             ax2.set_xlabel('trace')
             ax2.set_ylabel('time [ms]')
-        
-    if args.panels == 'earth-model':    
-        fig = plt.figure()
-        ax1 = fig.add_subplot(111)  
-        ax1.imshow( model , aspect=aspect, cmap=plt.get_cmap('gist_earth'), vmin=np.amin(model)-np.amax(model)/2,vmax= np.amax(model)+np.amax(model)/2 )
-
-        if args.model_wiggle == 'True':
-            wiggle(warray_amp[pad:-pad,:], dt=1, skipt = args.wiggle_skips, gain = args.wiggle_skips+1 )
-            ax1.set_ylim(max(ax1.set_ylim()),min(ax1.set_ylim()))
-        
-        ax1.set_xlabel('trace')
-        ax1.set_ylabel('time [ms]')
-        ax1.set_title(args.title % locals()) 
-    
-    if args.panels == 'seismic':
-        fig = plt.figure() 
-        
-        if args.display == 'wiggle':        
-            ax1 = fig.add_subplot(111)
-            wiggle(warray_amp, dt=1, skipt = args.wiggle_skips, gain = args.wiggle_skips+1)       
-        else:
-            ax1 = fig.add_subplot(111)
-            ax1.imshow( warray_amp, aspect=aspect, cmap=args.colour)
-            ax1.set_ylim(max(ax1.set_ylim()),min(ax1.set_ylim()))
-        
-        if args.display == 'both':
-            ax1 = fig.add_subplot(111)
-            wiggle(warray_amp,dt=1, skipt = args.wiggle_skips, gain = args.wiggle_skips+1 )
-            #invert y-axis
-            ax1.set_ylim(max(ax1.set_ylim()),min(ax1.set_ylim()))
-        
-        ax1.set_xlabel('trace')
-        ax1.set_ylabel('time [ms]')
-        #invert y-axis
-        #ax1.set_ylim(max(ax1.set_ylim()),min(ax1.set_ylim()))
-        ax1.set_title(args.title % locals())
     
     return return_current_figure()
 
