@@ -6,6 +6,7 @@ from modelr.web.urlargparse import rock_properties_type,\
 from modelr.rock_properties import FUNCTIONS
 from modelr.web.util import return_current_figure
 import numpy as np
+from scipy import arcsin
 
 
 short_description = (
@@ -18,20 +19,28 @@ def add_arguments(parser):
                         type=str, help='The title of the plot')
 
     parser.add_argument('Rpp0', type=rock_properties_type, 
-                        help='rock properties of upper rock',
+                        help='rock properties of upper rock: Vp, Rho, Vs, Vp std. dev., Rho std. dev., Vs std. dev.)',
                         required=True)
     
     parser.add_argument('Rpp1', type=rock_properties_type, 
-                        help='rock properties of lower rock',
+                        help='rock properties of lower rock: Vp, Rho, Vs, Vp std. dev., Rho std. dev., Vs std. dev.',
                         required=True)
                         
-    parser.add_argument( 'iterations', type=int, default=1000,
+    parser.add_argument( 'iterations', type=int, default=1000, 
                          help='number of monte carlo simulations' )
     
     parser.add_argument('reflectivity_method', type=reflectivity_func,
                         help='Algorithm for calculating reflectivity',
                         default='zoeppritz',
-                        choices=FUNCTIONS.keys())  
+                        choices=FUNCTIONS.keys())
+                        
+    parser.add_argument('plot_type', type=str,
+                        help='AVO, AB, or dashboard ',
+                        default='AVO'
+                        )
+    
+    
+    
  
     return parser
 
@@ -43,10 +52,30 @@ def run_script(args):
     Rprop1 = args.Rpp1
 
     theta = np.arange(0,90)
+    
+    if args.plot_type == 'dashboard':
+        
+        fig =plt.figure()
+        fig.subplots_adjust(bottom=0.025, left=0.025, top = 0.975, right=0.975)
 
-    fig = plt.figure()
-    ax1 = fig.add_subplot(111)
-
+        plt.subplot(1,2,1)
+        plt.xticks([]), plt.yticks([])
+        
+        plt.subplot(1,2,2)
+        plt.xticks([]), plt.yticks([])
+        
+        plt.subplot(2,3,4)
+        plt.xticks([]), plt.yticks([])
+        
+        plt.subplot(2,3,5)
+        plt.xticks([]), plt.yticks([])
+        
+        plt.subplot(2,3,6)
+        plt.xticks([]), plt.yticks([])
+        
+    else: 
+        fig = plt.figure()
+        ax1 = fig.add_subplot(111)
     data = np.zeros( theta.shape )
     
     for i in range( args.iterations - 1 ):
@@ -62,20 +91,42 @@ def run_script(args):
         reflect = args.reflectivity_method( vp0, vs0, rho0,
                                             vp1, vs1, rho1,
                                             theta )
-
-        plt.plot( theta, reflect ,color = 'red', alpha = 0.02)
-        plt.ylim((-1,1))
-        data += np.nan_to_num( reflect )
-
+        if args.plot_type == 'AVO':        
+            plt.plot( theta, reflect ,color = 'red', alpha = 0.02)
+            if vp1 > vp0:
+                theta_crit = arcsin( vp0 / vp1 )*180/np.pi
+                plt.axvline( x= theta_crit , color='black',alpha=0.02 )
+            plt.ylim((-1,1))
+            data += np.nan_to_num( reflect )        
+                   
+        else:
+            plt.scatter( reflect[0], (reflect[60]-reflect[0] ) , color = 'red' , s=20, alpha=0.05 )
+            data += np.nan_to_num( reflect )   
+          
     data /= args.iterations
-
-    plt.plot( theta, data, color='green' )
     
-    plt.title(args.title % locals())
-    plt.ylabel('reflectivity')
-    plt.ylim(-1,1)
-    plt.xlabel('offset (degrees)')
-    plt.grid()
+    if args.plot_type == 'AVO':
+        
+        plt.plot( theta, data, color='green' )
+        
+        plt.title(args.title % locals())
+        plt.ylabel('reflectivity')
+        plt.ylim(-1,1)
+        plt.xlabel('offset (degrees)')
+        plt.grid()
+        
+    else:    
+        #don't have the 
+        plt.scatter( data[0], data[60]-data[0] , color='green', s=40, alpha = 0.5 ) 
+        
+        plt.title(args.title % locals())
+        plt.ylabel('gradient [B]')
+        plt.ylim(-1,1)
+        plt.xlabel('intercept [A]')
+        plt.xlim(-1,1)
+        plt.grid()
+        
+    
     
     return return_current_figure()
     
