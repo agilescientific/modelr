@@ -8,16 +8,13 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 from argparse import ArgumentParser
+from modelr.web.defaults import default_parsers
 
 from modelr.reflectivity import get_reflectivity, do_convolve
 
 import modelr.modelbuilder as mb
 
-from modelr.web.urlargparse import rock_properties_type, reflectivity_type, wavelet_type
-from modelr.web.urlargparse import WAVELETS
-
-from modelr.rock_properties import MODELS
-
+from modelr.web.urlargparse import rock_properties_type
 from modelr.web.util import return_current_figure
 from modelr.web.util import wiggle
 
@@ -26,30 +23,25 @@ short_description = 'Create a simple wedge model.'
 
 def add_arguments(parser):
     
-    parser.add_argument('title', 
-                        default='Plot',
-                        type=str,
-                        help='The title of the plot'
-                        )
-                        
-    parser.add_argument('pad',
-                        default=50,
-                        type=int,
-                        help='The time in milliseconds above and below the wedge'
-                        )
-                        
+    default_parser_list = ['ntraces',
+                           'pad',
+                           'reflectivity_method',
+                           'title',
+                           'theta',
+                           'f',
+                           'display',
+                           'colour',
+                           'wavelet'
+                           ]
+    
+    default_parsers(parser,default_parser_list)
+                            
     parser.add_argument('thickness',
                         default=50,
                         type=int,
                         help='The maximum thickness of the wedge'
                         )
-                        
-    parser.add_argument('ntraces',
-                        default=300,
-                        type=int,
-                        help='Number of traces'
-                        )
-    
+                            
     parser.add_argument('Rock0',
                         type=rock_properties_type, 
                         help='Rock properties of upper rock [Vp,Vs, rho]',
@@ -71,34 +63,22 @@ def add_arguments(parser):
                         default='2500,1250,2650'
                         )
     
-    parser.add_argument('reflectivity_method',
-                        type=reflectivity_type,
-                        help='Algorithm for calculating reflectivity',
-                        default='zoeppritz',
-                        choices=MODELS.keys()
-                        ) 
-                         
-    parser.add_argument('theta',
-                        type=float,
-                        help='Angle of incidence',
+    parser.add_argument('wiggle_skips',
+                        type=int,
+                        help='Wiggle traces to skip',
                         default=0
                         )
                         
-    parser.add_argument('f',
-                        type=float,
-                        action='list',
-                        help='Frequency of wavelet',
-                        default=25
-                        )
-                                                
-    parser.add_argument('colour',
+    parser.add_argument('panels',
                         type=str,
-                        help='Matplotlib colourmap',
-                        default='Greys'
+                        help='The plot(s) to return',
+                        default='seismic',
+                        choices= ['earth-model','seismic','both']
                         )
-    
-    parser.add_argument('display',
+                        
+    parser.add_argument('model_wiggle',
                         type=str,
+<<<<<<< HEAD
                         help='wiggle, image, or both',
                         default='image',
                         choices= ['wiggle','variable_density','both']
@@ -133,12 +113,20 @@ def add_arguments(parser):
                         )
                         
 
+=======
+                        help='Plot wiggles on model plot',
+                        default='False',
+                        choices=['True','False']
+                        )
+                        
+>>>>>>> 9b4dd3bc2f96c0464ec1173058eb1e8afbb9637f
     return parser
-
 
 def run_script(args):
     
     matplotlib.interactive(False)
+    
+    model_wiggle = bool(args.model_wiggle)
 
     # Get the physical model (an array of rocks)    
     model = mb.channel(pad = args.pad,
@@ -158,8 +146,14 @@ def run_script(args):
                                     reflectivity_method = args.reflectivity_method
                                     )
     
+    # Get the seismic array
     warray_amp = do_convolve(args.wavelet, args.f, reflectivity)
     
+<<<<<<< HEAD
+=======
+    #################################
+    # Build the plot
+>>>>>>> 9b4dd3bc2f96c0464ec1173058eb1e8afbb9637f
     aspect = float(warray_amp.shape[1]) / warray_amp.shape[0]                                        
     
     pad = np.ceil((warray_amp.shape[0] - model.shape[0]) / 2)
@@ -169,7 +163,11 @@ def run_script(args):
         ax1 = fig.add_subplot(121)
         ax1.imshow( model,aspect=aspect, cmap=plt.get_cmap('gist_earth'),vmin=np.amin(model)-np.amax(model)/2,vmax= np.amax(model)+np.amax(model)/2)
         
+<<<<<<< HEAD
         if args.model_wiggle:
+=======
+        if model_wiggle:
+>>>>>>> 9b4dd3bc2f96c0464ec1173058eb1e8afbb9637f
             wiggle(warray_amp[pad:-pad,:], dt=1, skipt = args.wiggle_skips, gain = args.wiggle_skips+1 )
             ax1.set_ylim(max(ax1.set_ylim()),min(ax1.set_ylim()))
         
@@ -197,8 +195,12 @@ def run_script(args):
             ax2.set_xlabel('trace')
             ax2.set_ylabel('time [ms]')
         
+<<<<<<< HEAD
         
     if args.panels == 'model':    
+=======
+    if args.panels == 'earth-model':    
+>>>>>>> 9b4dd3bc2f96c0464ec1173058eb1e8afbb9637f
         fig = plt.figure()
         ax1 = fig.add_subplot(111)  
         ax1.imshow( model , aspect=aspect, cmap=plt.get_cmap('gist_earth'), vmin=np.amin(model)-np.amax(model)/2,vmax= np.amax(model)+np.amax(model)/2 )
@@ -206,7 +208,11 @@ def run_script(args):
         ax1.set_ylabel('time [ms]')
         ax1.set_title(args.title % locals()) 
     
+<<<<<<< HEAD
     if args.panels == 'data':
+=======
+    if args.panels == 'seismic':
+>>>>>>> 9b4dd3bc2f96c0464ec1173058eb1e8afbb9637f
         fig = plt.figure() 
         
         if args.display == 'wiggle':        
