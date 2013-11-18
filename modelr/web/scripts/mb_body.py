@@ -134,6 +134,7 @@ def run_script(args):
                                     reflectivity_method = args.reflectivity_method
                                     )
     
+    # This is for selecting the type of plot... not implemented yet
     if args.selection == 'frequency':
         warray_amp = do_convolve(args.wavelet, args.f, reflectivity)                        
     elif args.selection == 'offset':
@@ -203,7 +204,6 @@ def run_script(args):
             ax2.set_ylim(max(ax2.set_ylim()),min(ax2.set_ylim()))
         
         if args.display == 'both':
-            ax2 = fig.add_subplot(122)
             wiggle(warray_amp, dt=1, skipt = args.wiggle_skips, gain = args.wiggle_skips+1 )
             #invert y-axis
             ax2.set_ylim(max(ax2.set_ylim()),min(ax2.set_ylim()))
