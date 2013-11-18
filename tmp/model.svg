@@ -1,2 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
+<<<<<<< HEAD
 <svg baseProfile="tiny" height="150" version="1.2" width="300" xmlns="http://www.w3.org/2000/svg" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xlink="http://www.w3.org/1999/xlink"><defs /><rect fill="blue" height="150" width="300" x="0" y="0" /><ellipse cx="150" cy="25" fill="red" rx="90.0" ry="100" /><rect fill="white" height="50" width="300" x="0" y="0" /></svg>
+=======
+<svg baseProfile="tiny" height="90" version="1.2" width="300" xmlns="http://www.w3.org/2000/svg" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xlink="http://www.w3.org/1999/xlink"><defs /><polygon fill="blue" points="0,40 1,40 299,40 300,40 300,90 0,90" /><polygon fill="red" points="0,50 1,50 299,50 300,50 300,40 299,40 1,40 0,40" /></svg>
+>>>>>>> 63850421c4f48724e54086d907c40c777ddaa53e

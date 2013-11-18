@@ -116,8 +116,9 @@ def channel_svg(pad, thickness, traces, layers,fluid):
     
     return outfile_name
     
-def wedge_svg(pad, thickness, traces, layers,fluid):
+def wedge_svg(pad, margin, thickness, traces, layers, fluid):
     """
+    OBSOLETE, not currently used
     Makes a wedge.
     Give it pad, thickness, traces, and an iterable of layers.
     Returns an array.
@@ -135,7 +136,57 @@ def wedge_svg(pad, thickness, traces, layers,fluid):
         subwedge = svgwrite.shapes.Rect(insert=(0,pad), size=(width,height-pad)).fill('blue')
         dwg.add(subwedge)
     
-    points = [(0, pad), (traces, pad), (traces, height - pad)]
+    # Draw the wedge
+    points = [(margin, pad), (traces, pad), (traces, height - pad)]
+    wedge = svgwrite.shapes.Polygon(points).fill('red')
+    dwg.add(wedge)
+    
+    # Do this for a string
+    #svg_code = dwg.tostring()
+    
+    # Do this for a file
+    dwg.save()
+    
+    return outfile_name
+    
+def body_svg(pad, margin, left, right, traces, layers, fluid):
+    """
+    Makes a body.
+    Used for tilted slabs and wedges.
+    Give it pad, left and right thickness, traces, and an iterable of layers.
+    Returns an array.
+    """    
+    
+    outfile_name = 'tmp/model.svg'
+    
+    width = traces
+    height = 2 * pad + max(left[1],right[1])
+    
+    dwg = svgwrite.Drawing(outfile_name, size=(width,height), profile='tiny')
+    
+    # If we have 3 layers, draw the bottom layer
+    if len(layers) > 2:
+        points = [(0, pad + left[1]),
+                  (margin, pad + left[1]),
+                  (width - margin, pad + right[1]),
+                  (width, pad + right[1]),
+                  (width, height),
+                  (0,height)
+                  ]
+        subwedge = svgwrite.shapes.Polygon(points).fill('blue')
+        dwg.add(subwedge)
+    
+    # Draw the body
+    points = [(0, pad + left[0]),
+              (margin, pad + left[0]),
+              (width - margin, pad + right[0]),
+              (width, pad + right[0]),
+              (width, pad + right[1]),
+              (width - margin, pad + right[1]),
+              (margin, pad + left[1]),
+              (0, pad + left[1])
+              ]
+              
     wedge = svgwrite.shapes.Polygon(points).fill('red')
     dwg.add(wedge)
     
@@ -149,6 +200,7 @@ def wedge_svg(pad, thickness, traces, layers,fluid):
     
 def tilted_svg(pad, thickness, traces, layers, fluid):
     """
+    OBSOLETE, not currently used
     Makes a tilted block.
     Give it pad, thickness, traces, and an iterable of layers.
     Returns an array.
@@ -210,11 +262,18 @@ def tilted_svg(pad, thickness, traces, layers, fluid):
 ###########################################
 # Wrappers
 
-def wedge(pad, thickness, traces, layers, fluid=None):
+def wedge(pad, margin, thickness, traces, layers, fluid=None):
     colours = len(layers)
     if fluid:
         colours += 1
-    return png2array(svg2png(wedge_svg(pad,thickness,traces,layers,fluid),colours))
+    #We are just usin body_svg for everything
+    return png2array(svg2png(body_svg(pad, margin, (0,0), (0,thickness), traces, layers, fluid),colours))
+    
+def body(pad, margin, left, right, traces, layers, fluid=None):
+    colours = len(layers)
+    if fluid:
+        colours += 1
+    return png2array(svg2png(body_svg(pad, margin, left, right, traces, layers, fluid),colours))
     
 def channel(pad, thickness, traces, layers, fluid=None):
     colours = len(layers)
@@ -226,13 +285,13 @@ def tilted(pad, thickness, traces, layers, fluid=None):
     colours = len(layers)
     if fluid:
         colours += 1
-    return png2array(svg2png(tilted_svg(pad,thickness,traces,layers,fluid),colours))
+    return png2array(svg2png(body_svg(pad, 0, (0,thickness),(1.5*thickness,2.5*thickness), traces, layers, fluid),colours))
     
     
 ###########################################
 # Test suite
 
 if __name__ == '__main__':
-    wparray =  channel(20,50,300,['rock1','rock2', 'rock3'])
+    wparray =  body(20,50,300,['rock1','rock2', 'rock3'])
     print wparray
     print np.unique(wparray)
