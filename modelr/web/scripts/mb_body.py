@@ -148,6 +148,20 @@ def run_script(args):
     pad = np.ceil((warray_amp.shape[0] - model.shape[0]) / 2)
 
     # Set up the figure objects
+<<<<<<< HEAD
+    if args.panels == 'both':
+        fig = plt.figure(figsize = (12,4))
+    else: 
+        fig = plt.figure()
+     
+    # Set up the plot objects   
+    if args.panels == 'both':
+        ax1 = fig.add_subplot(121)
+    elif args.panels == 'earth-model':
+        ax1 = fig.add_subplot(111)
+    #else: # args.panels == 'seismic':
+    #    ax2 = fig.add_subplot(111)
+=======
     if args.panels == 'both':
         fig = plt.figure(figsize = (10,3))
     else: 
@@ -161,6 +175,7 @@ def run_script(args):
         ax1 = fig.add_subplot(111)
     else: # args.panels == 'seismic':
         ax2 = fig.add_subplot(111)
+>>>>>>> 8ea69a39f9df7df97131b04e2e0e14d2f11e8ce3
     
     # Do the earth-model plot
     if args.panels == 'earth-model' or args.panels == 'both':
@@ -169,6 +184,7 @@ def run_script(args):
         
         # Add wiggles if required
         if args.model_wiggle == 'True':
+            ax1
             wiggle(warray_amp[pad:-pad,:], dt=1, skipt = args.wiggle_skips, gain = args.wiggle_skips+1 )
             ax1.set_ylim(max(ax1.set_ylim()),min(ax1.set_ylim()))
         
@@ -177,6 +193,24 @@ def run_script(args):
         ax1.set_title(args.title % locals())
 
     # Do the seismic plot, if required
+<<<<<<< HEAD
+    if args.panels == 'both':
+        ax2 = fig.add_subplot(122)    
+    if args.panels == 'seismic':
+        ax2 = fig.add_subplot(111)
+        # Do the variable density plot, if required   
+    if args.display == 'variable-density' or args.display == 'both':        
+        ax2.imshow(warray_amp[pad:-pad,:], aspect=aspect, cmap=args.colour)
+        ax2.set_ylim(max(ax2.set_ylim()),min(ax2.set_ylim()))
+        
+    # Do the wiggle plot, if required
+    if args.display == 'wiggle' or args.display == 'both':
+        wiggle(warray_amp[pad:-pad,:], dt=1, skipt = args.wiggle_skips, gain = args.wiggle_skips+1 )
+        #invert y-axis
+        ax2.set_ylim(max(ax2.set_ylim()),min(ax2.set_ylim()))
+        ax2.set_xlabel('trace')
+        ax2.set_ylabel('time [ms]')
+=======
     if args.panels == 'seismic' or args.panels == 'both':
         # Do the variable density plot, if required   
         if args.display == 'variable-density' or args.display == 'both':        
@@ -190,6 +224,7 @@ def run_script(args):
             ax2.set_ylim(max(ax2.set_ylim()),min(ax2.set_ylim()))
             ax2.set_xlabel('trace')
             ax2.set_ylabel('time [ms]')
+>>>>>>> 8ea69a39f9df7df97131b04e2e0e14d2f11e8ce3
     
     return return_current_figure()
 

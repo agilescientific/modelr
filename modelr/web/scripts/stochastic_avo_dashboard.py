@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 from modelr.web.urlargparse import rock_properties_type,\
      reflectivity_func
 from modelr.rock_properties import FUNCTIONS
@@ -54,29 +55,10 @@ def run_script(args):
     theta = np.arange(0,90)
     
     if args.plot_type == 'dashboard':
-        
-        fig =plt.figure()
+        fig =plt.figure(figsize = (15,4))
         fig.subplots_adjust(bottom=0.025, left=0.025, top = 0.975, right=0.975)
-
-        plt.subplot(1,2,1)
-        plt.xticks([]), plt.yticks([])
-        
-        plt.subplot(1,2,2)
-        plt.xticks([]), plt.yticks([])
-        
-        plt.subplot(2,3,4)
-        plt.xticks([]), plt.yticks([])
-        
-        plt.subplot(2,3,5)
-        plt.xticks([]), plt.yticks([])
-        
-        plt.subplot(2,3,6)
-        plt.xticks([]), plt.yticks([])
-        
-    else: 
-        fig = plt.figure()
-        ax1 = fig.add_subplot(111)
-    data = np.zeros( theta.shape )
+        fig.hold(True)
+        G = gridspec.GridSpec(2,9)
     
     for i in range( args.iterations - 1 ):
 
@@ -97,14 +79,41 @@ def run_script(args):
                 theta_crit = arcsin( vp0 / vp1 )*180/np.pi
                 plt.axvline( x= theta_crit , color='black',alpha=0.02 )
             plt.ylim((-1,1))
-            data += np.nan_to_num( reflect )        
+            #data += np.nan_to_num( reflect )        
                    
-        else:
+        if args.plot_type == 'AB':
             plt.scatter( reflect[0], (reflect[60]-reflect[0] ) , color = 'red' , s=20, alpha=0.05 )
-            data += np.nan_to_num( reflect )   
-          
-    data /= args.iterations
+            #data += np.nan_to_num( reflect )   
+            
+        #do dashboard plot:
+        if args.plot_type == 'dashboard':
+                    
+            #ax_1
+            ax_1 = plt.subplot(G[:,0:3])
+            plt.hold(True)        
+            plt.plot( theta, reflect ,color = 'red', alpha = 0.1)
+            #plt.grid()
     
+            if vp1 > vp0:
+                theta_crit = arcsin( vp0 / vp1 )*180/np.pi
+                plt.axvline( x= theta_crit , color='black',alpha=.5 )
+            plt.ylim((-1,1))
+            #data += np.nan_to_num( reflect )
+                            
+            plt.xticks([]), plt.yticks([])
+            #plt.text(0.14,0.5, 'AVO plot',ha='center',va='center',size=10,alpha=.5)
+                    
+            #ax_2
+            ax_2 = plt.subplot(G[:,3:6])
+            plt.hold(True)
+            plt.scatter( reflect[0], (reflect[60]-reflect[0] ) , color = 'red' , s=20, alpha=0.02 )
+            #data += np.nan_to_num( reflect )   
+            plt.xticks([]), plt.yticks([])
+            #plt.grid()
+            #plt.text(0.50,0.5, 'Int-Gradient plot',ha='center',va='center',size=10,alpha=.5)
+                        
+    #data /= args.iterations
+    '''
     if args.plot_type == 'AVO':
         
         plt.plot( theta, data, color='green' )
@@ -114,20 +123,56 @@ def run_script(args):
         plt.ylim(-1,1)
         plt.xlabel('offset (degrees)')
         plt.grid()
-        
-    else:    
-        #don't have the 
+    
+    if args.plot_type == 'AB':
         plt.scatter( data[0], data[60]-data[0] , color='green', s=40, alpha = 0.5 ) 
-        
         plt.title(args.title % locals())
         plt.ylabel('gradient [B]')
         plt.ylim(-1,1)
         plt.xlabel('intercept [A]')
         plt.xlim(-1,1)
-        plt.grid()
+        plt.grid()       
+    '''
+    if args.plot_type == 'dashboard':
+        #ax_3
+        ax_3 = plt.subplot(G[0,6])
+        plt.hist(np.random.normal(Rprop0.vp, Rprop0.vp_sig, args.iterations), 50)
+        plt.xticks([]), plt.yticks([])
+        #plt.text(0.70,0.66, 'vp0',ha='center',va='center',size=10,alpha=.5)
+            
+        #ax_4
+        ax_4 = plt.subplot(G[0,7])
+        plt.hist(np.random.normal(Rprop0.vs, Rprop0.vs_sig, args.iterations), 50)
+        plt.xticks([]), plt.yticks([])
+        #plt.text(0.85,0.66, 'vs0',ha='center',va='center',size=10,alpha=.5)
         
-    
-    
+        #ax_5
+        ax_5 = plt.subplot(G[0,8])
+        plt.hist(np.random.normal(Rprop0.rho, Rprop0.rho_sig, args.iterations), 50)
+        plt.xticks([]), plt.yticks([])
+        #plt.text(0.92,0.66, 'rho0',ha='center',va='center',size=10,alpha=.5)
+        
+        #ax_6
+        ax_6 = plt.subplot(G[1,6])
+        plt.hist(np.random.normal(Rprop1.vp, Rprop1.vp_sig, args.iterations), 50)
+        plt.xticks([]), plt.yticks([])
+        #plt.text(0.70,0.33, 'vp0',ha='center',va='center',size=10,alpha=.5)
+        
+        #ax_7
+        ax_7 = plt.subplot(G[1,7])
+        plt.hist(np.random.normal(Rprop1.vs, Rprop1.vs_sig, args.iterations),50)
+        plt.xticks([]), plt.yticks([])
+        #plt.text(0.85,0.33, 'vs0',ha='center',va='center',size=10,alpha=.5)
+        
+        #ax_8
+        ax_8 = plt.subplot(G[1,8])
+        plt.hist(np.random.normal(Rprop1.rho, Rprop1.rho_sig, args.iterations),50)
+        plt.xticks([]), plt.yticks([])
+        plt.text(0.92,0.33, 'rho0',ha='center',va='center',size=10,alpha=.5)
+        plt.axis('tight')
+        #savefig('../figures/multiplot_ex.png',dpi=48)
+        plt.show()
+
     return return_current_figure()
     
     

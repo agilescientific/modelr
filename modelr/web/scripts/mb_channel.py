@@ -78,11 +78,48 @@ def add_arguments(parser):
                         
     parser.add_argument('model_wiggle',
                         type=str,
+<<<<<<< HEAD
+                        help='wiggle, image, or both',
+                        default='image',
+                        choices= ['wiggle','variable_density','both']
+                        )
+                    
+    parser.add_argument('wiggle_skips',
+                        type=int,
+                        help='traces to skip',
+                        default=0
+                        )
+                        
+    parser.add_argument('panels',
+                        type=str,
+                        help='model, data, or both',
+                        default='data',
+                        choices= ['earth_model','seismic','both']
+                        )
+                        
+
+    parser.add_argument('wavelet',
+                        type=wavelet_type,
+                        help='Wavelet type',
+                        default='ricker',
+                        choices=WAVELETS.keys()
+                        )
+                        
+    parser.add_argument('model_wiggle',
+                        type=bool,
+                        help='plot wiggles on model (True or False)',
+                        default=False,
+                        choices=['True','False']
+                        )
+                        
+
+=======
                         help='Plot wiggles on model plot',
                         default='False',
                         choices=['True','False']
                         )
                         
+>>>>>>> 9b4dd3bc2f96c0464ec1173058eb1e8afbb9637f
     return parser
 
 def run_script(args):
@@ -112,8 +149,11 @@ def run_script(args):
     # Get the seismic array
     warray_amp = do_convolve(args.wavelet, args.f, reflectivity)
     
+<<<<<<< HEAD
+=======
     #################################
     # Build the plot
+>>>>>>> 9b4dd3bc2f96c0464ec1173058eb1e8afbb9637f
     aspect = float(warray_amp.shape[1]) / warray_amp.shape[0]                                        
     
     pad = np.ceil((warray_amp.shape[0] - model.shape[0]) / 2)
@@ -123,7 +163,11 @@ def run_script(args):
         ax1 = fig.add_subplot(121)
         ax1.imshow( model,aspect=aspect, cmap=plt.get_cmap('gist_earth'),vmin=np.amin(model)-np.amax(model)/2,vmax= np.amax(model)+np.amax(model)/2)
         
+<<<<<<< HEAD
+        if args.model_wiggle:
+=======
         if model_wiggle:
+>>>>>>> 9b4dd3bc2f96c0464ec1173058eb1e8afbb9637f
             wiggle(warray_amp[pad:-pad,:], dt=1, skipt = args.wiggle_skips, gain = args.wiggle_skips+1 )
             ax1.set_ylim(max(ax1.set_ylim()),min(ax1.set_ylim()))
         
@@ -151,7 +195,12 @@ def run_script(args):
             ax2.set_xlabel('trace')
             ax2.set_ylabel('time [ms]')
         
+<<<<<<< HEAD
+        
+    if args.panels == 'model':    
+=======
     if args.panels == 'earth-model':    
+>>>>>>> 9b4dd3bc2f96c0464ec1173058eb1e8afbb9637f
         fig = plt.figure()
         ax1 = fig.add_subplot(111)  
         ax1.imshow( model , aspect=aspect, cmap=plt.get_cmap('gist_earth'), vmin=np.amin(model)-np.amax(model)/2,vmax= np.amax(model)+np.amax(model)/2 )
@@ -159,7 +208,11 @@ def run_script(args):
         ax1.set_ylabel('time [ms]')
         ax1.set_title(args.title % locals()) 
     
+<<<<<<< HEAD
+    if args.panels == 'data':
+=======
     if args.panels == 'seismic':
+>>>>>>> 9b4dd3bc2f96c0464ec1173058eb1e8afbb9637f
         fig = plt.figure() 
         
         if args.display == 'wiggle':        
