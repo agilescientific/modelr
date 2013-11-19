@@ -9,17 +9,15 @@ import matplotlib.pyplot as plt
 
 from argparse import ArgumentParser
 from modelr.web.defaults import default_parsers
-
-from modelr.reflectivity import get_reflectivity, do_convolve
-
-import modelr.modelbuilder as mb
-
 from modelr.web.urlargparse import rock_properties_type
+
 from modelr.web.util import return_current_figure
 from modelr.web.util import wiggle
 
+from modelr.reflectivity import get_reflectivity, do_convolve
+import modelr.modelbuilder as mb
 
-short_description = 'Create a simple wedge model.'
+short_description = 'Create a simple wedge or slab model.'
 
 def add_arguments(parser):
     
@@ -153,22 +151,20 @@ def run_script(args):
     else: 
         fig = plt.figure()
      
-    # Set up the plot objects   
-    if args.panels == 'both':
-        ax1 = fig.add_subplot(121)
-    elif args.panels == 'earth-model':
-        ax1 = fig.add_subplot(111)
-        
-        
-    
-    # Do the earth-model plot
+    # Do the earth-model plot, if required
     if args.panels == 'earth-model' or args.panels == 'both':
+        
+        # Set up the plot objects   
+        if args.panels == 'both':
+            ax1 = fig.add_subplot(121)
+        elif args.panels == 'earth-model':
+            ax1 = fig.add_subplot(111)
+
         # ax1 is for the earth model
         ax1.imshow( model,aspect=aspect, cmap=plt.get_cmap('gist_earth'), vmin=np.amin(model)-np.amax(model)/2, vmax= np.amax(model)+np.amax(model)/2)
         
         # Add wiggles if required
         if args.model_wiggle == 'True':
-            ax1
             wiggle(warray_amp[pad:-pad,:], dt=1, skipt = args.wiggle_skips, gain = args.wiggle_skips+1 )
             ax1.set_ylim(max(ax1.set_ylim()),min(ax1.set_ylim()))
         
@@ -178,6 +174,8 @@ def run_script(args):
 
     # Do the seismic plot, if required
     if args.panels == 'seismic' or args.panels == 'both':
+        
+        # Set up the plot object
         if args.panels == 'both':
             ax2 = fig.add_subplot(122)    
         if args.panels == 'seismic':
