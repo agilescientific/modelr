@@ -90,7 +90,7 @@ def add_arguments(parser):
     parser.add_argument('base1',
                         type=str,
                         help='Plot 1, base layer',
-                        choices=['wiggle', 'variable-density', 'model', 'reflectivity'],
+                        choices=['wiggle', 'variable-density', 'earth-model', 'reflectivity'],
                         default='variable-density'
                         )
     
@@ -110,9 +110,15 @@ def add_arguments(parser):
     
     parser.add_argument('overlay2',
                         type=str,
-                        help='Plot 2, overlay ',
+                        help='Plot 2, overlay',
                         choices=['none', 'wiggle', 'variable-density', 'earth-model', 'reflectivity'],
                         default='none'
+                        )
+    
+    parser.add_argument('opacity',
+                        type=float,
+                        help='Opacity of overlays',
+                        default=0.5
                         )
     
     return parser
@@ -157,94 +163,122 @@ def run_script(args):
     # Build the plot(s)
        
     # Simplify the plot request a bit
-    if args.overlay1 == 'none': overlay1 = None
-    if args.base2 == 'none': base2 = None
-    if args.overlay2 == 'none': overlay2 = None
+    base1 = args.base1
+    
+    if args.overlay1 == 'none':
+        overlay1 = None
+    else:
+        overlay1 = args.overlay1
+    
+    if args.base2 == 'none':
+        base2 = None
+    else:
+        base2 = args.base2
+    
+    if args.overlay2 == 'none':
+        overlay2 = None
+    else:
+        overlay2 = args.overlay2
+    
     plots = [(base1, overlay1), (base2, overlay2)]
 
+    # Calculate some basic stuff
     aspect = float(warray_amp.shape[1]) / warray_amp.shape[0]                                        
     pad = np.ceil((warray_amp.shape[0] - model.shape[0]) / 2)
 
-    # Set up the figure
+    # We're going to make a PNG for each plot
+    # First, set up the matplotlib figure
+    # This will go inside the 'for' when we are doing the full loop
+    # It's here so that return_current_figure() knows what to return
     fig = plt.figure()
-     
+            
     # Start a loop for the figures...
     for plot in plots:
-                
-        # If there is an overlay we want a different kind of figure (maybe?) 
-        if plot[1]:
-            ax1 = fig.add_subplot(121)
-        else:
-            ax1 = fig.add_subplot(111)
-            
-        # If there's no base plot, there are no more plots and we're done
+        
+        # If there's no base plot for this plot,
+        # then there are no more plots and we're done
         if not plot[0]:
             break
+                
+        # Set up the plot
+        ax = fig.add_subplot(111)
             
-        # Display the two plots by looping over the tuple
-        for subplot in plot:
+        # Each plot can have two layers (maybe more later?)
+        # Display the two layers by looping over the non-blank elements
+        # of the tuple
+        for layer in filter(None, plot):
             
             # for starters, find out if this is a base or an overlay
-            if plot.index(subplot) == 1:
+            if plot.index(layer) == 1:
                 # then we're in an overlay so...
-                ax1 = fig.add_subplot(122)
                 alpha = args.opacity
-                
-            if plot[0] == 'earth-model':
-                ax1.imshow(model,
-                        aspect=aspect,
-                        cmap=plt.get_cmap('gist_earth'),
-                        vmin=np.amin(model)-np.amax(model)/2,
-                        vmax= np.amax(model)+np.amax(model)/2,
-                        alpha = alpha
-                        )
+            else:
+                alpha = 1.0
             
-            if plot[0] == 'variable-density':
-                ax1.imshow(warray_amp[pad:-pad,:],
-                        aspect=aspect,
-                        cmap=args.colour,
-                        alpha = alpha
-                        )
+            # Now find out what sort of plot we're making on this loop...        
+            if layer == 'earth-model':
+                ax.imshow(model,
+                           aspect = aspect,
+                           cmap = plt.get_cmap('gist_earth'),
+                           vmin = np.amin(model)-np.amax(model)/2,
+                           vmax = np.amax(model)+np.amax(model)/2,
+                           alpha = alpha
+                           )
+            
+            elif layer == 'variable-density':
+                ax.imshow(warray_amp[pad:-pad,:],
+                           aspect = aspect,
+                           cmap = args.colour,
+                           alpha = alpha
+                           )
     
-            if plot[0] == 'reflectivity':
+            elif layer == 'reflectivity':
                 # Show unconvolved reflectivities
-                ax1.imshow(reflectivity[pad:-pad,:],
-                        aspect=aspect,
-                        cmap=args.colour,
-                        alpha = alpha
-                        )
+                ax.imshow(reflectivity,
+                           aspect = aspect,
+                           cmap = plt.get_cmap('Greys'),
+                           alpha = alpha
+                           )
 
-            if plot[1] == 'wiggle':
+            elif layer == 'wiggle':
             # wiggle needs an alpha setting too
                 wiggle(warray_amp[pad:-pad,:],
-                       dt=1,
+                       dt = 1,
                        skipt = args.wiggle_skips,
-                       gain = args.wiggle_skips+1
+                       gain = args.wiggle_skips + 1,
+                       line_colour = 'black',
+                       fill_colour = 'black',
+                       opacity = 0.5
                        )
-                ax1.set_ylim(max(ax1.set_ylim()),min(ax1.set_ylim()))
+                ax.set_ylim(max(ax.set_ylim()),min(ax.set_ylim()))
+                
+            else:
+                # We should never get here
+                continue
         
-        ax1.set_xlabel('trace')
-        ax1.set_ylabel('time [ms]')
-        ax1.set_title(args.title % locals())
+        ax.set_xlabel('trace')
+        ax.set_ylabel('time [ms]')
+        ax.set_title(args.title % locals())
 
-    # Inside for loop
-        # Save the figure as a PNG
-        fig_path = tempfile.mktemp('.png')
-        plt.savefig(fig_path) 
+# For now let's just try to get one base + overlay working
+    return return_current_figure()
 
-    # Outside for loop
-    program = 'montage'
-    command = [program, '-mode', 'concatenate', '-tile', '1x', infiles, outfile]
-    subprocess.call(command)
-
-    # Save the figure as a PNG
-    with open(fig_path, 'rb') as fd:
-    data = fd.read()
-
-
-        
-    return # binary blob from png readfile
-
+# Eventually we want to getto this stitching together
+#    # Inside for loop
+#        # Save the figure as a PNG
+#        fig_path = tempfile.mktemp('.png')
+#        plt.savefig(fig_path) 
+#
+#    # Outside for loop
+#    program = 'montage'
+#    command = [program, '-mode', 'concatenate', '-tile', '1x', infiles, outfile]
+#    subprocess.call(command)
+#
+#    # Save the figure as a PNG
+#    with open(fig_path, 'rb') as fd:
+#    data = fd.read()
+#
+#    return # binary blob from png readfile (see current method in util.py)
     
 def main():
     parser = ArgumentParser(usage=short_description,

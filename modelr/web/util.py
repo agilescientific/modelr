@@ -24,7 +24,7 @@ def return_current_figure():
     
     return data
 
-def wiggle(data,dt,skipt=0,gain=1,lwidth=.5):
+def wiggle(data, dt, line_colour='black', fill_colour='blue', opacity=0.5, skipt=0, gain=1, lwidth=.5):
     """
     Make a wiggle trace.
     
@@ -48,9 +48,9 @@ def wiggle(data,dt,skipt=0,gain=1,lwidth=.5):
         trace[0]=0
         trace[-1]=0  
         new_trace = gain*(trace/np.amax(data))  
-        plt.plot(i+new_trace, t,color='black',linewidth=lwidth, alpha=0.5)
+        plt.plot(i+new_trace, t, color=line_colour, linewidth=lwidth, alpha=opacity)
         #fill_index = np.greater(new_trace,np.zeros(trace.shape))
-        plt.fill_betweenx(t,i+new_trace, i ,  new_trace > 0, color='blue', alpha=.5, lw=0)
+        plt.fill_betweenx(t,i+new_trace, i ,  new_trace > 0, color=fill_colour, alpha=opacity, lw=0)
         
         #plt.fill(i+(gain*fill_trace/np.amax(data)),t,'k',linewidth=0)
                 
