@@ -64,8 +64,8 @@ def svg2png(infile=None, colours=2):
     #cairosvg.svg2png(bytestring=svg_code,write_to=fout)
     
     # Use ImageMagick to do the conversion
-    convert = 'convert'
-    command = [convert, '-colors', str(colours), infile, outfile]
+    program = 'convert'
+    command = [program, '-colors', str(colours), infile, outfile]
     
     subprocess.call(command)
         

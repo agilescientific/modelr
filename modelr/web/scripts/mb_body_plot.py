@@ -27,7 +27,6 @@ def add_arguments(parser):
                            'title',
                            'theta',
                            'f',
-                           'display',
                            'colour',
                            'wavelet'
                            ]
@@ -87,21 +86,35 @@ def add_arguments(parser):
                         help='Wiggle traces to skip',
                         default=0
                         )
-                        
-    parser.add_argument('panels',
+                                                
+    parser.add_argument('base1',
                         type=str,
-                        help='The plot(s) to return',
-                        default='seismic',
-                        choices= ['earth-model','seismic','both']
+                        help='Plot 1, base layer',
+                        choices=['wiggle', 'variable-density', 'model', 'reflectivity'],
+                        default='variable-density'
                         )
-                        
-    parser.add_argument('model_wiggle',
+    
+    parser.add_argument('overlay1',
                         type=str,
-                        help='Plot wiggles on model plot',
-                        default='False',
-                        choices=['False','True']
+                        help='Plot 1, overlay',
+                        choices=['none', 'wiggle', 'variable-density', 'earth-model', 'reflectivity'],
+                        default='none'
                         )
-                            
+    
+    parser.add_argument('base2',
+                        type=str,
+                        help='Plot 2, base layer',
+                        choices=['none', 'wiggle', 'variable-density', 'earth-model', 'reflectivity'],
+                        default='none'
+                        )
+    
+    parser.add_argument('overlay2',
+                        type=str,
+                        help='Plot 2, overlay ',
+                        choices=['none', 'wiggle', 'variable-density', 'earth-model', 'reflectivity'],
+                        default='none'
+                        )
+    
     return parser
 
 
@@ -142,72 +155,95 @@ def run_script(args):
     
     #################################
     # Build the plot(s)
+       
+    # Simplify the plot request a bit
+    if args.overlay1 == 'none': overlay1 = None
+    if args.base2 == 'none': base2 = None
+    if args.overlay2 == 'none': overlay2 = None
+    plots = [(base1, overlay1), (base2, overlay2)]
+
     aspect = float(warray_amp.shape[1]) / warray_amp.shape[0]                                        
     pad = np.ceil((warray_amp.shape[0] - model.shape[0]) / 2)
 
-    # Set up the figure objects
-    if args.panels == 'both':
-        fig = plt.figure(figsize = (12,4))
-    else: 
-        fig = plt.figure()
+    # Set up the figure
+    fig = plt.figure()
      
-    # Do the earth-model plot, if required
-    if args.panels == 'earth-model' or args.panels == 'both':
-        
-        # Set up the plot objects   
-        if args.panels == 'both':
+    # Start a loop for the figures...
+    for plot in plots:
+                
+        # If there is an overlay we want a different kind of figure (maybe?) 
+        if plot[1]:
             ax1 = fig.add_subplot(121)
-        elif args.panels == 'earth-model':
+        else:
             ax1 = fig.add_subplot(111)
+            
+        # If there's no base plot, there are no more plots and we're done
+        if not plot[0]:
+            break
+            
+        # Display the two plots by looping over the tuple
+        for subplot in plot:
+            
+            # for starters, find out if this is a base or an overlay
+            if plot.index(subplot) == 1:
+                # then we're in an overlay so...
+                ax1 = fig.add_subplot(122)
+                alpha = args.opacity
+                
+            if plot[0] == 'earth-model':
+                ax1.imshow(model,
+                        aspect=aspect,
+                        cmap=plt.get_cmap('gist_earth'),
+                        vmin=np.amin(model)-np.amax(model)/2,
+                        vmax= np.amax(model)+np.amax(model)/2,
+                        alpha = alpha
+                        )
+            
+            if plot[0] == 'variable-density':
+                ax1.imshow(warray_amp[pad:-pad,:],
+                        aspect=aspect,
+                        cmap=args.colour,
+                        alpha = alpha
+                        )
+    
+            if plot[0] == 'reflectivity':
+                # Show unconvolved reflectivities
+                ax1.imshow(reflectivity[pad:-pad,:],
+                        aspect=aspect,
+                        cmap=args.colour,
+                        alpha = alpha
+                        )
 
-        # ax1 is for the earth model
-        ax1.imshow(model,
-                   aspect=aspect,
-                   cmap=plt.get_cmap('gist_earth'),
-                   vmin=np.amin(model)-np.amax(model)/2,
-                   vmax= np.amax(model)+np.amax(model)/2
-                   )
-        
-        # Add wiggles if required
-        if args.model_wiggle == 'True':
-            wiggle(warray_amp[pad:-pad,:],
-                   dt=1,
-                   skipt = args.wiggle_skips,
-                   gain = args.wiggle_skips+1
-                   )
-            ax1.set_ylim(max(ax1.set_ylim()),min(ax1.set_ylim()))
+            if plot[1] == 'wiggle':
+            # wiggle needs an alpha setting too
+                wiggle(warray_amp[pad:-pad,:],
+                       dt=1,
+                       skipt = args.wiggle_skips,
+                       gain = args.wiggle_skips+1
+                       )
+                ax1.set_ylim(max(ax1.set_ylim()),min(ax1.set_ylim()))
         
         ax1.set_xlabel('trace')
         ax1.set_ylabel('time [ms]')
         ax1.set_title(args.title % locals())
 
-    # Do the seismic plot, if required
-    if args.panels == 'seismic' or args.panels == 'both':
+    # Inside for loop
+        # Save the figure as a PNG
+        fig_path = tempfile.mktemp('.png')
+        plt.savefig(fig_path) 
+
+    # Outside for loop
+    program = 'montage'
+    command = [program, '-mode', 'concatenate', '-tile', '1x', infiles, outfile]
+    subprocess.call(command)
+
+    # Save the figure as a PNG
+    with open(fig_path, 'rb') as fd:
+    data = fd.read()
+
+
         
-        # Set up the plot object
-        if args.panels == 'both':
-            ax2 = fig.add_subplot(122)    
-        if args.panels == 'seismic':
-            ax2 = fig.add_subplot(111)
-            
-            # Do the variable density plot, if required   
-        if args.display == 'variable-density' or args.display == 'both':        
-            ax2.imshow(warray_amp[pad:-pad,:], aspect=aspect, cmap=args.colour)
-            ax2.set_ylim(max(ax2.set_ylim()),min(ax2.set_ylim()))
-            
-        # Do the wiggle plot, if required
-        if args.display == 'wiggle' or args.display == 'both':
-            wiggle(warray_amp[pad:-pad,:],
-                   dt=1,
-                   skipt = args.wiggle_skips,
-                   gain = args.wiggle_skips+1
-                   )
-            #invert y-axis
-            ax2.set_ylim(max(ax2.set_ylim()),min(ax2.set_ylim()))
-            ax2.set_xlabel('trace')
-            ax2.set_ylabel('time [ms]')
-        
-    return return_current_figure()
+    return # binary blob from png readfile
 
     
 def main():
