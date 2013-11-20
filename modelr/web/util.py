@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from agilegeo.wavelet import ricker
 import numpy as np
 
-def return_current_figure():
+def get_figure_data():
     '''
     Return the current plot as a binary blob. 
     '''
@@ -21,6 +21,11 @@ def return_current_figure():
         data = fd.read()
         
     unlink(fig_path)
+        
+    # Alternative approach to do it in memory rather than on disk
+    #image_file = tempfile.SpooledTemporaryFile(suffix='.png')
+    #plt.savefig(image_file, format='png') 
+    #data = image_file.read()
     
     return data
 

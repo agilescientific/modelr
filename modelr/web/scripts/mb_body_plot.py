@@ -6,13 +6,13 @@ Created on Apr 30, 2012
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-import tempfile, subprocess
 
 from argparse import ArgumentParser
 from modelr.web.defaults import default_parsers
 from modelr.web.urlargparse import rock_properties_type
 
 from modelr.web.util import wiggle
+from modelr.web.util import return_current_figure
 
 from modelr.reflectivity import get_reflectivity, do_convolve
 import modelr.modelbuilder as mb
@@ -183,28 +183,28 @@ def run_script(args):
         overlay2 = args.overlay2
     
     plots = [(base1, overlay1), (base2, overlay2)]
-    file_list = []
 
     # Calculate some basic stuff
     aspect = float(warray_amp.shape[1]) / warray_amp.shape[0]                                        
     pad = np.ceil((warray_amp.shape[0] - model.shape[0]) / 2)
 
-    # We're going to make a PNG for each plot
-            
+    # First, set up the matplotlib figure
+    fig = plt.figure()
+        
     # Start a loop for the figures...
     
     for plot in plots:
-        
-        # First, set up the matplotlib figure
-        fig = plt.figure()
         
         # If there's no base plot for this plot,
         # then there are no more plots and we're done
         if not plot[0]:
             break
+            
+        l = len(plots)
+        p = plots.index(plot)
                 
         # Set up the plot
-        ax = fig.add_subplot(111)
+        ax = fig.add_subplot(1,l,p+1)
             
         # Each plot can have two layers (maybe more later?)
         # Display the two layers by looping over the non-blank elements
@@ -263,28 +263,7 @@ def run_script(args):
         ax.set_ylabel('time [ms]')
         ax.set_title(args.title % locals())
 
-        # Save the figure as a temporary PNG file
-        f = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
-        file_list.append(f.name)
-        plt.savefig(f, format='png')
-
-    # Combine the plots with montage
-    # Create the outfile object
-    outfile = tempfile.NamedTemporaryFile(suffix='.png')
-    
-    # Build the ImageMagick convert command
-    command = ['convert', '-append']
-    for file_name in file_list:
-        command.append(file_name)
-    command.append(outfile.name)
-    
-    # Run ImageMagick montage
-    subprocess.call(command)
-
-    # Grab the binary blob
-    data = outfile.read()
-    
-    return data
+    return return_current_figure()
 
 # For now let's just try to get one base + overlay working
 #    return return_current_figure()

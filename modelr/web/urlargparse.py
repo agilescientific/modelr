@@ -56,7 +56,7 @@ def reflectivity_type(str_input):
         parser.add_argument('reflectivity_model', type=reflectivity_type, help='... ', default='zoeppritz', choices=MODELS.keys())
      
     '''
-    from modelr.rock_properties import MODELS
+    from modelr.reflectivity import MODELS
     return MODELS[str_input]
 
 """

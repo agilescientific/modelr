@@ -5,8 +5,6 @@ modelr.rock_properties -- TODO short docstring here
 
 TODO: long doc here 
 '''
-
-from agilegeo import avo as reflection
     
 class RockProperties(object):
     '''
@@ -46,13 +44,3 @@ class RockProperties(object):
           (self.vp, self.rho, self.vs)
         
 
-MODELS = {
-             'zoeppritz': reflection.zoeppritz,
-             'akirichards': reflection.akirichards,
-             'akirichards_alt': reflection.akirichards_alt,
-             'fatti': reflection.fatti,
-             'shuey2': reflection.shuey2,
-             'shuey3': reflection.shuey3,
-#             'bortfeld2': reflection.bortfeld2, # WHERE ARE THESE?
-#             'bortfeld3': reflection.bortfeld3,
-             }
