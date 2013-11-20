@@ -10,7 +10,8 @@ import matplotlib.pyplot as plt
 from argparse import ArgumentParser
 
 from modelr.reflectivity import create_wedge
-from modelr.web.urlargparse import rock_properties_type, reflectivity_type, wavelet_type
+from modelr.web.urlargparse import rock_properties_type, \
+     reflectivity_type, wavelet_type
 from modelr.web.urlargparse import WAVELETS
 
 from modelr.rock_properties import MODELS
@@ -130,7 +131,8 @@ def run_script(args):
                               theta = args.theta,
                               wavelet=args.wavelet,
                               f = args.f,
-                              reflectivity_method = args.reflectivity_method
+                              reflectivity_method =
+                                args.reflectivity_method
                               )
         
     fig = plt.figure()
