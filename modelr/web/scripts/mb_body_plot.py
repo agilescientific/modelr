@@ -12,7 +12,7 @@ from modelr.web.defaults import default_parsers
 from modelr.web.urlargparse import rock_properties_type
 
 from modelr.web.util import wiggle
-from modelr.web.util import return_current_figure
+from modelr.web.util import get_figure_data
 
 from modelr.reflectivity import get_reflectivity, do_convolve
 import modelr.modelbuilder as mb
@@ -192,7 +192,6 @@ def run_script(args):
     fig = plt.figure()
         
     # Start a loop for the figures...
-    
     for plot in plots:
         
         # If there's no base plot for this plot,
@@ -200,10 +199,11 @@ def run_script(args):
         if not plot[0]:
             break
             
+        # Establish what sort of subplot grid we need
         l = len(plots)
         p = plots.index(plot)
                 
-        # Set up the plot
+        # Set up the plot 'canvas'
         ax = fig.add_subplot(1,l,p+1)
             
         # Each plot can have two layers (maybe more later?)
@@ -263,7 +263,7 @@ def run_script(args):
         ax.set_ylabel('time [ms]')
         ax.set_title(args.title % locals())
 
-    return return_current_figure()
+    return get_figure_data()
 
 # For now let's just try to get one base + overlay working
 #    return return_current_figure()
