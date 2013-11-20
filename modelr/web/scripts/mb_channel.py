@@ -78,7 +78,6 @@ def add_arguments(parser):
                         
     parser.add_argument('model_wiggle',
                         type=str,
-<<<<<<< HEAD
                         help='wiggle, image, or both',
                         default='image',
                         choices= ['wiggle','variable_density','both']
@@ -112,14 +111,6 @@ def add_arguments(parser):
                         choices=['True','False']
                         )
                         
-
-=======
-                        help='Plot wiggles on model plot',
-                        default='False',
-                        choices=['True','False']
-                        )
-                        
->>>>>>> 9b4dd3bc2f96c0464ec1173058eb1e8afbb9637f
     return parser
 
 def run_script(args):

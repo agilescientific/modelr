@@ -59,9 +59,11 @@ def reflectivity_type(str_input):
     from modelr.rock_properties import MODELS
     return MODELS[str_input]
 
+"""
 def reflectivity_func(str_input):
     from modelr.rock_properties import FUNCTIONS
     return FUNCTIONS[str_input]
+"""
     
 class Argument(object):
     '''
@@ -152,11 +154,13 @@ class URLArgumentParser(object):
 #        self.arguments = {'help': Argument('help')}
         self.arguments = {}
         
-    def add_argument(self, name, required=False, default=None, type=str, action='store', help='', choices=None):
+    def add_argument(self, name, required=False, default=None,
+                     type=str, action='store', help='', choices=None):
         '''
         add an argument
         '''
-        arg = Argument(name, required, default, type, action, help, choices)
+        arg = Argument(name, required, default, type, action,
+                       help, choices)
         self.arguments[name] = arg
         
     def parse_params(self, params):
@@ -196,14 +200,17 @@ class URLArgumentParser(object):
     @property
     def json_data(self):
         obj = {'description': self.description,
-               'arguments': {k:v.json_dict for (k, v) in self.arguments.items()}}
+               'arguments': {k:v.json_dict for (k, v)
+                             in self.arguments.items()}}
         return json.dumps(obj)
     
     @property
     def help_html(self):
         
-        arguments = '\n'.join(arg.html_help for arg in self.arguments.values())
-        return '<p>%s</p><ul>\n%s</ul>' % (self.description, arguments)
+        arguments = '\n'.join(arg.html_help for arg in
+                              self.arguments.values())
+        return '<p>%s</p><ul>\n%s</ul>' % (self.description,
+                                           arguments)
         
     def raise_help(self):
         raise SendHelp(self.help_html)

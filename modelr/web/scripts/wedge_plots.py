@@ -44,7 +44,8 @@ def run_script(args):
     Rprop0 = RockProperties(args.vp0, args.vs0, args.rho0) 
     Rprop1 = RockProperties(args.vp1, args.vs1, args.rho1)
     
-    warray_amp = create_wedge(args.ntraces, args.pad, args.max_thickness,
+    warray_amp = create_wedge(args.ntraces, args.pad,
+                              args.max_thickness,
                               Rprop0, Rprop1, args.theta, args.f)
     
     # Read off the amplitudes of the peak and trough
@@ -106,8 +107,11 @@ def run_script(args):
     
     
 def main():
-    parser = ArgumentParser(usage=short_description, description=__doc__)
-    parser.add_argument('time', default=150, type=int, help='The size in mili seconds of the plot')
+    parser = ArgumentParser(usage=short_description,
+                            description=__doc__)
+    parser.add_argument('time', default=150,
+                        type=int,
+                        help='The size in mili seconds of the plot')
     args = parser.parse_args()
     run_script(args)
     

@@ -14,7 +14,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 import tempfile
 from os import unlink
-from modelr.web.urlargparse import reflectivity_type
+from modelr.web.urlargparse import reflectivity_type, wavelet_type, \
+     WAVELETS
 from modelr.web.util import return_current_figure
 from modelr.rock_properties import MODELS
 import numpy as np

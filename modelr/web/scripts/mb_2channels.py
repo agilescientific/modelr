@@ -13,7 +13,8 @@ from modelr.reflectivity import get_reflectivity, do_convolve
 
 import modelr.modelbuilder as mb
 
-from modelr.web.urlargparse import rock_properties_type, reflectivity_type, wavelet_type
+from modelr.web.urlargparse import rock_properties_type, \
+     reflectivity_type, wavelet_type
 from modelr.web.urlargparse import WAVELETS
 
 from modelr.rock_properties import MODELS

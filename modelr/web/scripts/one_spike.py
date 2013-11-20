@@ -60,7 +60,10 @@ def run_script(args):
     array_amp = np.zeros([args.time])
     array_time = np.arange(args.time)
     
-    Rpp = args.reflectivity_model(args.Rock1, args.Rock2, args.theta1)
+    Rpp = args.reflectivity_model(args.Rock1.vp,args.Rock1.vs,
+                                  args.Rock1.rho, args.Rock2.vp,
+                                  args.Rock2.vs,args.Rock2.rho,
+                                  args.theta1)
     
     array_amp[args.time // 2] = Rpp
     
