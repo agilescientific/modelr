@@ -188,8 +188,12 @@ def run_script(args):
     aspect = float(warray_amp.shape[1]) / warray_amp.shape[0]                                        
     pad = np.ceil((warray_amp.shape[0] - model.shape[0]) / 2)
 
+    # Work out the size of the figure
+    width = 10
+    height = width/aspect
+
     # First, set up the matplotlib figure
-    fig = plt.figure()
+    fig = plt.figure(figsize=(width, height))
         
     # Start a loop for the figures...
     for plot in plots:
@@ -262,6 +266,8 @@ def run_script(args):
         ax.set_xlabel('trace')
         ax.set_ylabel('time [ms]')
         ax.set_title(args.title % locals())
+
+    fig.tight_layout()
 
     return get_figure_data()
 
