@@ -6,12 +6,12 @@ Created on Apr 30, 2012
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+import tempfile, subprocess
 
 from argparse import ArgumentParser
 from modelr.web.defaults import default_parsers
 from modelr.web.urlargparse import rock_properties_type
 
-from modelr.web.util import return_current_figure
 from modelr.web.util import wiggle
 
 from modelr.reflectivity import get_reflectivity, do_convolve
@@ -163,6 +163,8 @@ def run_script(args):
     # Build the plot(s)
        
     # Simplify the plot request a bit
+    # This will need to be a loop if we want to cope with
+    # an arbitrary number of base plots; or allow up to 6 (say)
     base1 = args.base1
     
     if args.overlay1 == 'none':
@@ -181,19 +183,20 @@ def run_script(args):
         overlay2 = args.overlay2
     
     plots = [(base1, overlay1), (base2, overlay2)]
+    file_list = []
 
     # Calculate some basic stuff
     aspect = float(warray_amp.shape[1]) / warray_amp.shape[0]                                        
     pad = np.ceil((warray_amp.shape[0] - model.shape[0]) / 2)
 
     # We're going to make a PNG for each plot
-    # First, set up the matplotlib figure
-    # This will go inside the 'for' when we are doing the full loop
-    # It's here so that return_current_figure() knows what to return
-    fig = plt.figure()
             
     # Start a loop for the figures...
+    
     for plot in plots:
+        
+        # First, set up the matplotlib figure
+        fig = plt.figure()
         
         # If there's no base plot for this plot,
         # then there are no more plots and we're done
@@ -260,25 +263,32 @@ def run_script(args):
         ax.set_ylabel('time [ms]')
         ax.set_title(args.title % locals())
 
-# For now let's just try to get one base + overlay working
-    return return_current_figure()
+        # Save the figure as a temporary PNG file
+        f = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
+        file_list.append(f.name)
+        plt.savefig(f, format='png')
 
-# Eventually we want to getto this stitching together
-#    # Inside for loop
-#        # Save the figure as a PNG
-#        fig_path = tempfile.mktemp('.png')
-#        plt.savefig(fig_path) 
-#
-#    # Outside for loop
-#    program = 'montage'
-#    command = [program, '-mode', 'concatenate', '-tile', '1x', infiles, outfile]
-#    subprocess.call(command)
-#
-#    # Save the figure as a PNG
-#    with open(fig_path, 'rb') as fd:
-#    data = fd.read()
-#
-#    return # binary blob from png readfile (see current method in util.py)
+    # Combine the plots with montage
+    # Create the outfile object
+    outfile = tempfile.NamedTemporaryFile(suffix='.png')
+    
+    # Build the ImageMagick convert command
+    command = ['convert', '-append']
+    for file_name in file_list:
+        command.append(file_name)
+    command.append(outfile.name)
+    
+    # Run ImageMagick montage
+    subprocess.call(command)
+
+    # Grab the binary blob
+    data = outfile.read()
+    
+    return data
+
+# For now let's just try to get one base + overlay working
+#    return return_current_figure()
+
     
 def main():
     parser = ArgumentParser(usage=short_description,
