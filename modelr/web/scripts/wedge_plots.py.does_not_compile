@@ -35,6 +35,7 @@ def add_arguments(parser):
     parser.add_argument('f', type=float, help='frequency', default=25)
 
     parser.add_argument('plot', type=str, help='Plot type', default='Synthetic'
+    
     return parser
 
 def run_script(args):

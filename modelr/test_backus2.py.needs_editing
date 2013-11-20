@@ -1,0 +1,206 @@
+# Another enthought function from SVN
+# licensing is unclear
+1from scipy \
+2	        import amax, amin, arange, array, zeros, ones, Float, matrixmultiply, \
+3	               where, sqrt, compress
+4	
+5	from enthought.util.numeric \
+6	        import safe_len
+7	
+8	import types
+9	import copy
+10	
+11	
+12	def backus_vertical (*in_args) :
+13	    """
+14	    <function function_name='backus_vertical'
+15	              name='backus_vertical'
+16	              category='Elasticity'
+17	              description='Compute vertical velocity Backus average of
+18	                           n lithologies'
+19	              is_hidden='true' >
+20	
+21	        <history>
+22	            2003/03/10  rjb  Changed parameter names to family names
+23	            2003/03/10  rjb  Changed fcn name to match file name
+24	            2003/08/07  rjb  Changed REPEATS to REPEAT
+25	            2005/04/06  wjd  Convert to Python
+26	        </history>
+27	
+28	        <inputs>
+29	            <repeat_group names='1 2 3'
+30	                          min_num='1'
+31	                          max_num='-1' >
+32	                <arg   name='x'
+33	                       modifier='lith'
+34	                       bundle=''
+35	                       units='V/V'
+36	                       description='Lamination fraction of lithology n'
+37	                       family_name='volume_frac'
+38	                       external_type='Log'
+39	                       internal_type='Array'
+40	                       is_index='false'
+41	                       is_optional='false'
+42	                       arg_name='x_lith'/>
+43	                <arg   name='vp'
+44	                       modifier='lith'
+45	                       bundle=''
+46	                       units='KM/S'
+47	                       description='P-velocity of lithology n'
+48	                       family_name='pvelocity'
+49	                       external_type='Log'
+50	                       internal_type='Array'
+51	                       is_index='false'
+52	                       is_optional='false'
+53	                       arg_name='vp_lith'/>
+54	                <arg   name='vs'
+55	                       modifier='lith'
+56	                       bundle=''
+57	                       units='KM/S'
+58	                       description='S-velocity of lithology n'
+59	                       family_name='svelocity'
+60	                       external_type='Log'
+61	                       internal_type='Array'
+62	                       is_index='false'
+63	                       is_optional='false'
+64	                       arg_name='vs_lith'/>
+65	                <arg   name='rhob'
+66	                       modifier='lith'
+67	                       bundle=''
+68	                       units='G/CC'
+69	                       description='Bulk density of lithology n'
+70	                       family_name='density'
+71	                       external_type='Log'
+72	                       internal_type='Array'
+73	                       is_index='false'
+74	                       is_optional='false'
+75	                       arg_name='rhob_lith'/>
+76	            </repeat_group>
+77	        </inputs>
+78	
+79	        <outputs>
+80	            <arg   name='vp'
+81	                   modifier=''
+82	                   bundle='bck'
+83	                   units='KM/S'
+84	                   description='Vertical P-velocity of wet rock'
+85	                   family_name='pvelocity'
+86	                   external_type='Log'
+87	                   internal_type='Array'
+88	                   is_index='false'
+89	                   is_optional='false'
+90	                   arg_name='vp_bck'/>
+91	            <arg   name='vs'
+92	                   modifier=''
+93	                   bundle='bck'
+94	                   units='KM/S'
+95	                   description='Vertical S-velocity of wet rock'
+96	                   family_name='svelocity'
+97	                   external_type='Log'
+98	                   internal_type='Array'
+99	                   is_index='false'
+100	                   is_optional='false'
+101	                   arg_name='vs_bck'/>
+102	            <arg   name='rhob'
+103	                   modifier=''
+104	                   bundle='bck'
+105	                   units='G/CC'
+106	                   description='Bulk density laminated solid'
+107	                   family_name='density'
+108	                   external_type='Log'
+109	                   internal_type='Array'
+110	                   is_index='false'
+111	                   is_optional='false'
+112	                   arg_name='rhob_bck'/>
+113	        </outputs>
+114	
+115	        <help>
+116	            backus_vertical:
+117	            Compute the vertical velocity Backus average of n lithologies
+118	        </help>
+119	
+120	    </function>
+121	    """
+122	
+123	    in_parms_per_group = 4
+124	    num_in_groups = len(in_args)//in_parms_per_group
+125	    # check to make sure there is at least one group of input parameters
+126	    if num_in_groups == 0 :
+127	        raise TypeError, 'Must provide minimum of one group of inputs'
+128	
+129	    # check to make sure input parameters are in groups of in_parms_per_group
+130	    if len(in_args) % in_parms_per_group != 0 :
+131	        raise TypeError, 'Must provide input parameters in groups of %s' % \
+132	            in_parms_per_group
+133	
+134	    # accumulate m "compliance"
+135	    cbm = zeros(safe_len(in_args[1]), typecode=Float)
+136	    # accumulate shear "compliance"
+137	    cbu = zeros(safe_len(in_args[1]), typecode=Float)
+138	    # accumulate bulk density
+139	    crhob = zeros(safe_len(in_args[1]), typecode=Float)
+140	    xtot = zeros(safe_len(in_args[1]), typecode=Float)
+141	   
+142	    for k in range(0, len(in_args), in_parms_per_group) :
+143	        x_lith    = in_args[k]
+144	        vp_lith   = in_args[k+1]
+145	        vs_lith   = in_args[k+2]
+146	        rhob_lith = in_args[k+3]
+147	
+148	        m = rhob_lith * vp_lith * vp_lith
+149	        u = rhob_lith * vs_lith * vs_lith
+150	
+151	        # accumulate sum of reciprocals for moduli
+152	        xtot = xtot + x_lith
+153	        cbm = cbm + x_lith/m
+154	        cbu = cbu + x_lith/u
+155	        crhob = crhob + x_lith * rhob_lith
+156	
+157	    # prevent division by zero
+158	    if safe_len(xtot) > 1 :
+159	        iz = compress(xtot == 0.0, arange(len(xtot)))
+160	        for i1 in range(len(iz)) :
+161	            xtot[iz[i1]] = 1.
+162	        iz = compress(cbm == 0.0, arange(len(cbm)))
+163	        for i1 in range(len(iz)) :
+164	            cbm[iz[i1]] = 1.
+165	        iz = compress(cbu == 0.0, arange(len(cbu)))
+166	        for i1 in range(len(iz)) :
+167	            cbu[iz[i1]] = 1.
+168	    else :
+169	        if xtot == 0.0 :
+170	            xtot = array(( 1. ))
+171	        if cbm == 0.0 :
+172	            cbm = array(( 1. ))
+173	        if cbu == 0.0 :
+174	            cbu = array(( 1. ))
+175	
+176	    mavg = xtot/cbm            # backus average m modulus
+177	    uavg = xtot/cbu            # backus average u modulus
+178	    rhob_bck = crhob/xtot      # average density
+179	
+180	    if safe_len(rhob_bck) > 1 :
+181	        i0 = compress(rhob_bck == 0.0, arange(len(rhob_bck)))
+182	        for i1 in range(len(i0)) :
+183	            rhob_bck[i0[i1]] = 1.
+184	    else :
+185	        set_rhob_to_1 = False
+186	        if rhob_bck == 0.0 :
+187	            rhob_bck = array(( 1. ))
+188	            set_rhob_to_1 = True
+189	
+190	    vp_bck = sqrt(mavg/rhob_bck)
+191	    vs_bck = sqrt(uavg/rhob_bck)
+192	
+193	    if safe_len(rhob_bck) > 1 :
+194	        for i1 in range(len(i0)) :
+195	            vp_bck[i0[i1]] = 0.
+196	            vs_bck[i0[i1]] = 0.
+197	            rhob_bck[i0[i1]] = 0.
+198	    else :
+199	        if set_rhob_to_1 == True :
+200	            vp_bck = array(( 0. ))
+201	            vs_bck = array(( 0. ))
+202	            rhob_bck = array(( 0. ))
+203	
+204	    return (vp_bck, vs_bck, rhob_bck)
