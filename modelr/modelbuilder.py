@@ -14,6 +14,8 @@ import numpy as np
 import svgwrite
 import subprocess
 import tempfile
+import urllib
+import time
 
 # Try cairosvg again on EC2 server
 #import cairosvg
@@ -47,10 +49,17 @@ def svg2png(infile, colours=2):
     Give it the file path.
     Get back a file path to a PNG.
     """
+    
+    # Trying to handle weirdness with web2array not producing anything
+    if isinstance(infile, str):
+        # Then we've not got a file object, so read the file
+        infile_name = infile
+    else:
+        infile_name = infile.name
 
     # Write the PNG output
     # Testing: we will eventually just return the PNG
-    outfile = tempfile.NamedTemporaryFile(suffix='.png')
+    outfile = tempfile.NamedTemporaryFile(suffix='.png', dir='/tmp')
     
     # To read an SVG file from disk
     #infile = open(infile_name,'r')
@@ -62,8 +71,7 @@ def svg2png(infile, colours=2):
     #cairosvg.svg2png(bytestring=svg_code,write_to=fout)
     
     # Use ImageMagick to do the conversion
-    program = 'convert'
-    command = [program, '-colors', str(colours), infile.name, outfile.name]
+    command = ['convert', '-colors', str(colours), infile_name, outfile.name]
     
     subprocess.call(command)
         
@@ -73,8 +81,22 @@ def svg2png(infile, colours=2):
     return outfile
     
 def svg2array(infile, colours=2):
-     return png2array(svg2png(infile, colours))
+    return png2array(svg2png(infile, colours))
+    
+def web2array(url,colours=2):
+    
+    suffix = '.' + url.split('.')[-1]
+    outfile = tempfile.NamedTemporaryFile(suffix=suffix, dir='/tmp')
+    urllib.urlretrieve(url,outfile.name)
 
+    if suffix == '.png':
+        return png2array(outfile)
+    elif suffix == '.svg':
+        return svg2array(outfile,colours)
+    else:
+        pass # Throw an error
+        
+        
 ###########################################
 # Code to generate geometries
 
@@ -195,6 +217,6 @@ def tilted(pad, thickness, traces, layers, fluid=None):
 # Test suite
 
 if __name__ == '__main__':
-    wparray =  body(20,50,300,['rock1','rock2', 'rock3'])
+    wparray =  web2array('https://www.dropbox.com/s/x4dmga5m7flnaaw/ellipse.svg',colours=3)
     print wparray
     print np.unique(wparray)
