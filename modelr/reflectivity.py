@@ -7,6 +7,7 @@ Basic methods for creating models.
 
 '''
 import numpy as np
+import scipy
 from modelr.web.urlargparse import WAVELETS
 from agilegeo import avo as reflection
 
@@ -74,12 +75,27 @@ def get_reflectivity(data,
 
     array_amp = np.zeros( data.shape )
 
-    for trace in range(data.shape[1]):
-        for sample in range(data.shape[0] - 1):
+    # Make an array that only has the boundaries in it
+    # This is a hack to reduce the number of times we call
+    # reflectivity_method
+    boundaries = np.diff(data, axis=0)
+    # Note that this array has one less row than data array,
+    # the first row is 'missing'
+    
+    # Now iterate over this array, with index flags turned on
+    # If we hit a non-zero value, we need to get the reflectivity
+    # Pretty gross, but it works
+    i = np.nditer(boundaries, flags=['multi_index'])
+    while not i.finished:
+        if i[0] != 0:
+            # These are the indices in data
+            sample = i.multi_index[0]
+            trace = i.multi_index[1]
             array_amp[sample,trace] = \
-              reflectivity_method(colourmap[data[sample,trace]],
-                                  colourmap[data[sample+1,trace]],
-                                  theta)
+                reflectivity_method(colourmap[data[sample,trace]],
+                                    colourmap[data[sample+1,trace]],
+                                    theta)
+        i.iternext()
 
     return array_amp
 
@@ -96,8 +112,7 @@ def do_convolve(wavelet,f,array_amp,dt=0.001,traces=None):
     warray_amp = np.zeros([samples, traces])
     
     for i in range(traces):
-        warray_amp[:, i] = np.convolve(array_amp[:, i], w,
-                                       mode='same')
+        warray_amp[:, i] = np.convolve(array_amp[:, i], w, mode='same')
         
     return np.array(warray_amp)
 
