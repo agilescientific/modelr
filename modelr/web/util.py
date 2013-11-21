@@ -29,12 +29,12 @@ def get_figure_data():
     
     return data
 
-def wiggle(data, dt, line_colour='black', fill_colour='blue', opacity=0.5, skipt=0, gain=1, lwidth=.5):
+def wiggle(data, dt=1, line_colour='black', fill_colour='blue', opacity=0.5, skipt=0, gain=1, lwidth=.5):
     """
     Make a wiggle trace.
     
     param: data: as array      
-    param: dt: sample rate in seconds
+    param: dt: sample interval <<<< WHAT IS THIS??
     param: skipt: number of traces to skip
     param: gain: scaling factor
     param: lwidth: width of line

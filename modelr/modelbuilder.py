@@ -27,35 +27,30 @@ import tempfile
 ###########################################
 # Image converters
 
-def png2array(infile=None):
+def png2array(infile):
     """
     Turns a PNG into a numpy array.
     
-    Give it a path to a 
+    Give it a PNG file name.
+    Returns a NumPy array.
     """
-    
-    if infile == None:
-        infile = 'tmp/model.png'
     
     # Use RGB triplets... could encode as Vp, Vs, rho
     #im_color = np.array(Image.open(infile))
 
-    im = np.array(Image.open(infile).convert('P',palette=Image.ADAPTIVE, colors=8),'f')
+    im = np.array(Image.open(infile.name).convert('P',palette=Image.ADAPTIVE, colors=8),'f')
     return np.array(im,dtype=np.uint8)
    
-def svg2png(infile=None, colours=2):
+def svg2png(infile, colours=2):
     """
     Convert SVG file to PNG file.
     Give it the file path.
     Get back a file path to a PNG.
     """
 
-    if infile == None:
-        infile = 'tmp/model.svg'
-    
     # Write the PNG output
     # Testing: we will eventually just return the PNG
-    outfile = 'tmp/model.png'
+    outfile = tempfile.NamedTemporaryFile(suffix='.png')
     
     # To read an SVG file from disk
     #infile = open(infile_name,'r')
@@ -68,7 +63,7 @@ def svg2png(infile=None, colours=2):
     
     # Use ImageMagick to do the conversion
     program = 'convert'
-    command = [program, '-colors', str(colours), infile, outfile]
+    command = [program, '-colors', str(colours), infile.name, outfile.name]
     
     subprocess.call(command)
         
@@ -76,18 +71,21 @@ def svg2png(infile=None, colours=2):
     #outfile.close()
 
     return outfile
+    
+def svg2array(infile, colours=2):
+     return png2array(svg2png(infile, colours))
 
 ###########################################
 # Code to generate geometries
 
-def channel_svg(pad, thickness, traces, layers,fluid):
+def channel_svg(pad, thickness, traces, layers, fluid):
     """
     Makes a wedge.
     Give it pad, thickness, traces, and an iterable of layers.
-    Returns an SVG file name.
+    Returns an SVG file.
     """    
     
-    outfile_name = 'tmp/model.svg'
+    outfile = tempfile.NamedTemporaryFile(suffix='.svg')
     
     top_colour = 'white'
     body_colour = 'red'
@@ -96,7 +94,7 @@ def channel_svg(pad, thickness, traces, layers,fluid):
     width = traces
     height = 2.5*pad + thickness
     
-    dwg = svgwrite.Drawing(outfile_name, size=(width,height), profile='tiny')
+    dwg = svgwrite.Drawing(outfile.name, size=(width,height), profile='tiny')
     
     # Draw the bottom layer
     bottom_layer = svgwrite.shapes.Rect(insert=(0,0), size=(width,height)).fill(bottom_colour)
@@ -116,7 +114,7 @@ def channel_svg(pad, thickness, traces, layers,fluid):
     # Do this for a file
     dwg.save()
     
-    return outfile_name
+    return outfile
      
 def body_svg(pad, margin, left, right, traces, layers, fluid):
     """
@@ -169,13 +167,13 @@ def body(pad, margin, left, right, traces, layers, fluid=None):
     colours = len(layers)
     if fluid:
         colours += 1
-    return png2array(svg2png(body_svg(pad, margin, left, right, traces, layers, fluid),colours))
+    return svg2array(body_svg(pad, margin, left, right, traces, layers, fluid),colours)
     
 def channel(pad, thickness, traces, layers, fluid=None):
     colours = len(layers)
     if fluid:
         colours += 1
-    return png2array(svg2png(channel_svg(pad,thickness,traces,layers,fluid),colours))
+    return svg2array(channel_svg(pad,thickness,traces,layers,fluid),colours)
 
 # No scripts call these, but we'll leave them here for now;
 # they are both just special cases of body.   
@@ -184,13 +182,13 @@ def wedge(pad, margin, thickness, traces, layers, fluid=None):
     if fluid:
         colours += 1
     #We are just usin body_svg for everything
-    return png2array(svg2png(body_svg(pad, margin, (0,0), (0,thickness), traces, layers, fluid),colours))
+    return svg2array(body_svg(pad, margin, (0,0), (0,thickness), traces, layers, fluid),colours)
     
 def tilted(pad, thickness, traces, layers, fluid=None):
     colours = len(layers)
     if fluid:
         colours += 1
-    return png2array(svg2png(body_svg(pad, 0, (0,thickness),(1.5*thickness,2.5*thickness), traces, layers, fluid),colours))
+    return svg2array(body_svg(pad, 0, (0,thickness),(1.5*thickness,2.5*thickness), traces, layers, fluid),colours)
     
     
 ###########################################
