@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 Created on Apr 30, 2012
 
@@ -11,8 +12,8 @@ from argparse import ArgumentParser
 from modelr.web.defaults import default_parsers
 from modelr.web.urlargparse import rock_properties_type
 
-from modelr.web.util import return_current_figure
 from modelr.web.util import wiggle
+from modelr.web.util import get_figure_data
 
 from modelr.reflectivity import get_reflectivity, do_convolve
 import modelr.modelbuilder as mb
@@ -159,10 +160,18 @@ def run_script(args):
     else:
         warray_amp = do_convolve(args.wavelet, args.f, reflectivity)
     
+    nsamps, ntraces = model.shape
+    
+    dt = 0.001 #sample rate of model (has to match wavelet)
+    
+    dx = 10    #trace offset (in metres)
+    
     #################################
     # Build the plot(s)
        
     # Simplify the plot request a bit
+    # This will need to be a loop if we want to cope with
+    # an arbitrary number of base plots; or allow up to 6 (say)
     base1 = args.base1
     
     if args.overlay1 == 'none':
@@ -186,12 +195,15 @@ def run_script(args):
     aspect = float(warray_amp.shape[1]) / warray_amp.shape[0]                                        
     pad = np.ceil((warray_amp.shape[0] - model.shape[0]) / 2)
 
-    # We're going to make a PNG for each plot
+    # Work out the size of the figure
+    each_width = 5
+    width = each_width*len(plots)
+    height = width/aspect
+
     # First, set up the matplotlib figure
-    # This will go inside the 'for' when we are doing the full loop
-    # It's here so that return_current_figure() knows what to return
-    fig = plt.figure()
-            
+    #fig = plt.figure()
+    fig = plt.figure(figsize=(width, height))
+        
     # Start a loop for the figures...
     for plot in plots:
         
@@ -199,9 +211,13 @@ def run_script(args):
         # then there are no more plots and we're done
         if not plot[0]:
             break
+            
+        # Establish what sort of subplot grid we need
+        l = len(plots)
+        p = plots.index(plot)
                 
-        # Set up the plot
-        ax = fig.add_subplot(111)
+        # Set up the plot 'canvas'
+        ax = fig.add_subplot(1,l,p+1)
             
         # Each plot can have two layers (maybe more later?)
         # Display the two layers by looping over the non-blank elements
@@ -218,67 +234,62 @@ def run_script(args):
             # Now find out what sort of plot we're making on this loop...        
             if layer == 'earth-model':
                 ax.imshow(model,
-                           aspect = aspect,
                            cmap = plt.get_cmap('gist_earth'),
                            vmin = np.amin(model)-np.amax(model)/2,
                            vmax = np.amax(model)+np.amax(model)/2,
-                           alpha = alpha
+                           alpha = alpha,
+                           aspect='auto',
+                           extent=[0,model.shape[1],model.shape[0]*dt,0],
+                           origin = 'upper'  
                            )
             
             elif layer == 'variable-density':
                 ax.imshow(warray_amp[pad:-pad,:],
-                           aspect = aspect,
                            cmap = args.colour,
-                           alpha = alpha
+                           alpha = alpha,
+                           aspect='auto',
+                           extent=[0,model.shape[1],model.shape[0]*dt,0], 
+                           origin = 'upper'
                            )
     
             elif layer == 'reflectivity':
                 # Show unconvolved reflectivities
                 ax.imshow(reflectivity,
-                           aspect = aspect,
                            cmap = plt.get_cmap('Greys'),
-                           alpha = alpha
+                           aspect='auto',
+                           extent=[0,model.shape[1],model.shape[0]*dt,0],
+                           origin = 'upper' 
                            )
 
             elif layer == 'wiggle':
             # wiggle needs an alpha setting too
+                ###axes = [ax , ax.twinx() ]
                 wiggle(warray_amp[pad:-pad,:],
-                       dt = 1,
+                       dt = dt,
                        skipt = args.wiggle_skips,
                        gain = args.wiggle_skips + 1,
                        line_colour = 'black',
                        fill_colour = 'black',
                        opacity = 0.5
-                       )
-                ax.set_ylim(max(ax.set_ylim()),min(ax.set_ylim()))
+                       )    
+                #might not need next two lines
                 
+                       
             else:
                 # We should never get here
-                continue
-        
+                continue     
         ax.set_xlabel('trace')
-        ax.set_ylabel('time [ms]')
+        ax.set_ylabel('time [s]')
         ax.set_title(args.title % locals())
+        
+
+    fig.tight_layout()
+
+    return get_figure_data()
 
 # For now let's just try to get one base + overlay working
-    return return_current_figure()
+#    return return_current_figure()
 
-# Eventually we want to getto this stitching together
-#    # Inside for loop
-#        # Save the figure as a PNG
-#        fig_path = tempfile.mktemp('.png')
-#        plt.savefig(fig_path) 
-#
-#    # Outside for loop
-#    program = 'montage'
-#    command = [program, '-mode', 'concatenate', '-tile', '1x', infiles, outfile]
-#    subprocess.call(command)
-#
-#    # Save the figure as a PNG
-#    with open(fig_path, 'rb') as fd:
-#    data = fd.read()
-#
-#    return # binary blob from png readfile (see current method in util.py)
     
 def main():
     parser = ArgumentParser(usage=short_description,

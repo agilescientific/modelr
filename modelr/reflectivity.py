@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 ================================================================
 modelr.reflectivity -- TODO short docstring here
@@ -7,12 +8,63 @@ Basic methods for creating models.
 
 '''
 import numpy as np
-#from agilegeo.wavelet import *
+import scipy
+from modelr.web.urlargparse import WAVELETS
+from agilegeo import avo as reflection
 
 ###################
 # New style functions
 
-def get_reflectivity(data, colourmap, theta=0, f=25, reflectivity_method='zoeppritz', dt=0.001):
+def zoeppritz(Rp0, Rp1, theta1):
+    '''
+    Wrapper around long zoeppritz funcion.
+    
+    :param Rp0:
+    :param Rp1:
+    :param theta1:
+     
+    '''
+    return reflection.zoeppritz(Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp, Rp1.vs, Rp1.rho, theta1)    
+
+def akirichards(Rp0, Rp1, theta1):
+    reflection.akirichards(Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp, Rp1.vs, Rp1.rho, theta1)
+
+def akirichards_alt(Rp0, Rp1, theta1):
+    reflection.akirichards_alt(Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp, Rp1.vs, Rp1.rho, theta1)
+
+def fatti(Rp0, Rp1, theta1):
+    reflection.fatti(Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp, Rp1.vs, Rp1.rho, theta1)
+
+def shuey2(Rp0, Rp1, theta1):
+    reflection.shuey2(Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp, Rp1.vs, Rp1.rho, theta1)
+
+def shuey3(Rp0, Rp1, theta1):
+    reflection.shuey3(Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp, Rp1.vs, Rp1.rho, theta1)
+
+def bortfeld2(Rp0, Rp1, theta1):
+    reflection.bortfeld2(Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp, Rp1.vs, Rp1.rho, theta1)
+    
+def bortfeld3(Rp0, Rp1, theta1):
+    reflection.bortfeld3(Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp, Rp1.vs, Rp1.rho, theta1)
+
+MODELS = {
+             'zoeppritz': zoeppritz,
+             'akirichards': akirichards,
+             'akirichards_alt': akirichards_alt,
+             'fatti': fatti,
+             'shuey2': shuey2,
+             'shuey3': shuey3,
+#             'bortfeld2': reflection.bortfeld2, # WHERE ARE THESE?
+#             'bortfeld3': reflection.bortfeld3,
+             }
+
+def get_reflectivity(data,
+                     colourmap,
+                     theta=0,
+                     f=25,
+                     reflectivity_method='zoeppritz',
+                     dt=0.001
+                     ):
     '''
     Create reflectivities from model.
     
@@ -24,9 +76,27 @@ def get_reflectivity(data, colourmap, theta=0, f=25, reflectivity_method='zoeppr
 
     array_amp = np.zeros( data.shape )
 
-    for trace in range(data.shape[1]):
-        for sample in range(data.shape[0] - 1):
-            array_amp[sample,trace] = reflectivity_method(colourmap[data[sample,trace]], colourmap[data[sample+1,trace]], theta)
+    # Make an array that only has the boundaries in it
+    # This is a hack to reduce the number of times we call
+    # reflectivity_method
+    boundaries = np.diff(data, axis=0)
+    # Note that this array has one less row than data array,
+    # the first row is 'missing'
+    
+    # Now iterate over this array, with index flags turned on
+    # If we hit a non-zero value, we need to get the reflectivity
+    # Pretty gross, but it works
+    i = np.nditer(boundaries, flags=['multi_index'])
+    while not i.finished:
+        if i[0] != 0:
+            # These are the indices in data
+            sample = i.multi_index[0]
+            trace = i.multi_index[1]
+            array_amp[sample,trace] = \
+                reflectivity_method(colourmap[data[sample,trace]],
+                                    colourmap[data[sample+1,trace]],
+                                    theta)
+        i.iternext()
 
     return array_amp
 
@@ -50,7 +120,10 @@ def do_convolve(wavelet,f,array_amp,dt=0.001,traces=None):
 ####################
 # Old model-building functions
 
-def create_wedge(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0, wavelet='ricker', f=25, reflectivity_method='zoeppritz', dt=0.001):
+def create_wedge(ntraces, pad, max_thickness, prop0, prop1, 
+                 prop2=None, theta=0, wavelet=WAVELETS['ricker'],
+                 f=25,reflectivity_method=MODELS['zoeppritz'],
+                 dt=0.001):
     '''
     Create a wedge model.
     
@@ -71,12 +144,15 @@ def create_wedge(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0,
     nsamples = (2 * pad + max_thickness) * scale
       
     array_amp = np.zeros([nsamples, ntraces])
-    fwedge = np.floor(np.linspace(pad * scale, (pad + max_thickness) * scale,
+    fwedge = np.floor(np.linspace(pad * scale,
+                                 (pad + max_thickness) * scale,
                       ntraces, endpoint=False))
     wedge = np.array(fwedge, dtype=int)
 
-    Rp0 = reflectivity_method(prop0, prop1, theta)
-    Rp1 = reflectivity_method(prop1, prop2, theta)
+    Rp0 = reflectivity_method(prop0.vp, prop0.vs, prop0.rho,
+                              prop1.vp, prop1.vs, prop1.rho, theta)
+    Rp1 = reflectivity_method(prop1.vp, prop1.vs, prop1.rho,
+                              prop2.vp, prop2.vs, prop2.rho, theta)
     
     array_amp[pad * scale, :] += Rp0
     array_amp[wedge, np.arange(ntraces)] += Rp1
@@ -85,7 +161,10 @@ def create_wedge(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0,
     
     return result
 
-def create_tilted(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0, wavelet='ricker', f=25, reflectivity_method='zoeppritz', dt=0.001):
+def create_tilted(ntraces, pad, max_thickness, prop0, prop1,
+                  prop2=None, theta=0, wavelet=WAVELETS['ricker'],
+                  f=25,reflectivity_method=MODELS['zoeppritz'],
+                  dt=0.001):
     '''
     Create a tilted model.
     
@@ -123,8 +202,10 @@ def create_tilted(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0
                       
     bwedge = np.array(fwedge, dtype=int)
 
-    Rp0 = reflectivity_method(prop0, prop1, theta)
-    Rp1 = reflectivity_method(prop1, prop2, theta)
+    Rp0 = reflectivity_method(prop0.vp, prop0.vs, prop0.rho,
+                              prop1.vp, prop1.vs, prop1.rho, theta)
+    Rp1 = reflectivity_method(prop1.vp, prop1.vs, prop1.rho,
+                              prop2.vp, prop2.vs, prop2.rho, theta)
     
     array_amp = np.zeros([nsamples, ntraces])
     array_amp[ twedge, np.arange(ntraces)] += Rp0
@@ -134,9 +215,12 @@ def create_tilted(ntraces, pad, max_thickness, prop0, prop1, prop2=None, theta=0
     
     return result
 
-def create_theta(pad, thickness, prop0, prop1, theta, wavelet='ricker', f=25, dt=0.001, reflectivity_method='zoeppritz'):
+def create_theta(pad, thickness, prop0, prop1,
+                 theta, wavelet=WAVELETS['ricker'], f=25, dt=0.001,
+                 reflectivity_method=MODELS['zoeppritz']):
     '''
-    Create a 2D array where the first dimension is time and the second is angle.
+    Create a 2D array where the first dimension is time
+    and the second is angle.
 
     :param pad: pad the array top and bottom in ms
     :param thickness: the distanc between the two interfaces
@@ -150,21 +234,29 @@ def create_theta(pad, thickness, prop0, prop1, theta, wavelet='ricker', f=25, dt
       
     array_amp = np.zeros([nsamples, theta.size])
         
-    Rp0 = reflectivity_method(prop0, prop1, theta)
-    Rp1 = reflectivity_method(prop1, prop0, theta)
+    Rp0 = reflectivity_method(prop0.vp, prop0.vs,
+                              prop0.rho, prop1.vp, prop1.vs,
+                              prop1.rho, theta)
+    Rp1 = reflectivity_method(prop1.vp, prop1.vs, prop1.rho,
+                              prop0.vp, prop0.vs, prop0.rho, theta)
     
     array_amp[pad, :] += Rp0
     array_amp[pad + thickness, :] += Rp1
     
     print "sending now"
     
-    result = do_convolve(wavelet, f, array_amp, dt, traces=theta.size)
+    result = do_convolve(wavelet, f, array_amp, dt,
+                         traces=theta.size)
     
     return result
     
-def create_theta_spike(pad, prop0, prop1, theta, f, duration, reflectivity_method):
+def create_theta_spike(pad, prop0, prop1, theta, f,
+                       duration,
+                       reflectivity_method = MODELS['zoeppritz'],
+                       wavelet = WAVELETS['ricker']):
     '''
-    Create a 2D array where the first dimension is time and the second is angle.
+    Create a 2D array where the first dimension is time and
+    the second is angle.
 
     :param pad: pad the array top and bottom in ms
     :param prop0: rock properties 1
@@ -177,9 +269,10 @@ def create_theta_spike(pad, prop0, prop1, theta, f, duration, reflectivity_metho
 
     array_amp = np.zeros([nsamples, theta.size])
 
-    Rp = reflectivity_method(prop0, prop1, theta)
+    Rp = reflectivity_method(prop0.vp, prop0.vs, prop0.rho,
+                             prop1.vp, prop1.vs, prop1.rho, theta)
     array_amp[pad, :] += Rp
 
-    result = do_convolve(f,duration,array_amp,traces=theta.size)
+    result = do_convolve(wavelet,f, array_amp, traces=theta.size)
     
     return result

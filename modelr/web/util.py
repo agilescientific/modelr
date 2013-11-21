@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from agilegeo.wavelet import ricker
 import numpy as np
 
-def return_current_figure():
+def get_figure_data():
     '''
     Return the current plot as a binary blob. 
     '''
@@ -28,15 +28,19 @@ def wiggle(data, dt, line_colour='black', fill_colour='blue', opacity=0.5, skipt
     """
     Make a wiggle trace.
     
-    param: data: as array      
+    param: data: as array
+    param: xaxis of the two-way-time vector      
     param: dt: sample rate in seconds
+    param: nsamps: number of samples in the model (to clip wiggle plot extents)
+    param: dx: offset between each trace
+    param: ntraces: total number of traces
     param: skipt: number of traces to skip
     param: gain: scaling factor
     param: lwidth: width of line
     """  
     
     t = np.arange(data.shape[0])*dt
-    
+    #t_rev = np.flipud(t)
     for i in range(0,data.shape[1],skipt+1):
     #               trace=zeros(SH['ns']+2)
     #               dtrace=Data[:,i]
@@ -51,13 +55,8 @@ def wiggle(data, dt, line_colour='black', fill_colour='blue', opacity=0.5, skipt
         plt.plot(i+new_trace, t, color=line_colour, linewidth=lwidth, alpha=opacity)
         #fill_index = np.greater(new_trace,np.zeros(trace.shape))
         plt.fill_betweenx(t,i+new_trace, i ,  new_trace > 0, color=fill_colour, alpha=opacity, lw=0)
-        
-        #plt.fill(i+(gain*fill_trace/np.amax(data)),t,'k',linewidth=0)
-                
-    #plt.grid(True)
+    
     plt.axis('tight')
-    plt.gca().invert_yaxis()
-    #plt.show()
 
 if __name__ == '__main__':
     dt =0.001
