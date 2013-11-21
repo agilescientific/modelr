@@ -60,16 +60,13 @@ MODELS = {
 def get_reflectivity(data,
                      colourmap,
                      theta=0,
-                     f=25,
                      reflectivity_method='zoeppritz',
-                     dt=0.001
                      ):
     '''
     Create reflectivities from model.
     
-    :param model: the physical model to use
+    :param data: the physical model to use
     :param theta: angle of incidence
-    :param f: the frequency for the wavelet
     :param reflectivity_method: the reflectivity algorithm to use
     '''
 

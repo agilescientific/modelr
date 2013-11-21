@@ -13,6 +13,7 @@ from PIL import Image
 import numpy as np
 import svgwrite
 import subprocess
+import tempfile
 
 # Try cairosvg again on EC2 server
 #import cairosvg
@@ -29,6 +30,8 @@ import subprocess
 def png2array(infile=None):
     """
     Turns a PNG into a numpy array.
+    
+    Give it a path to a 
     """
     
     if infile == None:
@@ -81,18 +84,17 @@ def channel_svg(pad, thickness, traces, layers,fluid):
     """
     Makes a wedge.
     Give it pad, thickness, traces, and an iterable of layers.
-    Returns an array.
+    Returns an SVG file name.
     """    
     
     outfile_name = 'tmp/model.svg'
     
     top_colour = 'white'
     body_colour = 'red'
-    fluid_colour = 'green'
     bottom_colour = 'blue'
     
     width = traces
-    height = 2*pad + thickness
+    height = 2.5*pad + thickness
     
     dwg = svgwrite.Drawing(outfile_name, size=(width,height), profile='tiny')
     
@@ -115,46 +117,12 @@ def channel_svg(pad, thickness, traces, layers,fluid):
     dwg.save()
     
     return outfile_name
-    
-def wedge_svg(pad, margin, thickness, traces, layers, fluid):
-    """
-    OBSOLETE, not currently used
-    Makes a wedge.
-    Give it pad, thickness, traces, and an iterable of layers.
-    Returns an array.
-    """    
-    
-    outfile_name = 'tmp/model.svg'
-    
-    width = traces
-    height = 2 * pad + thickness
-    
-    dwg = svgwrite.Drawing(outfile_name, size=(width,height), profile='tiny')
-    
-    # If we have 3 layers, draw the background
-    if len(layers) > 2:
-        subwedge = svgwrite.shapes.Rect(insert=(0,pad), size=(width,height-pad)).fill('blue')
-        dwg.add(subwedge)
-    
-    # Draw the wedge
-    points = [(margin, pad), (traces, pad), (traces, height - pad)]
-    wedge = svgwrite.shapes.Polygon(points).fill('red')
-    dwg.add(wedge)
-    
-    # Do this for a string
-    #svg_code = dwg.tostring()
-    
-    # Do this for a file
-    dwg.save()
-    
-    return outfile_name
-    
+     
 def body_svg(pad, margin, left, right, traces, layers, fluid):
     """
-    Makes a body.
-    Used for tilted slabs and wedges.
+    Makes a body. Used for tilted slabs and wedges.
     Give it pad, left and right thickness, traces, and an iterable of layers.
-    Returns an array.
+    Returns an SVG file name.
     """    
     
     outfile_name = 'tmp/model.svg'
@@ -164,28 +132,24 @@ def body_svg(pad, margin, left, right, traces, layers, fluid):
     
     dwg = svgwrite.Drawing(outfile_name, size=(width,height), profile='tiny')
     
+    
+    p1 = (0, pad + left[0]),
+    p2 = (margin, pad + left[0]),
+    p3 = (width - margin, pad + right[0]),
+    p4 = (width, pad + right[0]),
+    p5 = (width, pad + right[1]),
+    p6 = (width - margin, pad + right[1]),
+    p7 = (margin, pad + left[1]),
+    p8 = (0, pad + left[1])
+    
     # If we have 3 layers, draw the bottom layer
     if len(layers) > 2:
-        points = [(0, pad + left[1]),
-                  (margin, pad + left[1]),
-                  (width - margin, pad + right[1]),
-                  (width, pad + right[1]),
-                  (width, height),
-                  (0,height)
-                  ]
+        points = [p8, p7, p6, p5, (width, height), (0,height)]
         subwedge = svgwrite.shapes.Polygon(points).fill('blue')
         dwg.add(subwedge)
     
     # Draw the body
-    points = [(0, pad + left[0]),
-              (margin, pad + left[0]),
-              (width - margin, pad + right[0]),
-              (width, pad + right[0]),
-              (width, pad + right[1]),
-              (width - margin, pad + right[1]),
-              (margin, pad + left[1]),
-              (0, pad + left[1])
-              ]
+    points = [p1, p2, p3, p4, p5, p6, p7, p8]
               
     wedge = svgwrite.shapes.Polygon(points).fill('red')
     dwg.add(wedge)
@@ -197,78 +161,10 @@ def body_svg(pad, margin, left, right, traces, layers, fluid):
     dwg.save()
     
     return outfile_name
-    
-def tilted_svg(pad, thickness, traces, layers, fluid):
-    """
-    OBSOLETE, not currently used
-    Makes a tilted block.
-    Give it pad, thickness, traces, and an iterable of layers.
-    Returns an array.
-    """    
-    
-    outfile_name = 'tmp/model.svg'
-    
-    background_colour = 'white'
-    slab_colour = 'red'
-    fluid_colour = 'green'
-    bottom_colour = 'blue'
-    
-    width = traces
-    height = 2 * pad + 2.5 * thickness
-    
-    dwg = svgwrite.Drawing(outfile_name, size=(width,height), profile='tiny')
-    
-    p1 = (0, pad)
-    p2 = (width, height - pad - thickness)
-    p3 = (width, height - pad)
-    p4 = (0, pad + thickness)
-
-    # Draw the background, will become the slab as we overlay the upper and lower layers
-    slab = svgwrite.shapes.Rect(insert=(0,0), size=(width,height)).fill(slab_colour)
-    dwg.add(slab)
-    
-    # Add fluid, if any
-    if fluid:
-        fluid = svgwrite.shapes.Rect(insert=(0,0), size=(width,height/2)).fill(fluid_colour)
-        dwg.add(fluid)
-    
-    # Draw the top layer
-    points = [(0,0), (width,0), p2, p1]
-    toplayer = svgwrite.shapes.Polygon(points).fill(background_colour)
-    dwg.add(toplayer)
-        
-    # Draw the bottom layer
-    if len(filter(None,layers)) > 2:
-        background_colour = bottom_colour
-    points = [p4, p3, (width,height), (0,height)]
-    bottomlayer = svgwrite.shapes.Polygon(points).fill(background_colour)
-    dwg.add(bottomlayer)
-    
-    # Draw the slab
-    # No longer need this, with new way to draw
-    #points = [p1, p2, p3, p4]
-    #slab = svgwrite.shapes.Polygon(points).fill('red')
-    #dwg.add(slab)
-    
-    # Do this for a string
-    #svg_code = dwg.tostring()
-    
-    # Do this for a file
-    dwg.save()
-    
-    return outfile_name
-
 
 ###########################################
 # Wrappers
 
-def wedge(pad, margin, thickness, traces, layers, fluid=None):
-    colours = len(layers)
-    if fluid:
-        colours += 1
-    #We are just usin body_svg for everything
-    return png2array(svg2png(body_svg(pad, margin, (0,0), (0,thickness), traces, layers, fluid),colours))
-    
 def body(pad, margin, left, right, traces, layers, fluid=None):
     colours = len(layers)
     if fluid:
@@ -280,6 +176,15 @@ def channel(pad, thickness, traces, layers, fluid=None):
     if fluid:
         colours += 1
     return png2array(svg2png(channel_svg(pad,thickness,traces,layers,fluid),colours))
+
+# No scripts call these, but we'll leave them here for now;
+# they are both just special cases of body.   
+def wedge(pad, margin, thickness, traces, layers, fluid=None):
+    colours = len(layers)
+    if fluid:
+        colours += 1
+    #We are just usin body_svg for everything
+    return png2array(svg2png(body_svg(pad, margin, (0,0), (0,thickness), traces, layers, fluid),colours))
     
 def tilted(pad, thickness, traces, layers, fluid=None):
     colours = len(layers)
