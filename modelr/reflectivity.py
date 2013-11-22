@@ -54,8 +54,8 @@ MODELS = {
              'fatti': fatti,
              'shuey2': shuey2,
              'shuey3': shuey3,
-             'bortfeld2': reflection.bortfeld2,
-             'bortfeld3': reflection.bortfeld3,
+             'bortfeld2': bortfeld2,
+             'bortfeld3': bortfeld3,
              }
 
 FUNCTIONS = {
