@@ -16,6 +16,8 @@ import subprocess
 import tempfile
 import urllib
 import time
+from cStringIO import StringIO
+import os
 
 # Try cairosvg again on EC2 server
 #import cairosvg
@@ -26,10 +28,20 @@ import time
 # make 'body' generic
 # make adding fluids easy, by intersecting with body?
 
+def check_file(path_to_file, attempts=0, timeout=5, sleep_int=5):
+    if attempts < timeout and os.path.exists(path_to_file) and os.path.isfile(path_to_file): 
+        try:
+            f = open(path_to_file)
+            f.close()
+            return path_to_file
+        except:
+            time.sleep(sleep_int)
+            check_file(path_to_file, attempts + 1)
+            
 ###########################################
 # Image converters
 
-def png2array(infile):
+def png2array(infile, colours=2):
     """
     Turns a PNG into a numpy array.
     
@@ -40,9 +52,25 @@ def png2array(infile):
     # Use RGB triplets... could encode as Vp, Vs, rho
     #im_color = np.array(Image.open(infile))
 
-    im = np.array(Image.open(infile.name).convert('P',palette=Image.ADAPTIVE, colors=8),'f')
+    ## Trying to fix bug with web files
+    #attempts = 0
+    #while True:
+    #    attempts += 1
+    #    try:
+    #        im = np.array(Image.open(infile.name).convert('P',palette=Image.ADAPTIVE, colors=colours),'f')
+    #        return np.array(im,dtype=np.uint8)
+    #    except:
+    #        if attempts > 5:
+    #            break
+    #        else:
+    #            time.sleep(1)
+    #            pass
+            
+    
+    # This works with everything except files read from the web
+    im = np.array(Image.open(infile.name).convert('P',palette=Image.ADAPTIVE, colors=colours),'f')
     return np.array(im,dtype=np.uint8)
-   
+    
 def svg2png(infile, colours=2):
     """
     Convert SVG file to PNG file.
@@ -81,7 +109,7 @@ def svg2png(infile, colours=2):
     return outfile
     
 def svg2array(infile, colours=2):
-    return png2array(svg2png(infile, colours))
+    return png2array(svg2png(infile, colours),colours)
     
 def web2array(url,colours=2):
     
@@ -90,7 +118,7 @@ def web2array(url,colours=2):
     urllib.urlretrieve(url,outfile.name)
 
     if suffix == '.png':
-        return png2array(outfile)
+        return png2array(outfile,colours)
     elif suffix == '.svg':
         return svg2array(outfile,colours)
     else:
@@ -107,7 +135,7 @@ def channel_svg(pad, thickness, traces, layers, fluid):
     Returns an SVG file.
     """    
     
-    outfile = tempfile.NamedTemporaryFile(suffix='.svg')
+    outfile = tempfile.NamedTemporaryFile(suffix='.svg', dir='/tmp')
     
     top_colour = 'white'
     body_colour = 'red'
@@ -117,6 +145,7 @@ def channel_svg(pad, thickness, traces, layers, fluid):
     height = 2.5*pad + thickness
     
     dwg = svgwrite.Drawing(outfile.name, size=(width,height), profile='tiny')
+    #dwg = svgwrite.Drawing('not_used.svg', size=(width,height), profile='tiny')
     
     # Draw the bottom layer
     bottom_layer = svgwrite.shapes.Rect(insert=(0,0), size=(width,height)).fill(bottom_colour)
@@ -132,6 +161,7 @@ def channel_svg(pad, thickness, traces, layers, fluid):
 
     # Do this for a string
     #svg_code = dwg.tostring()
+    #outfile = StringIO(svg_code)
     
     # Do this for a file
     dwg.save()
@@ -217,6 +247,6 @@ def tilted(pad, thickness, traces, layers, fluid=None):
 # Test suite
 
 if __name__ == '__main__':
-    wparray =  web2array('https://www.dropbox.com/s/x4dmga5m7flnaaw/ellipse.svg',colours=3)
+    wparray =  web2array('https://www.dropbox.com/s/9map0i9ii59hx9d/test.png',colours=3)
     print wparray
     print np.unique(wparray)
