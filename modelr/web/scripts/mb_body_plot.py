@@ -103,7 +103,9 @@ def run_script(args):
     left = (args.left[0], args.left[1])
     right = (args.right[0], args.right[1])
     
-    model = mb.body(traces = args.ntraces,
+    traces = args.ntraces
+    
+    model = mb.body(traces = traces,
                    pad = args.pad,
                    margin=args.margin,
                    left = left,
@@ -113,6 +115,7 @@ def run_script(args):
                    
     if args.slice != 'spatial':
         model = model[args.trace:args.trace+1,:]
+        #model = np.tile(model,(10,2))
 
     if args.slice == 'offset':
         theta0 = args.theta[0]
@@ -124,12 +127,13 @@ def run_script(args):
             theta_step = 1
         
         theta = np.arange(theta0, theta1, theta_step)
+        traces = np.size(theta)
 
     else:
         try:
-            theta = args.theta[0]
+            theta = np.array(args.theta[0])
         except:
-            theta = args.theta
+            theta = np.array(args.theta)
     
     if args.slice == 'frequency':
         f0 = args.f[0]

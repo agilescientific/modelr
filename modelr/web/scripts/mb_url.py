@@ -86,7 +86,7 @@ def run_script(args):
                                       args.reflectivity_method
                                     )
     
-    warray_amp = do_convolve(args.wavelet, args.f, reflectivity)
+    warray_amp = do_convolve(args.wavelet, args.f, reflectivity, traces=args.ntraces)
     
     #################################
     # Build the plot(s)

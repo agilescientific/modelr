@@ -90,8 +90,10 @@ def get_reflectivity(data,
     :param reflectivity_method: the reflectivity algorithm to use
     '''
 
-    if ( len( theta ) > 1 ):
-        array_amp = np.zeros( [data.shape].append( len( theta ) ) )
+    if ( np.size(theta) > 1 ):
+        array_shape = list(data.shape)
+        array_shape.append(np.size(theta))
+        array_amp = np.zeros(array_shape)
 
     else:
         array_amp = np.zeros( data.shape )
@@ -111,13 +113,14 @@ def get_reflectivity(data,
         if i[0] != 0:
             # These are the indices in data
             sample = i.multi_index[0]
-            next_sample = i.multi_index[:]
+            next_sample = list(i.multi_index[:])
             next_sample[0] += 1
+            next_sample = tuple(next_sample)
             ref = reflectivity_method(colourmap[data[i.multi_index]],
                                       colourmap[data[next_sample]],
                                       theta)
             
-            if( len( theta )==1 ):
+            if( np.size(theta) ==1 ):
                 array_amp[i.multi_index] = ref
             else:
                 array_amp[i.multi_index, :] = ref
@@ -130,6 +133,8 @@ def do_convolve(wavelet,f,array_amp,dt=0.001,traces=None):
     
     if traces == None:
         traces = array_amp.shape[1]
+        
+    print "++++++++" + array_amp.shape
     
     duration = 0.2
     w = wavelet(duration,dt, f)
