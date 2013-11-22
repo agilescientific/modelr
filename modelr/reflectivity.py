@@ -80,9 +80,7 @@ FUNCTIONS = {
 def get_reflectivity(data,
                      colourmap,
                      theta=0,
-                     f=25,
-                     reflectivity_method='zoeppritz',
-                     dt=0.001
+                     reflectivity_method=MODELS['zoeppritz']
                      ):
     '''
     Create reflectivities from model.
@@ -92,7 +90,11 @@ def get_reflectivity(data,
     :param reflectivity_method: the reflectivity algorithm to use
     '''
 
-    array_amp = np.zeros( data.shape )
+    if ( len( theta ) > 1 ):
+        array_amp = np.zeros( [data.shape].append( len( theta ) ) )
+
+    else:
+        array_amp = np.zeros( data.shape )
 
     # Make an array that only has the boundaries in it
     # This is a hack to reduce the number of times we call
@@ -109,11 +111,17 @@ def get_reflectivity(data,
         if i[0] != 0:
             # These are the indices in data
             sample = i.multi_index[0]
-            trace = i.multi_index[1]
-            array_amp[sample,trace] = \
-                reflectivity_method(colourmap[data[sample,trace]],
-                                    colourmap[data[sample+1,trace]],
-                                    theta)
+            next_sample = i.multi_index[:]
+            next_sample[0] += 1
+            ref = reflectivity_method(colourmap[data[i.multi_index]],
+                                      colourmap[data[next_sample]],
+                                      theta)
+            
+            if( len( theta )==1 ):
+                array_amp[i.multi_index] = ref
+            else:
+                array_amp[i.multi_index, :] = ref
+                
         i.iternext()
 
     return array_amp
