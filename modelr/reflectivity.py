@@ -80,9 +80,7 @@ FUNCTIONS = {
 def get_reflectivity(data,
                      colourmap,
                      theta=0,
-                     f=25,
                      reflectivity_method='zoeppritz',
-                     dt=0.001
                      ):
     '''
     Create reflectivities from model.

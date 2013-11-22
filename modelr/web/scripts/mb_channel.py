@@ -142,6 +142,10 @@ def run_script(args):
     # Get the seismic array
     warray_amp = do_convolve(args.wavelet, args.f, reflectivity)
     
+    nsamps, ntraces = model.shape
+    dt = 0.001 #sample rate of model (has to match wavelet)
+    dx = 10    #trace offset (in metres)
+    
     #################################
     # Build the plot(s)
        
@@ -172,7 +176,8 @@ def run_script(args):
     pad = np.ceil((warray_amp.shape[0] - model.shape[0]) / 2)
 
     # Work out the size of the figure
-    width = 10
+    each_width = 5
+    width = each_width*len(plots)
     height = width/aspect
 
     # First, set up the matplotlib figure
@@ -208,51 +213,57 @@ def run_script(args):
             # Now find out what sort of plot we're making on this loop...        
             if layer == 'earth-model':
                 ax.imshow(model,
-                           aspect = aspect,
                            cmap = plt.get_cmap('gist_earth'),
                            vmin = np.amin(model)-np.amax(model)/2,
                            vmax = np.amax(model)+np.amax(model)/2,
-                           alpha = alpha
+                           alpha = alpha,
+                           aspect='auto',
+                           extent=[0,model.shape[1],model.shape[0]*dt,0],
+                           origin = 'upper'  
                            )
             
             elif layer == 'variable-density':
                 ax.imshow(warray_amp[pad:-pad,:],
-                           aspect = aspect,
                            cmap = args.colour,
-                           alpha = alpha
+                           alpha = alpha,
+                           aspect='auto',
+                           extent=[0,model.shape[1],model.shape[0]*dt,0], 
+                           origin = 'upper'
                            )
     
             elif layer == 'reflectivity':
                 # Show unconvolved reflectivities
                 ax.imshow(reflectivity,
-                           aspect = aspect,
                            cmap = plt.get_cmap('Greys'),
-                           alpha = alpha
+                           aspect='auto',
+                           extent=[0,model.shape[1],model.shape[0]*dt,0],
+                           origin = 'upper' 
                            )
 
             elif layer == 'wiggle':
+            # wiggle needs an alpha setting too
                 wiggle(warray_amp[pad:-pad,:],
-                       dt = 1, # Not sure what this is for?
+                       dt = dt,
                        skipt = args.wiggle_skips,
                        gain = args.wiggle_skips + 1,
                        line_colour = 'black',
                        fill_colour = 'black',
                        opacity = 0.5
-                       )
-                ax.set_ylim(max(ax.set_ylim()),min(ax.set_ylim()))
+                       )    
+                if plot.index(layer) == 0:
+                    # then we're in an base layer so...
+                    ax.set_ylim(max(ax.set_ylim()),min(ax.set_ylim()))
 
             else:
                 # We should never get here
-                continue
-        
+                continue     
         ax.set_xlabel('trace')
-        ax.set_ylabel('time [ms]')
+        ax.set_ylabel('time [s]')
         ax.set_title(args.title % locals())
-
+        
     fig.tight_layout()
 
     return get_figure_data()
-
 def main():
     parser = ArgumentParser(usage=short_description,
                             description=__doc__

@@ -78,12 +78,20 @@ def add_arguments(parser):
                         default=1
                         )
 
-    parser.add_argument('selection',
+    parser.add_argument('slice',
                         type=str,
                         help='Slice to return',
-                        default='thickness',
-                        choices=['thickness', 'offset', 'frequency']
+                        default='spatial',
+                        choices=['spatial', 'offset', 'frequency']
                         )
+                        
+    parser.add_argument('trace',
+                        type=int,
+                        help='Trace to use for non-spatial slice',
+                        default=0
+                        )
+                        
+                        
                         
     return parser
 
@@ -102,30 +110,58 @@ def run_script(args):
                    right = right,
                    layers = (args.Rock0,args.Rock1,args.Rock2)
                    )
-        
+                   
+    if args.slice != 'spatial':
+        model = model[args.trace:args.trace+1,:]
 
+    if args.slice == 'offset':
+        theta0 = args.theta[0]
+        theta1 = args.theta[1]
+        
+        try:
+            theta_step = args.theta[2]
+        except:
+            theta_step = 1
+        
+        theta = np.arange(theta0, theta1, theta_step)
+
+    else:
+        try:
+            theta = args.theta[0]
+        except:
+            theta = args.theta
+    
+    if args.slice == 'frequency':
+        f0 = args.f[0]
+        f1 = args.f[1]
+        
+        try:
+            f_step = args.f[2]
+        except:
+            f_step = 1
+        
+        f = np.arange(f0, f1, f_step)
+        
+    else:
+        f = args.f
+        
     colourmap = { 0: args.Rock0, 1: args.Rock1 }
     if not isinstance(args.Rock2, str):
         colourmap[2] = args.Rock2
     
+    ############################
+    # Get reflectivities
     reflectivity = get_reflectivity(data=model,
                                     colourmap = colourmap,
-                                    theta = args.theta,
+                                    theta = theta,
                                     reflectivity_method = args.reflectivity_method
                                     )
     
-    # This is for selecting the type of plot... not implemented yet
-    if args.selection == 'frequency':
-        warray_amp = do_convolve(args.wavelet, args.f, reflectivity)                        
-    elif args.selection == 'offset':
-        warray_amp = do_convolve(args.wavelet, args.f, reflectivity)
-    else:
-        warray_amp = do_convolve(args.wavelet, args.f, reflectivity)
-    
+    # Do convolution
+    warray_amp = do_convolve(args.wavelet, f, reflectivity)                        
+
     nsamps, ntraces = model.shape
-    
     dt = 0.001 #sample rate of model (has to match wavelet)
-    
     dx = 10    #trace offset (in metres)
     
     #################################
@@ -243,11 +279,6 @@ def run_script(args):
         ax.set_ylabel('time [s]')
         ax.set_title(args.title % locals())
         
-
-    fig.tight_layout()
-
-    return get_figure_data()
-
     fig.tight_layout()
 
     return get_figure_data()
