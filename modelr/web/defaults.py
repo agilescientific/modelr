@@ -62,14 +62,52 @@ def default_parsers(parser, list_of_parsers):
                             default='Greys'
                             )
         
-    if 'display' in list_of_parsers:
-        parser.add_argument('display',
+    if 'wiggle_skips' in list_of_parsers:
+        parser.add_argument('wiggle_skips',
+                            type=int,
+                            help='Wiggle traces to skip',
+                            default=0
+                            )
+                                                    
+    if 'base1' in list_of_parsers:
+        parser.add_argument('base1',
                             type=str,
-                            help='Type of seismic display',
-                            choices=['wiggle', 'variable-density', 'both'],
+                            help='Plot 1, base layer',
+                            choices=['wiggle', 'variable-density', 'earth-model', 'reflectivity'],
                             default='variable-density'
                             )
         
+    if 'overlay1' in list_of_parsers:
+        parser.add_argument('overlay1',
+                            type=str,
+                            help='Plot 1, overlay',
+                            choices=['none', 'wiggle', 'variable-density', 'earth-model', 'reflectivity'],
+                            default='none'
+                            )
+        
+    if 'base2' in list_of_parsers:
+        parser.add_argument('base2',
+                            type=str,
+                            help='Plot 2, base layer',
+                            choices=['none', 'wiggle', 'variable-density', 'earth-model', 'reflectivity'],
+                            default='none'
+                            )
+        
+    if 'overlay2' in list_of_parsers:
+        parser.add_argument('overlay2',
+                            type=str,
+                            help='Plot 2, overlay',
+                            choices=['none', 'wiggle', 'variable-density', 'earth-model', 'reflectivity'],
+                            default='none'
+                            )
+        
+    if 'opacity' in list_of_parsers:
+        parser.add_argument('opacity',
+                            type=float,
+                            help='Opacity of overlays',
+                            default=0.5
+                            )
+    
     if 'wavelet' in list_of_parsers:
         parser.add_argument('wavelet',
                             type=wavelet_type,

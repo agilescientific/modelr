@@ -17,7 +17,7 @@ from modelr.web.util import get_figure_data
 from modelr.reflectivity import get_reflectivity, do_convolve
 import modelr.modelbuilder as mb
 
-short_description = 'The Agile logo!'
+short_description = 'Use a model from a file on the web.'
 
 def add_arguments(parser):
     
@@ -82,7 +82,6 @@ def run_script(args):
     reflectivity = get_reflectivity(data=model,
                                     colourmap = colourmap,
                                     theta = args.theta,
-                                    f = args.f,
                                     reflectivity_method = \
                                       args.reflectivity_method
                                     )

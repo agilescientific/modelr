@@ -28,7 +28,10 @@ def add_arguments(parser):
                            'theta',
                            'f',
                            'colour',
-                           'wavelet'
+                           'wavelet', 
+                           'wiggle_skips',
+                           'base1','base2','overlay1','overlay2',
+                           'opacity'
                            ]
     
     default_parsers(parser,default_parser_list)
@@ -81,46 +84,6 @@ def add_arguments(parser):
                         choices=['thickness', 'offset', 'frequency']
                         )
                         
-    parser.add_argument('wiggle_skips',
-                        type=int,
-                        help='Wiggle traces to skip',
-                        default=0
-                        )
-                                                
-    parser.add_argument('base1',
-                        type=str,
-                        help='Plot 1, base layer',
-                        choices=['wiggle', 'variable-density', 'earth-model', 'reflectivity'],
-                        default='variable-density'
-                        )
-    
-    parser.add_argument('overlay1',
-                        type=str,
-                        help='Plot 1, overlay',
-                        choices=['none', 'wiggle', 'variable-density', 'earth-model', 'reflectivity'],
-                        default='none'
-                        )
-    
-    parser.add_argument('base2',
-                        type=str,
-                        help='Plot 2, base layer',
-                        choices=['none', 'wiggle', 'variable-density', 'earth-model', 'reflectivity'],
-                        default='none'
-                        )
-    
-    parser.add_argument('overlay2',
-                        type=str,
-                        help='Plot 2, overlay',
-                        choices=['none', 'wiggle', 'variable-density', 'earth-model', 'reflectivity'],
-                        default='none'
-                        )
-    
-    parser.add_argument('opacity',
-                        type=float,
-                        help='Opacity of overlays',
-                        default=0.5
-                        )
-    
     return parser
 
 
@@ -147,7 +110,6 @@ def run_script(args):
     reflectivity = get_reflectivity(data=model,
                                     colourmap = colourmap,
                                     theta = args.theta,
-                                    f = args.f,
                                     reflectivity_method = args.reflectivity_method
                                     )
     
