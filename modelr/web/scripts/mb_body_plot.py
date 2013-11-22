@@ -114,8 +114,7 @@ def run_script(args):
                    )
 
     if args.slice != 'spatial':
-        model = model[args.trace:args.trace+1,:]
-        model = np.ravel(model)
+        model = model[:,args.trace]
 
     if args.slice == 'offset':
         theta0 = args.theta[0]

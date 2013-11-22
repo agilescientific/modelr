@@ -140,13 +140,11 @@ def do_convolve(wavelet,f,array_amp,dt=0.001,traces=None):
     samples = max(array_amp.shape[0], w.shape[0])
     
     warray_amp = np.zeros([samples, traces])
-    
-    #np.ravel(warray_amp)
-    
+        
     for i in range(traces):
         warray_amp[:, i] = np.convolve(array_amp[:, i], w, mode='same')
 
-    return np.array(warray_amp)
+    return warray_amp
 
 ####################
 # Old model-building functions
