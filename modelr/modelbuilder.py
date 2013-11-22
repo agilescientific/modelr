@@ -74,11 +74,11 @@ def png2array(infile, colours=2):
 def svg2png(infile, colours=2):
     """
     Convert SVG file to PNG file.
-    Give it the file path.
+    Give it the file object.
     Get back a file path to a PNG.
     """
     
-    # Trying to handle weirdness with web2array not producing anything
+    ## Trying to handle weirdness with web2array not producing anything
     if isinstance(infile, str):
         # Then we've not got a file object, so read the file
         infile_name = infile
@@ -86,37 +86,32 @@ def svg2png(infile, colours=2):
         infile_name = infile.name
 
     # Write the PNG output
-    # Testing: we will eventually just return the PNG
-    outfile = tempfile.NamedTemporaryFile(suffix='.png', dir='/tmp')
-    
-    # To read an SVG file from disk
-    #infile = open(infile_name,'r')
-    #svg_code = infile.read()
-    #infile.close()
-    
-    # To write a PNG file out
-    #outfile = open('model.png','w')
-    #cairosvg.svg2png(bytestring=svg_code,write_to=fout)
+    outfile = tempfile.NamedTemporaryFile(suffix='.png')
     
     # Use ImageMagick to do the conversion
     command = ['convert', '-colors', str(colours), infile_name, outfile.name]
-    
     subprocess.call(command)
         
-    # Only need to close file if we're writing with cairosvg
-    #outfile.close()
-
     return outfile
     
 def svg2array(infile, colours=2):
     return png2array(svg2png(infile, colours),colours)
     
 def web2array(url,colours=2):
+    '''
+    Given a URL string, make an SVG or PNG on the web into a NumPy array.
+    Returns an array.
+    '''
     
+    # Get the file type from the URL
     suffix = '.' + url.split('.')[-1]
-    outfile = tempfile.NamedTemporaryFile(suffix=suffix, dir='/tmp')
+    # Make a tempfile with the correct extension
+    outfile = tempfile.NamedTemporaryFile(suffix=suffix)
+    
+    # Get the file from the web and save into the new temp file name
     urllib.urlretrieve(url,outfile.name)
 
+    # Call the correct converter
     if suffix == '.png':
         return png2array(outfile,colours)
     elif suffix == '.svg':
@@ -135,7 +130,7 @@ def channel_svg(pad, thickness, traces, layers, fluid):
     Returns an SVG file.
     """    
     
-    outfile = tempfile.NamedTemporaryFile(suffix='.svg', dir='/tmp')
+    outfile = tempfile.NamedTemporaryFile(suffix='.svg')
     
     top_colour = 'white'
     body_colour = 'red'
@@ -175,21 +170,21 @@ def body_svg(pad, margin, left, right, traces, layers, fluid):
     Returns an SVG file name.
     """    
     
-    outfile_name = 'tmp/model.svg'
+    outfile = tempfile.NamedTemporaryFile(suffix='.svg')
     
     width = traces
     height = 2 * pad + max(left[1],right[1])
     
-    dwg = svgwrite.Drawing(outfile_name, size=(width,height), profile='tiny')
+    dwg = svgwrite.Drawing(outfile.name, size=(width,height), profile='tiny')
     
     
-    p1 = (0, pad + left[0]),
-    p2 = (margin, pad + left[0]),
-    p3 = (width - margin, pad + right[0]),
-    p4 = (width, pad + right[0]),
-    p5 = (width, pad + right[1]),
-    p6 = (width - margin, pad + right[1]),
-    p7 = (margin, pad + left[1]),
+    p1 = (0, pad + left[0])
+    p2 = (margin, pad + left[0])
+    p3 = (width - margin, pad + right[0])
+    p4 = (width, pad + right[0])
+    p5 = (width, pad + right[1])
+    p6 = (width - margin, pad + right[1])
+    p7 = (margin, pad + left[1])
     p8 = (0, pad + left[1])
     
     # If we have 3 layers, draw the bottom layer
@@ -210,7 +205,7 @@ def body_svg(pad, margin, left, right, traces, layers, fluid):
     # Do this for a file
     dwg.save()
     
-    return outfile_name
+    return outfile
 
 ###########################################
 # Wrappers
@@ -247,6 +242,6 @@ def tilted(pad, thickness, traces, layers, fluid=None):
 # Test suite
 
 if __name__ == '__main__':
-    wparray =  web2array('https://www.dropbox.com/s/9map0i9ii59hx9d/test.png',colours=3)
+    wparray =  web2array('http://www.subsurfwiki.org/mediawiki/images/8/84/Modelr_test_ellipse.svg',colours=3)
     print wparray
     print np.unique(wparray)
