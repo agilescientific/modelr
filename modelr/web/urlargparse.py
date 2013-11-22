@@ -56,13 +56,29 @@ def reflectivity_type(str_input):
         parser.add_argument('reflectivity_model', type=reflectivity_type, help='... ', default='zoeppritz', choices=MODELS.keys())
      
     '''
-    from modelr.rock_properties import MODELS
+    from modelr.reflectivity import MODELS
     return MODELS[str_input]
 
+"""
 def reflectivity_func(str_input):
     from modelr.rock_properties import FUNCTIONS
     return FUNCTIONS[str_input]
+"""
     
+def reflectivity_type_hack(str_input):
+    '''
+    To be used as the 'type' value in an Argument. 
+    
+    Takes a string as input and returns an arbitrary value.
+    
+    Example::
+        
+        parser.add_argument('reflectivity_model', type=reflectivity_type, help='... ', default='zoeppritz', choices=MODELS.keys())
+     
+    '''
+    from modelr.reflectivity import FUNCTIONS
+    return FUNCTIONS[str_input]
+ 
 class Argument(object):
     '''
     A place holder for a url argument.
@@ -152,11 +168,13 @@ class URLArgumentParser(object):
 #        self.arguments = {'help': Argument('help')}
         self.arguments = {}
         
-    def add_argument(self, name, required=False, default=None, type=str, action='store', help='', choices=None):
+    def add_argument(self, name, required=False, default=None,
+                     type=str, action='store', help='', choices=None):
         '''
         add an argument
         '''
-        arg = Argument(name, required, default, type, action, help, choices)
+        arg = Argument(name, required, default, type, action,
+                       help, choices)
         self.arguments[name] = arg
         
     def parse_params(self, params):
@@ -196,14 +214,17 @@ class URLArgumentParser(object):
     @property
     def json_data(self):
         obj = {'description': self.description,
-               'arguments': {k:v.json_dict for (k, v) in self.arguments.items()}}
+               'arguments': {k:v.json_dict for (k, v)
+                             in self.arguments.items()}}
         return json.dumps(obj)
     
     @property
     def help_html(self):
         
-        arguments = '\n'.join(arg.html_help for arg in self.arguments.values())
-        return '<p>%s</p><ul>\n%s</ul>' % (self.description, arguments)
+        arguments = '\n'.join(arg.html_help for arg in
+                              self.arguments.values())
+        return '<p>%s</p><ul>\n%s</ul>' % (self.description,
+                                           arguments)
         
     def raise_help(self):
         raise SendHelp(self.help_html)

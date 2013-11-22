@@ -54,8 +54,19 @@ MODELS = {
              'fatti': fatti,
              'shuey2': shuey2,
              'shuey3': shuey3,
-#             'bortfeld2': reflection.bortfeld2, # WHERE ARE THESE?
-#             'bortfeld3': reflection.bortfeld3,
+             'bortfeld2': reflection.bortfeld2,
+             'bortfeld3': reflection.bortfeld3,
+             }
+
+FUNCTIONS = {
+             'zoeppritz': reflection.zoeppritz,
+             'akirichards': reflection.akirichards,
+             'akirichards_alt': reflection.akirichards_alt,
+             'fatti': reflection.fatti,
+             'shuey2': reflection.shuey2,
+             'shuey3': reflection.shuey3,
+             'bortfeld2': reflection.bortfeld2, 
+             'bortfeld3': reflection.bortfeld3,
              }
 
 def get_reflectivity(data,
@@ -68,9 +79,8 @@ def get_reflectivity(data,
     '''
     Create reflectivities from model.
     
-    :param model: the physical model to use
+    :param data: the physical model to use
     :param theta: angle of incidence
-    :param f: the frequency for the wavelet
     :param reflectivity_method: the reflectivity algorithm to use
     '''
 

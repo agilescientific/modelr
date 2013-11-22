@@ -3,8 +3,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from modelr.web.urlargparse import rock_properties_type,\
-     reflectivity_func
-from modelr.rock_properties import FUNCTIONS
+     reflectivity_type
+from modelr.rock_properties import MODELS
 from modelr.web.util import return_current_figure
 import numpy as np
 from scipy import arcsin
@@ -33,7 +33,7 @@ def add_arguments(parser):
     parser.add_argument('reflectivity_method', type=reflectivity_func,
                         help='Algorithm for calculating reflectivity',
                         default='zoeppritz',
-                        choices=FUNCTIONS.keys())
+                        choices=MODELS.keys())
                         
     parser.add_argument('plot_type', type=str,
                         help='AVO, AB, or dashboard ',

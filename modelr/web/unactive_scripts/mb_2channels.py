@@ -13,7 +13,8 @@ from modelr.reflectivity import get_reflectivity, do_convolve
 
 import modelr.modelbuilder as mb
 
-from modelr.web.urlargparse import rock_properties_type, reflectivity_type, wavelet_type
+from modelr.web.urlargparse import rock_properties_type, \
+     reflectivity_type, wavelet_type
 from modelr.web.urlargparse import WAVELETS
 
 from modelr.rock_properties import MODELS
@@ -22,53 +23,42 @@ from modelr.web.util import return_current_figure
 from modelr.web.util import wiggle
 
 
-short_description = 'Create a simple wedge model.'
+short_description = 'Some channels. Hand-drawn SVG.'
 
 def add_arguments(parser):
     
     parser.add_argument('title', 
-                        default='Plot',
+                        default='Channels',
                         type=str,
                         help='The title of the plot'
                         )
                         
-    parser.add_argument('pad',
-                        default=50,
-                        type=int,
-                        help='The time in milliseconds above and below the wedge'
-                        )
-                        
-    parser.add_argument('thickness',
-                        type=int,
-                        default=50,                        
-                        help='The maximum thickness of the wedge'
-                        )
-                        
-    parser.add_argument('ntraces',
-                        default=300,
-                        type=int,
-                        help='Number of traces'
-                        )
-    
     parser.add_argument('Rock0',
                         type=rock_properties_type, 
-                        help='Rock properties of upper rock [Vp,Vs, rho]',
+                        help='Rock properties [Vp,Vs, rho]',
                         required=True,
-                        default='2000,1000,2200'
+                        default='2350,1150,2400'
                         )
                         
     parser.add_argument('Rock1',
                         type=rock_properties_type, 
-                        help='Rock properties of middle rock [Vp, Vs, rho]',
+                        help='Rock properties [Vp, Vs, rho]',
                         required=True,
-                        default='2200,1100,2300'
+                        default='2150,1050,2300'
                         )
     
     parser.add_argument('Rock2',
                         type=rock_properties_type, 
-                        help='Rock properties of lower rock [Vp, Vs, rho]',
+                        help='Rock properties [Vp, Vs, rho]',
                         required=False,
-                        default='2500,1200,2600'
+                        default='2500,1250,2600'
+                        )
+    
+    parser.add_argument('Rock3',
+                        type=rock_properties_type, 
+                        help='Rock properties [Vp, Vs, rho]',
+                        required=False,
+                        default='2600,1350,2700'
                         )
     
     parser.add_argument('reflectivity_method',
@@ -79,13 +69,13 @@ def add_arguments(parser):
                         ) 
                          
     parser.add_argument('theta',
-                        type=int,
+                        type=float,
                         help='Angle of incidence',
-                        default=0
+                        default='0'
                         )
                         
     parser.add_argument('f',
-                        type=int,
+                        type=float,
                         action='list',
                         help='Frequency of wavelet',
                         default=25
@@ -93,15 +83,14 @@ def add_arguments(parser):
                         
     parser.add_argument('colour',
                         type=str,
-                        help='Matplotlib colourmap, ageo.co/modelrcolour',
+                        help='Matplotlib colourmap',
                         default='Greys'
                         )
     
     parser.add_argument('display',
                         type=str,
-                        help='Type of seismic display',
-                        choices=['wiggle', 'variable-density', 'both'],
-                        default='variable-density'
+                        help='wiggle, image, or both',
+                        default='image'
                         )
 
     parser.add_argument('wavelet',
@@ -111,31 +100,21 @@ def add_arguments(parser):
                         choices=WAVELETS.keys()
                         )
 
-    parser.add_argument('margin',
-                        type=int,
-                        help='Traces with zero thickness',
-                        default=1
-                        )
-
     return parser
 
 
 def run_script(args):
     
     matplotlib.interactive(False)
+ 
+    model = mb.png2array('tmp/channels.png')
 
-    # Get the physical model (an array of rocks)    
-    model = mb.wedge(traces = args.ntraces,
-                   pad = args.pad,
-                   margin=args.margin,
-                   thickness = args.thickness,
-                   layers = (args.Rock0,args.Rock1,args.Rock2)
-                   )
-
-    colourmap = { 0: args.Rock0, 1: args.Rock1 }
-    if not isinstance(args.Rock2, str):
-        colourmap[2] = args.Rock2
-    
+    colourmap = {0: args.Rock0,
+                 1: args.Rock1,
+                 2: args.Rock2,
+                 3: args.Rock3
+                }
+        
     reflectivity = get_reflectivity(data=model,
                                     colourmap = colourmap,
                                     theta = args.theta,
@@ -144,8 +123,7 @@ def run_script(args):
                                     )
     
     warray_amp = do_convolve(args.wavelet, args.f, reflectivity)
-        
-                        
+    
     fig = plt.figure()
     ax1 = fig.add_subplot(111)
 

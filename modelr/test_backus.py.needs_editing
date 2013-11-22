@@ -1,0 +1,216 @@
+# Backus fucntion from Enthought's SVN online someplace
+
+from enthought.util.scipyx \
+        import amax, amin, arange, array, zeros, ones, Float, matrixmultiply, \
+               where, sqrt, compress
+
+from enthought.util.numeric \
+        import safe_len
+
+import types
+import copy
+
+
+def backus_isotropic (k_wat_foo, vs_1, rhob_1, f_1, vp_2, vs_2, rhob_2) :
+    """
+    <function function_name='backus_isotropic'
+              name='backus_isotropic' 
+              category='Elasticity'
+              description='Backus average of two-layer system assuming
+                           isotropic layers'
+              unit_system_name='KGS'
+              is_hidden='true' >
+
+        <history>
+            2003/05/16 rjb Changed input names to match family names
+            2005/04/04 wjd Convert to Python
+        </history>
+
+        <inputs>
+            <arg   arg_name='vp_1'
+                   family_name='pvelocity'
+                   description='Layer 1 P-Velocity'
+                   />
+
+            <arg   name='vp'
+                   modifier=''
+                   bundle='1'
+                   units='KM/S'
+                   description='Layer 1 P-Velocity'
+                   family_name='pvelocity'
+                   external_type='Log'
+                   internal_type='Array'
+                   is_index='false'
+                   is_optional='false'
+                   arg_name='vp_1'/>
+            <arg   name='vs'
+                   modifier=''
+                   bundle='1'
+                   units='KM/S'
+                   description='Layer 1 S-Velocity'
+                   family_name='svelocity'
+                   external_type='Log'
+                   internal_type='Array'
+                   is_index='false'
+                   is_optional='false'
+                   arg_name='vs_1'/>
+            <arg   name='rhob'
+                   modifier=''
+                   bundle='1'
+                   units='G/CC'
+                   description='Layer 1 density'
+                   family_name='density'
+                   external_type='Log'
+                   internal_type='Array'
+                   is_index='false'
+                   is_optional='false'
+                   arg_name='rhob_1'/>
+            <arg   name='f'
+                   modifier=''
+                   bundle='1'
+                   units='V/V'
+                   description='Layer 1 fraction'
+                   family_name='volume_frac'
+                   external_type='Log'
+                   internal_type='Array'
+                   is_index='false'
+                   is_optional='false'
+                   arg_name='f_1'/>
+            <arg   name='vp'
+                   modifier=''
+                   bundle='2'
+                   units='KM/S'
+                   description='Layer 2 P-Velocity'
+                   family_name='pvelocity'
+                   external_type='Log'
+                   internal_type='Array'
+                   is_index='false'
+                   is_optional='false'
+                   arg_name='vp_2'/>
+            <arg   name='vs'
+                   modifier=''
+                   bundle='2'
+                   units='KM/S'
+                   description='Layer 2 S-Velocity'
+                   family_name='svelocity'
+                   external_type='Log'
+                   internal_type='Array'
+                   is_index='false'
+                   is_optional='false'
+                   arg_name='vs_2'/>
+            <arg   name='rhob'
+                   modifier=''
+                   bundle='2'
+                   units='G/CC'
+                   description='Layer 2 density'
+                   family_name='density'
+                   external_type='Log'
+                   internal_type='Array'
+                   is_index='false'
+                   is_optional='false'
+                   arg_name='rhob_2'/>
+        </inputs>
+
+        <outputs>
+            <arg   name='vp'
+                   modifier=''
+                   bundle='v'
+                   units='KM/S'
+                   description='Vertical P-velocity of wet rock'
+                   family_name='pvelocity'
+                   external_type='Log'
+                   internal_type='Array'
+                   is_index='false'
+                   is_optional='false'
+                   arg_name='vp_v'/>
+            <arg   name='vsh'
+                   modifier=''
+                   bundle='v'
+                   units='KM/S'
+                   description='Vertical S-velocity of wet rock'
+                   family_name='svelocity'
+                   external_type='Log'
+                   internal_type='Array'
+                   is_index='false'
+                   is_optional='false'
+                   arg_name='vsh_v'/>
+            <arg   name='rhob'
+                   modifier=''
+                   bundle=''
+                   units='G/CC'
+                   description='Average density'
+                   family_name='density'
+                   external_type='Log'
+                   internal_type='Array'
+                   is_index='false'
+                   is_optional='false'
+                   arg_name='rhob'/>
+            <arg   name='vp'
+                   modifier=''
+                   bundle='h'
+                   units='KM/S'
+                   description='Horizontal P-velocity of wet rock'
+                   family_name='pvelocity'
+                   external_type='Log'
+                   internal_type='Array'
+                   is_index='false'
+                   is_optional='false'
+                   arg_name='vp_h'/>
+            <arg   name='vsh'
+                   modifier=''
+                   bundle='h'
+                   units='KM/S'
+                   description='Horizontal shear velocity of wet rock'
+                   family_name='svelocity'
+                   external_type='Log'
+                   internal_type='Array'
+                   is_index='false'
+                   is_optional='false'
+                   arg_name='vsh_h'/>
+        </outputs>
+
+        <help>
+            backus_isotropic:
+            Backus average assuming two isotropic layers.  Equations from Levin
+            (1979) as given in Mavko, p. 144.  Last subscript for each output
+            describes direction of wave propagation. Both shear velocities are
+            for horizontal partical motion.  Note that vsh_v=vsv_h=vsv_v.
+        </help>
+
+    </function>
+    """
+
+    vec0 = zeros(safe_len(f_1), Float)
+    vec1 = ones(safe_len(f_1), Float)
+    f_1 = amax((vec0, amin((vec1, f_1), 0)), 0)
+    f_2 = 1 - f_1
+
+    m1 = rhob_1 * vp_1 * vp_1
+    m2 = rhob_2 * vp_2 * vp_2
+
+    u1 = rhob_1 * vs_1 * vs_1
+    u2 = rhob_2 * vs_2 * vs_2
+
+    r1 = (vs_1/vp_1)**2
+    r2 = (vs_2/vp_2)**2
+
+    rhob = f_1 * rhob_1 + f_2 * rhob_2
+
+    C = 1.0/(f_1/m1 + f_2/m2)
+    D = 1.0/(f_1/u1 + f_2/u2)
+
+    A = f_1 * 4. * u1 * (1. - r1) + f_2 * 4. * u2 * (1. - r2) + \
+        (f_1 * (1. - 2. * r1) + f_2 * (1. - 2. * r2))**2 * C
+
+    M = f_1 * u1 + f_2 * u2
+
+    # These terms are not needed for v & h velocities
+    #B = A - 2. * M
+    #F = (f_1 * (1 - 2. * r1) + f_2. * (1. - 2. * r2)) * C
+
+    vp_v  = sqrt(C/rhob)
+    vsh_v = sqrt(D/rhob)
+    vp_h  = sqrt(A/rhob)
+    vsh_h = sqrt(M/rhob)
+
+    return (vp_v, vsh_v, rhob, vp_h, vsh_h)

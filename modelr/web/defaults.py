@@ -6,7 +6,7 @@ Created on November 2013
 
 from modelr.web.urlargparse import reflectivity_type, wavelet_type
 from modelr.web.urlargparse import WAVELETS
-from modelr.rock_properties import MODELS
+from modelr.reflectivity import MODELS
 
 def default_parsers(parser, list_of_parsers):
     

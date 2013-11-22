@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import tempfile
 from os import unlink
 from modelr.web.urlargparse import rock_properties_type, \
-     reflectivity_type
+     reflectivity_type, wavelet_type, WAVELETS
 from modelr.web.util import return_current_figure
 from modelr.rock_properties import MODELS
 import numpy as np
@@ -42,6 +42,10 @@ def add_arguments(parser):
     
     parser.add_argument('f', type=float, help='Frequency of wavelet',
                         default=25)
+    parser.add_argument('wavelet', type=wavelet_type,
+                        help='Type of wavelet',
+                        default='ricker', choices = WAVELETS.keys())
+    
     parser.add_argument('points', type=int,
                         help='Length of wavelet in samples',
                         default=100)
@@ -72,7 +76,8 @@ def run_script(args):
     warray_amp = create_theta_spike(args.pad,
                                     Rprop0, Rprop1, theta,
                                     args.f, args.points,
-                                    args.reflectivity_method)
+                                    args.reflectivity_method,
+                                    args.wavelet )
     
     fig = plt.figure()
     ax1 = fig.add_subplot(111)

@@ -9,10 +9,7 @@ import matplotlib.pyplot as plt
 
 from argparse import ArgumentParser
 
-from modelr.reflectivity import get_reflectivity, do_convolve
-
-import modelr.modelbuilder as mb
-
+from modelr.reflectivity import create_wedge
 from modelr.web.urlargparse import rock_properties_type, \
      reflectivity_type, wavelet_type
 from modelr.web.urlargparse import WAVELETS
@@ -23,35 +20,53 @@ from modelr.web.util import return_current_figure
 from modelr.web.util import wiggle
 
 
-short_description = 'The Agile logo!'
+short_description = 'Create a simple wedge model.'
 
 def add_arguments(parser):
     
     parser.add_argument('title', 
-                        default='Agile*',
+                        default='Plot',
                         type=str,
                         help='The title of the plot'
                         )
                         
+    parser.add_argument('pad',
+                        default=50,
+                        type=int,
+                        help='The time in milliseconds above and below the wedge'
+                        )
+                        
+    parser.add_argument('max_thickness',
+                        default=50,
+                        type=int,
+                        help='The maximum thickness of the wedge'
+                        )
+                        
+    parser.add_argument('ntraces',
+                        default=300,
+                        type=int,
+                        help='Number of traces'
+                        )
+    
     parser.add_argument('Rock0',
                         type=rock_properties_type, 
-                        help='Rock properties of background [Vp,Vs, rho]',
+                        help='Rock properties of upper rock [Vp,Vs, rho]',
                         required=True,
-                        default='2350,1150,2400'
+                        default='2000,1000,2200'
                         )
                         
     parser.add_argument('Rock1',
                         type=rock_properties_type, 
-                        help='Rock properties of star [Vp, Vs, rho]',
+                        help='Rock properties of middle rock [Vp, Vs, rho]',
                         required=True,
-                        default='2150,1050,2300'
+                        default='2200,1100,2300'
                         )
     
     parser.add_argument('Rock2',
                         type=rock_properties_type, 
-                        help='Rock properties of Agile [Vp, Vs, rho]',
+                        help='Rock properties of lower rock [Vp, Vs, rho]',
                         required=False,
-                        default='2500,1250,2600'
+                        default='2500,1200,2600'
                         )
     
     parser.add_argument('reflectivity_method',
@@ -69,7 +84,7 @@ def add_arguments(parser):
                         
     parser.add_argument('f',
                         type=float,
-                        action='list',
+                        action=list,
                         help='Frequency of wavelet',
                         default=25
                         )
@@ -85,10 +100,10 @@ def add_arguments(parser):
                         help='wiggle, image, or both',
                         default='image'
                         )
-
+                        
     parser.add_argument('wavelet',
                         type=wavelet_type,
-                        help='Wavelet type',
+                        help='ricker, ormsby, sweep',
                         default='ricker',
                         choices=WAVELETS.keys()
                         )
@@ -107,20 +122,19 @@ def run_script(args):
     if isinstance(Rprop2, str):
         Rprop2 = None
     
-    model = mb.png2array('tmp/agile_logo_blue.png')
-
-    colourmap = { 0: Rprop0, 1: Rprop1, 2: Rprop2 }
+    warray_amp = create_wedge(ntraces = args.ntraces,
+                              pad = args.pad,
+                              max_thickness = args.max_thickness,
+                              prop0 = Rprop0,
+                              prop1 = Rprop1,
+                              prop2 = Rprop2,
+                              theta = args.theta,
+                              wavelet=args.wavelet,
+                              f = args.f,
+                              reflectivity_method =
+                                args.reflectivity_method
+                              )
         
-    reflectivity = get_reflectivity(data=model,
-                                    colourmap = colourmap,
-                                    theta = args.theta,
-                                    f = args.f,
-                                    reflectivity_method = \
-                                      args.reflectivity_method
-                                    )
-    
-    warray_amp = do_convolve(args.wavelet, args.f, reflectivity)
-    
     fig = plt.figure()
     ax1 = fig.add_subplot(111)
 

@@ -201,7 +201,6 @@ def run_script(args):
     height = width/aspect
 
     # First, set up the matplotlib figure
-    #fig = plt.figure()
     fig = plt.figure(figsize=(width, height))
         
     # Start a loop for the figures...
@@ -282,6 +281,10 @@ def run_script(args):
         ax.set_ylabel('time [s]')
         ax.set_title(args.title % locals())
         
+
+    fig.tight_layout()
+
+    return get_figure_data()
 
     fig.tight_layout()
 

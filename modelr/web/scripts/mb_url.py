@@ -17,8 +17,7 @@ from modelr.web.util import get_figure_data
 from modelr.reflectivity import get_reflectivity, do_convolve
 import modelr.modelbuilder as mb
 
-# This is required for Script help
-short_description = 'Create a simple wedge model.'
+short_description = 'The Agile logo!'
 
 def add_arguments(parser):
     
@@ -28,118 +27,66 @@ def add_arguments(parser):
                            'title',
                            'theta',
                            'f',
-                           'display',
                            'colour',
                            'wavelet'
                            ]
     
     default_parsers(parser,default_parser_list)
-                            
-    parser.add_argument('thickness',
-                        default=50,
-                        type=int,
-                        help='The maximum thickness of the wedge'
-                        )
-                            
+    
+                        
     parser.add_argument('Rock0',
                         type=rock_properties_type, 
-                        help='Rock properties of upper rock [Vp,Vs, rho]',
+                        help='Rock properties of background [Vp,Vs, rho]',
                         required=True,
-                        default='2400,1200,2500'
+                        default='2350,1150,2400'
                         )
                         
     parser.add_argument('Rock1',
                         type=rock_properties_type, 
-                        help='Rock properties of middle rock [Vp, Vs, rho]',
+                        help='Rock properties of star [Vp, Vs, rho]',
                         required=True,
-                        default='2200,1100,2300'
+                        default='2150,1050,2300'
                         )
     
     parser.add_argument('Rock2',
                         type=rock_properties_type, 
-                        help='Rock properties of lower rock [Vp, Vs, rho]',
+                        help='Rock properties of Agile [Vp, Vs, rho]',
                         required=False,
-                        default='2500,1250,2650'
+                        default='2500,1250,2600'
                         )
     
-    parser.add_argument('margin',
-                        type=int,
-                        help='Traces with zero thickness',
-                        default=1
-                        )
-
-    parser.add_argument('selection',
-                        type=str,
-                        help='Slice to return',
-                        default='thickness',
-                        choices=['thickness', 'offset', 'frequency']
-                        )
-                        
-    parser.add_argument('wiggle_skips',
-                        type=int,
-                        help='Wiggle traces to skip',
-                        default=0
-                        )
-                                                
-    parser.add_argument('base1',
-                        type=str,
-                        help='Plot 1, base layer',
-                        choices=['wiggle', 'variable-density', 'earth-model', 'reflectivity'],
-                        default='variable-density'
+    parser.add_argument('url',
+                        type=str, 
+                        help='a URL for an image with 3 colours',
+                        required=True
                         )
     
-    parser.add_argument('overlay1',
-                        type=str,
-                        help='Plot 1, overlay',
-                        choices=['none', 'wiggle', 'variable-density', 'earth-model', 'reflectivity'],
-                        default='none'
-                        )
-    
-    parser.add_argument('base2',
-                        type=str,
-                        help='Plot 2, base layer',
-                        choices=['none', 'wiggle', 'variable-density', 'earth-model', 'reflectivity'],
-                        default='none'
-                        )
-    
-    parser.add_argument('overlay2',
-                        type=str,
-                        help='Plot 2, overlay',
-                        choices=['none', 'wiggle', 'variable-density', 'earth-model', 'reflectivity'],
-                        default='none'
-                        )
-    
-    parser.add_argument('opacity',
-                        type=float,
-                        help='Opacity of overlays',
-                        default=0.5
-                        )
- 
-                        
     return parser
+
 
 def run_script(args):
     
     matplotlib.interactive(False)
+ 
+    Rprop0 = args.Rock0 
+    Rprop1 = args.Rock1
+    Rprop2 = args.Rock2
     
-    # Get the physical model (an array of rocks)    
-    model = mb.channel(pad = args.pad,
-                   thickness = args.thickness,
-                   traces = args.ntraces,
-                   layers = (args.Rock0,args.Rock1,args.Rock2)
-                   )
+    if isinstance(Rprop2, str):
+        Rprop2 = None
+    
+    model = mb.web2array(args.url)
 
-    colourmap = { 0: args.Rock0, 1: args.Rock1 }
-    if not isinstance(args.Rock2, str):
-        colourmap[2] = args.Rock2
-    
-    reflectivity = get_reflectivity(data = model,
+    colourmap = { 0: Rprop0, 1: Rprop1, 2: Rprop2 }
+        
+    reflectivity = get_reflectivity(data=model,
                                     colourmap = colourmap,
                                     theta = args.theta,
-                                    reflectivity_method = args.reflectivity_method
+                                    f = args.f,
+                                    reflectivity_method = \
+                                      args.reflectivity_method
                                     )
     
-    # Get the seismic array
     warray_amp = do_convolve(args.wavelet, args.f, reflectivity)
     
     #################################
@@ -252,7 +199,7 @@ def run_script(args):
     fig.tight_layout()
 
     return get_figure_data()
-
+    
 def main():
     parser = ArgumentParser(usage=short_description,
                             description=__doc__

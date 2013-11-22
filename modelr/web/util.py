@@ -21,19 +21,19 @@ def get_figure_data():
         data = fd.read()
         
     unlink(fig_path)
+        
+    # Alternative approach to do it in memory rather than on disk
+    #image_file = tempfile.SpooledTemporaryFile(suffix='.png')
+    #plt.savefig(image_file, format='png') 
+    #data = image_file.read()
     
     return data
 
-def wiggle(data, dt, line_colour='black', fill_colour='blue', opacity=0.5, skipt=0, gain=1, lwidth=.5):
+def wiggle(data, dt=1, line_colour='black', fill_colour='blue', opacity=0.5, skipt=0, gain=1, lwidth=.5):
     """
     Make a wiggle trace.
-    
-    param: data: as array
-    param: xaxis of the two-way-time vector      
-    param: dt: sample rate in seconds
-    param: nsamps: number of samples in the model (to clip wiggle plot extents)
-    param: dx: offset between each trace
-    param: ntraces: total number of traces
+    param: data: as array      
+    param: dt: sample interval <<<< WHAT IS THIS??
     param: skipt: number of traces to skip
     param: gain: scaling factor
     param: lwidth: width of line
