@@ -89,7 +89,8 @@ def get_reflectivity(data,
     :param theta: angle of incidence
     :param reflectivity_method: the reflectivity algorithm to use
     '''
-
+  
+    print( theta )
     if ( np.size(theta) > 1 ):
         array_shape = list(data.shape)
         array_shape.append(np.size(theta))
@@ -119,7 +120,7 @@ def get_reflectivity(data,
             ref = reflectivity_method(colourmap[data[i.multi_index]],
                                       colourmap[data[next_sample]],
                                       theta)
-            
+            print(colourmap[data[i.multi_index]])
             if( np.size(theta) ==1 ):
                 array_amp[i.multi_index] = ref
             else:
@@ -134,7 +135,6 @@ def do_convolve(wavelet,f,array_amp,dt=0.001,traces=None):
     if traces == None:
         traces = array_amp.shape[1]
         
-    print "++++++++" + array_amp.shape
     
     duration = 0.2
     w = wavelet(duration,dt, f)
@@ -142,12 +142,14 @@ def do_convolve(wavelet,f,array_amp,dt=0.001,traces=None):
     samples = max(array_amp.shape[0], w.shape[0])
     
     warray_amp = np.zeros([samples, traces])
-    
+
+    print( 'warray_amp', warray_amp.shape )
     for i in range(traces):
         warray_amp[:, i] = np.convolve(array_amp[:, i], w,
                                        mode='same')
-        
-    return np.array(warray_amp)
+
+    return warray_amp
+
 
 ####################
 # Old model-building functions
