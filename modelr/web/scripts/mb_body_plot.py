@@ -127,7 +127,7 @@ def run_script(args):
             theta_step = 1
         
         theta = np.arange(theta0, theta1, theta_step)
-        #traces = np.size(theta)
+        traces = np.size(theta)
 
     else:
         try:
@@ -162,9 +162,10 @@ def run_script(args):
                                     )
     
     # Do convolution
-    warray_amp = do_convolve(args.wavelet, f, reflectivity)                        
+    warray_amp = do_convolve(args.wavelet, f, reflectivity)
 
-    nsamps, ntraces = model.shape
+    
+    nsamps, ntraces = warray_amp.shape
     dt = 0.001 #sample rate of model (has to match wavelet)
     dx = 10    #trace offset (in metres)
     
@@ -204,6 +205,7 @@ def run_script(args):
 
     # First, set up the matplotlib figure
     fig = plt.figure(figsize=(width, height))
+    #plt.imshow( warray_amp)
         
     # Start a loop for the figures...
     for plot in plots:
@@ -240,7 +242,8 @@ def run_script(args):
                            vmax = np.amax(model)+np.amax(model)/2,
                            alpha = alpha,
                            aspect='auto',
-                           extent=[0,model.shape[1],model.shape[0]*dt,0],
+                           extent=[0,warray_amp.shape[1],
+                                   warray_amp.shape[0]*dt,0],
                            origin = 'upper'  
                            )
             
@@ -249,7 +252,8 @@ def run_script(args):
                            cmap = args.colour,
                            alpha = alpha,
                            aspect='auto',
-                           extent=[0,model.shape[1],model.shape[0]*dt,0], 
+                           extent=[0,warray_amp.shape[1],
+                                   warray_amp.shape[0]*dt,0], 
                            origin = 'upper'
                            )
     
@@ -258,7 +262,8 @@ def run_script(args):
                 ax.imshow(reflectivity,
                            cmap = plt.get_cmap('Greys'),
                            aspect='auto',
-                           extent=[0,model.shape[1],model.shape[0]*dt,0],
+                           extent=[0,warray_amp.shape[1],
+                                   warray_amp.shape[0]*dt,0],
                            origin = 'upper' 
                            )
 
