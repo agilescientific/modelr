@@ -224,7 +224,6 @@ def run_script(args):
 
             elif layer == 'wiggle':
             # wiggle needs an alpha setting too
-                ###axes = [ax , ax.twinx() ]
                 wiggle(warray_amp[pad:-pad,:],
                        dt = dt,
                        skipt = args.wiggle_skips,
@@ -233,9 +232,10 @@ def run_script(args):
                        fill_colour = 'black',
                        opacity = 0.5
                        )    
-                #might not need next two lines
-                
-                       
+                if plot.index(layer) == 0:
+                    # then we're in an base layer so...
+                    ax.set_ylim(max(ax.set_ylim()),min(ax.set_ylim()))
+
             else:
                 # We should never get here
                 continue     
