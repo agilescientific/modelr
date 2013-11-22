@@ -53,8 +53,19 @@ MODELS = {
              'fatti': fatti,
              'shuey2': shuey2,
              'shuey3': shuey3,
-#             'bortfeld2': reflection.bortfeld2, # WHERE ARE THESE?
-#             'bortfeld3': reflection.bortfeld3,
+             'bortfeld2': reflection.bortfeld2,
+             'bortfeld3': reflection.bortfeld3,
+             }
+
+FUNCTIONS = {
+             'zoeppritz': reflection.zoeppritz,
+             'akirichards': reflection.akirichards,
+             'akirichards_alt': reflection.akirichards_alt,
+             'fatti': reflection.fatti,
+             'shuey2': reflection.shuey2,
+             'shuey3': reflection.shuey3,
+             'bortfeld2': reflection.bortfeld2, 
+             'bortfeld3': reflection.bortfeld3,
              }
 
 def get_reflectivity(data,

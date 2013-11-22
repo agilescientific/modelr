@@ -1,10 +1,11 @@
 from argparse import ArgumentParser
 import matplotlib
 import matplotlib.pyplot as plt
-from modelr.web.urlargparse import rock_properties_type,\
-     reflectivity_type
-from modelr.rock_properties import MODELS
-from modelr.web.util import return_current_figure
+from modelr.web.urlargparse import rock_properties_type, reflectivity_type_hack
+from modelr.web.defaults import default_parsers
+from modelr.reflectivity import FUNCTIONS
+
+from modelr.web.util import get_figure_data
 import numpy as np
 from scipy import arcsin
 
@@ -15,8 +16,12 @@ short_description = (
 
 def add_arguments(parser):
 
-    parser.add_argument('title', default='Plot',
-                        type=str, help='The title of the plot')
+    default_parser_list = [
+                           'title'
+                           ]
+    
+    default_parsers(parser,default_parser_list)
+                            
 
     parser.add_argument('Rpp0', type=rock_properties_type, 
                         help='rock properties of upper rock: Vp, Rho, Vs, Vp std. dev., Rho std. dev., Vs std. dev.)',
@@ -29,18 +34,19 @@ def add_arguments(parser):
     parser.add_argument( 'iterations', type=int, default=1000, 
                          help='number of monte carlo simulations' )
     
-    parser.add_argument('reflectivity_method', type=reflectivity_type,
-                        help='Algorithm for calculating reflectivity',
-                        default='zoeppritz',
-                        choices=MODELS.keys())
-                        
     parser.add_argument('plot_type', type=str,
                         help='AVO, AB, or dashboard ',
                         default='AVO'
                         )
-    
-    
-    
+                        
+    parser.add_argument('reflectivity_method',
+                        type=reflectivity_type_hack,
+                        help='Algorithm for calculating reflectivity',
+                        default='zoeppritz',
+                        choices=FUNCTIONS.keys()
+                        ) 
+                                
+
  
     return parser
 
@@ -155,7 +161,7 @@ def run_script(args):
         plt.grid()
     
     
-    return return_current_figure()
+    return get_figure_data()
     
     
 def main():

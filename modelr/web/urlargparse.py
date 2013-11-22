@@ -65,6 +65,20 @@ def reflectivity_func(str_input):
     return FUNCTIONS[str_input]
 """
     
+def reflectivity_type_hack(str_input):
+    '''
+    To be used as the 'type' value in an Argument. 
+    
+    Takes a string as input and returns an arbitrary value.
+    
+    Example::
+        
+        parser.add_argument('reflectivity_model', type=reflectivity_type, help='... ', default='zoeppritz', choices=MODELS.keys())
+     
+    '''
+    from modelr.reflectivity import FUNCTIONS
+    return FUNCTIONS[str_input]
+ 
 class Argument(object):
     '''
     A place holder for a url argument.
