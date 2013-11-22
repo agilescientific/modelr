@@ -24,28 +24,36 @@ def zoeppritz(Rp0, Rp1, theta1):
     :param theta1:
      
     '''
-    return reflection.zoeppritz(Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp, Rp1.vs, Rp1.rho, theta1)    
+    return reflection.zoeppritz(Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp,
+                                Rp1.vs, Rp1.rho, theta1)    
 
 def akirichards(Rp0, Rp1, theta1):
-    return reflection.akirichards(Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp, Rp1.vs, Rp1.rho, theta1)
+    return reflection.akirichards(Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp,
+                                  Rp1.vs, Rp1.rho, theta1)
 
 def akirichards_alt(Rp0, Rp1, theta1):
-    return reflection.akirichards_alt(Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp, Rp1.vs, Rp1.rho, theta1)
+    return reflection.akirichards_alt(Rp0.vp, Rp0.vs, Rp0.rho,
+                                      Rp1.vp, Rp1.vs, Rp1.rho, theta1)
 
 def fatti(Rp0, Rp1, theta1):
-    return reflection.fatti(Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp, Rp1.vs, Rp1.rho, theta1)
+    return reflection.fatti(Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp,
+                            Rp1.vs, Rp1.rho, theta1)
 
 def shuey2(Rp0, Rp1, theta1):
-    return reflection.shuey2(Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp, Rp1.vs, Rp1.rho, theta1)
+    return reflection.shuey2(Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp,
+                             Rp1.vs, Rp1.rho, theta1)
 
 def shuey3(Rp0, Rp1, theta1):
-    return reflection.shuey3(Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp, Rp1.vs, Rp1.rho, theta1)
+    return reflection.shuey3(Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp,
+                             Rp1.vs, Rp1.rho, theta1)
 
 def bortfeld2(Rp0, Rp1, theta1):
-    return reflection.bortfeld2(Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp, Rp1.vs, Rp1.rho, theta1)
+    return reflection.bortfeld2(Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp,
+                                Rp1.vs, Rp1.rho, theta1)
     
 def bortfeld3(Rp0, Rp1, theta1):
-    return reflection.bortfeld3(Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp, Rp1.vs, Rp1.rho, theta1)
+    return reflection.bortfeld3(Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp,
+                                Rp1.vs, Rp1.rho, theta1)
 
 MODELS = {
              'zoeppritz': zoeppritz,
@@ -123,7 +131,8 @@ def do_convolve(wavelet,f,array_amp,dt=0.001,traces=None):
     warray_amp = np.zeros([samples, traces])
     
     for i in range(traces):
-        warray_amp[:, i] = np.convolve(array_amp[:, i], w, mode='same')
+        warray_amp[:, i] = np.convolve(array_amp[:, i], w,
+                                       mode='same')
         
     return np.array(warray_amp)
 
