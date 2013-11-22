@@ -133,9 +133,7 @@ def do_convolve(wavelet,f,array_amp,dt=0.001,traces=None):
     
     if traces == None:
         traces = array_amp.shape[1]
-        
-    print "++++++++" + array_amp.shape
-    
+            
     duration = 0.2
     w = wavelet(duration,dt, f)
     
@@ -143,10 +141,11 @@ def do_convolve(wavelet,f,array_amp,dt=0.001,traces=None):
     
     warray_amp = np.zeros([samples, traces])
     
+    #np.ravel(warray_amp)
+    
     for i in range(traces):
-        warray_amp[:, i] = np.convolve(array_amp[:, i], w,
-                                       mode='same')
-        
+        warray_amp[:, i] = np.convolve(array_amp[:, i], w, mode='same')
+
     return np.array(warray_amp)
 
 ####################

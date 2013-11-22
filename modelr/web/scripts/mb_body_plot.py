@@ -112,10 +112,10 @@ def run_script(args):
                    right = right,
                    layers = (args.Rock0,args.Rock1,args.Rock2)
                    )
-                   
+
     if args.slice != 'spatial':
         model = model[args.trace:args.trace+1,:]
-        #model = np.tile(model,(10,2))
+        model = np.ravel(model)
 
     if args.slice == 'offset':
         theta0 = args.theta[0]
@@ -127,13 +127,13 @@ def run_script(args):
             theta_step = 1
         
         theta = np.arange(theta0, theta1, theta_step)
-        traces = np.size(theta)
+        #traces = np.size(theta)
 
     else:
         try:
-            theta = np.array(args.theta[0])
+            theta = args.theta[0]
         except:
-            theta = np.array(args.theta)
+            theta = args.theta
     
     if args.slice == 'frequency':
         f0 = args.f[0]
