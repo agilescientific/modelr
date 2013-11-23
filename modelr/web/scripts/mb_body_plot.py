@@ -82,7 +82,7 @@ def add_arguments(parser):
                         type=str,
                         help='Slice to return',
                         default='spatial',
-                        choices=['spatial', 'offset', 'frequency']
+                        choices=['spatial', 'angle', 'frequency']
                         )
                         
     parser.add_argument('trace',
@@ -111,10 +111,16 @@ def run_script(args):
                    layers = (args.Rock0,args.Rock1,args.Rock2)
                    )
 
-    if args.slice != 'spatial':
-        model = model[:,args.trace]
+    model_aspect = float(model.shape[1]) / model.shape[0]
 
-    if args.slice == 'offset':
+    if args.slice == 'spatial':
+        model_to_convolve = model
+    else:
+        model_to_convolve = model[:,args.trace]
+        m = model_to_convolve.reshape((1,model.shape[0])).T
+        model = np.tile(m,(1,traces))
+        
+    if args.slice == 'angle':
         theta0 = args.theta[0]
         theta1 = args.theta[1]
         
@@ -152,12 +158,12 @@ def run_script(args):
     
     ############################
     # Get reflectivities
-    reflectivity = get_reflectivity(data=model,
+    reflectivity = get_reflectivity(data=model_to_convolve,
                                     colourmap = colourmap,
                                     theta = theta,
                                     reflectivity_method = args.reflectivity_method
                                     )
-    
+
     # Do convolution
     warray_amp = do_convolve(args.wavelet, f, reflectivity)
 
@@ -192,7 +198,13 @@ def run_script(args):
     plots = [(base1, overlay1), (base2, overlay2)]
 
     # Calculate some basic stuff
-    aspect = float(warray_amp.shape[1]) / warray_amp.shape[0]                                        
+    
+    # This doesn't work well for non-spatial slices
+    #aspect = float(warray_amp.shape[1]) / warray_amp.shape[0]                                        
+    
+    # This is *better* for non-spatial slices, but can't have overlays
+    aspect = model_aspect
+    
     pad = np.ceil((warray_amp.shape[0] - model.shape[0]) / 2)
 
     # Work out the size of the figure
