@@ -28,7 +28,7 @@ def add_arguments(parser):
                            'title',
                            'theta',
                            'f',
-                           'colour',
+                           'colourmap',
                            'wavelet', 
                            'wiggle_skips',
                            'base1','base2','overlay1','overlay2',
@@ -90,8 +90,6 @@ def add_arguments(parser):
                         help='Trace to use for non-spatial slice',
                         default=0
                         )
-                        
-                        
                         
     return parser
 
@@ -248,7 +246,7 @@ def run_script(args):
             
             elif layer == 'variable-density':
                 ax.imshow(warray_amp[pad:-pad,:],
-                           cmap = args.colour,
+                           cmap = args.colourmap,
                            alpha = alpha,
                            aspect='auto',
                            extent=[0,warray_amp.shape[1],

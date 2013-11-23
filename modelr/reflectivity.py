@@ -90,7 +90,7 @@ def get_reflectivity(data,
     :param reflectivity_method: the reflectivity algorithm to use
     '''
 
-    if ( np.size(theta) > 1 ):
+    if np.size(theta) > 1:
         array_shape = list(data.shape)
         array_shape.append(np.size(theta))
         array_amp = np.zeros(array_shape)
@@ -131,18 +131,29 @@ def get_reflectivity(data,
 
 def do_convolve(wavelet,f,array_amp,dt=0.001,traces=None):
     
-    if traces == None:
-        traces = array_amp.shape[1]
-            
-    duration = 0.2
-    w = wavelet(duration,dt, f)
+    # We need to expose this or deal with it somehow
+    # Duration of wavelet
+    duration = 0.20
     
-    samples = max(array_amp.shape[0], w.shape[0])
+    if np.size(f) > 1:
+        # Then we're providing a frequency panel
+        array_shape = [max(np.size(array_amp), (duration/dt))]
+        array_shape.append(np.size(f))
+        warray_amp = np.zeros(array_shape)
     
-    warray_amp = np.zeros([samples, traces])
-        
-    for i in range(traces):
-        warray_amp[:, i] = np.convolve(array_amp[:, i], w, mode='same')
+        for i, freq in enumerate(f):
+            w = wavelet(duration,dt, freq)
+            warray_amp[:, i] = np.convolve(array_amp, w, mode='same')
+
+    else:
+        # Then we're keeping constant frequency
+        if traces == None:
+            traces = array_amp.shape[1]
+        w = wavelet(duration,dt, f)
+        samples = max(array_amp.shape[0], w.shape[0])
+        warray_amp = np.zeros([samples, traces])
+        for i in range(traces):
+            warray_amp[:, i] = np.convolve(array_amp[:, i], w, mode='same')
 
     return warray_amp
 

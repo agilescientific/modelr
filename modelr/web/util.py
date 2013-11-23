@@ -11,12 +11,12 @@ import matplotlib.pyplot as plt
 from agilegeo.wavelet import ricker
 import numpy as np
 
-def get_figure_data():
+def get_figure_data(transparent=False):
     '''
     Return the current plot as a binary blob. 
     '''
     fig_path = tempfile.mktemp('.png')
-    plt.savefig(fig_path) 
+    plt.savefig(fig_path, transparent=transparent) 
     with open(fig_path, 'rb') as fd:
         data = fd.read()
         

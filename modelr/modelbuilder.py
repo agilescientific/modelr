@@ -18,6 +18,7 @@ import urllib
 import time
 from cStringIO import StringIO
 import os
+import requests
 
 # Try cairosvg again on EC2 server
 #import cairosvg
@@ -48,26 +49,6 @@ def png2array(infile, colours=2):
     Give it a PNG file name.
     Returns a NumPy array.
     """
-    
-    # Use RGB triplets... could encode as Vp, Vs, rho
-    #im_color = np.array(Image.open(infile))
-
-    ## Trying to fix bug with web files
-    #attempts = 0
-    #while True:
-    #    attempts += 1
-    #    try:
-    #        im = np.array(Image.open(infile.name).convert('P',palette=Image.ADAPTIVE, colors=colours),'f')
-    #        return np.array(im,dtype=np.uint8)
-    #    except:
-    #        if attempts > 5:
-    #            break
-    #        else:
-    #            time.sleep(1)
-    #            pass
-            
-    
-    # This works with everything except files read from the web
     im = np.array(Image.open(infile.name).convert('P',palette=Image.ADAPTIVE, colors=colours),'f')
     return np.array(im,dtype=np.uint8)
     
@@ -77,21 +58,13 @@ def svg2png(infile, colours=2):
     Give it the file object.
     Get back a file path to a PNG.
     """
-    
-    ## Trying to handle weirdness with web2array not producing anything
-    if isinstance(infile, str):
-        # Then we've not got a file object, so read the file
-        infile_name = infile
-    else:
-        infile_name = infile.name
-
     # Write the PNG output
     outfile = tempfile.NamedTemporaryFile(suffix='.png')
-    
-    # Use ImageMagick to do the conversion
-    command = ['convert', '-colors', str(colours), infile_name, outfile.name]
+
+    command = ['convert', '-colors', str(colours), infile.name, outfile.name]
     subprocess.call(command)
-        
+    
+    outfile.seek(0)
     return outfile
     
 def svg2array(infile, colours=2):
@@ -102,15 +75,15 @@ def web2array(url,colours=2):
     Given a URL string, make an SVG or PNG on the web into a NumPy array.
     Returns an array.
     '''
-    
     # Get the file type from the URL
     suffix = '.' + url.split('.')[-1]
+    
     # Make a tempfile with the correct extension
     outfile = tempfile.NamedTemporaryFile(suffix=suffix)
-    
+
     # Get the file from the web and save into the new temp file name
     urllib.urlretrieve(url,outfile.name)
-
+            
     # Call the correct converter
     if suffix == '.png':
         return png2array(outfile,colours)
@@ -242,6 +215,7 @@ def tilted(pad, thickness, traces, layers, fluid=None):
 # Test suite
 
 if __name__ == '__main__':
+    # This does not work when run in Canopy, I don't know why
     wparray =  web2array('http://www.subsurfwiki.org/mediawiki/images/8/84/Modelr_test_ellipse.svg',colours=3)
     print wparray
     print np.unique(wparray)

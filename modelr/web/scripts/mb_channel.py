@@ -29,7 +29,7 @@ def add_arguments(parser):
                            'theta',
                            'f',
                            'display',
-                           'colour',
+                           'colourmap',
                            'wavelet'
                            ]
     
@@ -115,12 +115,23 @@ def add_arguments(parser):
                         default=0.5
                         )
  
-                        
+    parser.add_argument('transparent',
+                        type=str,
+                        help='plot background transparency',
+                        default='True'
+                        options=['True','False']
+                        )
+ 
     return parser
 
 def run_script(args):
     
     matplotlib.interactive(False)
+    
+    if args.transparent == 'False' or args.transparent = 'No':
+        transparent = False
+    else:
+        transparent = True
     
     # Get the physical model (an array of rocks)    
     model = mb.channel(pad = args.pad,
@@ -224,7 +235,7 @@ def run_script(args):
             
             elif layer == 'variable-density':
                 ax.imshow(warray_amp[pad:-pad,:],
-                           cmap = args.colour,
+                           cmap = args.colourmap,
                            alpha = alpha,
                            aspect='auto',
                            extent=[0,model.shape[1],model.shape[0]*dt,0], 
@@ -263,7 +274,7 @@ def run_script(args):
         
     fig.tight_layout()
 
-    return get_figure_data()
+    return get_figure_data(transparent=transparent)
 def main():
     parser = ArgumentParser(usage=short_description,
                             description=__doc__

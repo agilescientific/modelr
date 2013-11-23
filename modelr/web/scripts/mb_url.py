@@ -27,8 +27,11 @@ def add_arguments(parser):
                            'title',
                            'theta',
                            'f',
-                           'colour',
-                           'wavelet'
+                           'colourmap',
+                           'wavelet',
+                           'wiggle_skips',
+                           'base1','base2','overlay1','overlay2',
+                           'opacity'                           
                            ]
     
     default_parsers(parser,default_parser_list)
@@ -36,28 +39,41 @@ def add_arguments(parser):
                         
     parser.add_argument('Rock0',
                         type=rock_properties_type, 
-                        help='Rock properties of background [Vp,Vs, rho]',
+                        help='Rock properties of rock 0 [Vp,Vs, rho]',
                         required=True,
                         default='2350,1150,2400'
                         )
                         
     parser.add_argument('Rock1',
                         type=rock_properties_type, 
-                        help='Rock properties of star [Vp, Vs, rho]',
+                        help='Rock properties of rock 1 [Vp, Vs, rho]',
                         required=True,
                         default='2150,1050,2300'
                         )
     
     parser.add_argument('Rock2',
                         type=rock_properties_type, 
-                        help='Rock properties of Agile [Vp, Vs, rho]',
+                        help='Rock properties of rock 2 [Vp, Vs, rho]',
                         required=False,
                         default='2500,1250,2600'
+                        )
+    
+    parser.add_argument('Rock3',
+                        type=rock_properties_type, 
+                        help='Rock properties of rock 3 [Vp, Vs, rho]',
+                        required=False,
+                        default='2600,1350,2700'
                         )
     
     parser.add_argument('url',
                         type=str, 
                         help='a URL for an image with 3 colours',
+                        required=True
+                        )
+    
+    parser.add_argument('rocks',
+                        type=int, 
+                        help='the number of rocks in the model',
                         required=True
                         )
     
@@ -71,13 +87,18 @@ def run_script(args):
     Rprop0 = args.Rock0 
     Rprop1 = args.Rock1
     Rprop2 = args.Rock2
+    Rprop3 = args.Rock3
     
     if isinstance(Rprop2, str):
         Rprop2 = None
     
-    model = mb.web2array(args.url)
+    model = mb.web2array(args.url, colours=args.rocks)
 
-    colourmap = { 0: Rprop0, 1: Rprop1, 2: Rprop2 }
+    colourmap = {0: Rprop0, 1: Rprop1}
+    if Rprop2:
+        colourmap[2] = Rprop2
+    if Rprop3:
+        colourmap[3] = Rprop3
         
     reflectivity = get_reflectivity(data=model,
                                     colourmap = colourmap,
@@ -164,7 +185,7 @@ def run_script(args):
             elif layer == 'variable-density':
                 ax.imshow(warray_amp[pad:-pad,:],
                            aspect = aspect,
-                           cmap = args.colour,
+                           cmap = args.colourmap,
                            alpha = alpha
                            )
     
@@ -185,7 +206,9 @@ def run_script(args):
                        fill_colour = 'black',
                        opacity = 0.5
                        )
-                ax.set_ylim(max(ax.set_ylim()),min(ax.set_ylim()))
+                if plot.index(layer) == 0:
+                    # then we're in an base layer so...
+                    ax.set_ylim(max(ax.set_ylim()),min(ax.set_ylim()))
 
             else:
                 # We should never get here

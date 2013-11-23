@@ -55,8 +55,8 @@ def default_parsers(parser, list_of_parsers):
                             default=25
                             )
                             
-    if 'colour' in list_of_parsers:
-        parser.add_argument('colour',
+    if 'colourmap' in list_of_parsers:
+        parser.add_argument('colourmap',
                             type=str,
                             help='Matplotlib colourmap, ageo.co/modelrcolour',
                             default='Greys'
