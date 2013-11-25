@@ -2,9 +2,9 @@ from argparse import ArgumentParser
 import matplotlib
 import matplotlib.pyplot as plt
 from modelr.web.urlargparse import rock_properties_type,\
-      reflectivity_type_hack
+      reflectivity_type
 from modelr.web.defaults import default_parsers
-from modelr.reflectivity import FUNCTIONS
+from modelr.constants import REFLECTION_MODELS as MODELS
 
 from modelr.web.util import get_figure_data
 import numpy as np
@@ -46,10 +46,10 @@ def add_arguments(parser):
                         )
                         
     parser.add_argument('reflectivity_method',
-                        type=reflectivity_type_hack,
+                        type=reflectivity_type,
                         help='Algorithm for calculating reflectivity',
                         default='zoeppritz',
-                        choices=FUNCTIONS.keys()
+                        choices=MODELS.keys()
                         ) 
                                 
 
@@ -63,7 +63,7 @@ def make_normal_dist( rock, sample_size, correlation=.8 ):
 
     :param rock: A rock properties structure.
     :param sample_size: The number of samples in the distribution.
-    :param correlation: The amount of correlation between the
+    :keyword correlation: The amount of correlation between the
                         uncertainties in each property.
 
     :returns distributions for vp, vs, rho

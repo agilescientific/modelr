@@ -5,8 +5,8 @@ Created on November 2013
 '''
 
 from modelr.web.urlargparse import reflectivity_type, wavelet_type
-from modelr.web.urlargparse import WAVELETS
-from modelr.reflectivity import MODELS
+from modelr.constants import WAVELETS
+from modelr.constants import REFLECTION_MODELS as MODELS
 
 def default_parsers(parser, list_of_parsers):
     
@@ -28,13 +28,15 @@ def default_parsers(parser, list_of_parsers):
         parser.add_argument('pad',
                             default=50,
                             type=int,
-                            help='The time in milliseconds above and below the wedge'
+                            help='The time in milliseconds above' +
+                            ' and below the wedge'
                             )
                             
     if 'reflectivity_method' in list_of_parsers:
         parser.add_argument('reflectivity_method',
                             type=reflectivity_type,
-                            help='Algorithm for calculating reflectivity',
+                            help='Algorithm for calculating' +
+                            ' reflectivity',
                             default='zoeppritz',
                             choices=MODELS.keys()
                             ) 
@@ -58,7 +60,8 @@ def default_parsers(parser, list_of_parsers):
     if 'colourmap' in list_of_parsers:
         parser.add_argument('colourmap',
                             type=str,
-                            help='Matplotlib colourmap, ageo.co/modelrcolour',
+                            help='Matplotlib colourmap, ' +
+                            'ageo.co/modelrcolour',
                             default='Greys'
                             )
         
@@ -73,7 +76,8 @@ def default_parsers(parser, list_of_parsers):
         parser.add_argument('base1',
                             type=str,
                             help='Plot 1, base layer',
-                            choices=['wiggle', 'variable-density', 'earth-model', 'reflectivity'],
+                            choices=['wiggle', 'variable-density',
+                                     'earth-model', 'reflectivity'],
                             default='variable-density'
                             )
         
@@ -81,7 +85,9 @@ def default_parsers(parser, list_of_parsers):
         parser.add_argument('overlay1',
                             type=str,
                             help='Plot 1, overlay',
-                            choices=['none', 'wiggle', 'variable-density', 'earth-model', 'reflectivity'],
+                            choices=['none', 'wiggle',
+                                     'variable-density',
+                                     'earth-model', 'reflectivity'],
                             default='none'
                             )
         
@@ -89,7 +95,9 @@ def default_parsers(parser, list_of_parsers):
         parser.add_argument('base2',
                             type=str,
                             help='Plot 2, base layer',
-                            choices=['none', 'wiggle', 'variable-density', 'earth-model', 'reflectivity'],
+                            choices=['none', 'wiggle',
+                                     'variable-density',
+                                     'earth-model', 'reflectivity'],
                             default='none'
                             )
         
@@ -97,7 +105,9 @@ def default_parsers(parser, list_of_parsers):
         parser.add_argument('overlay2',
                             type=str,
                             help='Plot 2, overlay',
-                            choices=['none', 'wiggle', 'variable-density', 'earth-model', 'reflectivity'],
+                            choices=['none', 'wiggle',
+                                     'variable-density',
+                                     'earth-model', 'reflectivity'],
                             default='none'
                             )
         

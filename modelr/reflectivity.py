@@ -90,9 +90,10 @@ def get_reflectivity(data,
         next_sample[0] += 1
         next_sample = tuple(next_sample)
         
-        ref = reflectivity_method( colourmap[data[i.multi_index]],
-                                   colourmap[data[next_sample]],
-                                   theta )
+        ref = rock_reflectivity( colourmap[data[i.multi_index]],
+                                 colourmap[data[next_sample]],
+                                 theta=theta,
+                                 method=reflectivity_method)
             
         if( np.size(theta) ==1 ):
             array_amp[i.multi_index] = ref

@@ -1,4 +1,4 @@
-import agilegeo.avo as reflect
+import agilegeo.avo as reflection
 import agilegeo.wavelet as wavelet
 
 """
@@ -18,7 +18,10 @@ REFLECTION_MODELS = {
              }
 
 WAVELETS = {
-    'ricker': ricker,
-    'ormsby': ormsby,
-    'sweep': sweep,    
+    'ricker': wavelet.ricker,
+    'ormsby': wavelet.ormsby,
+    'sweep': wavelet.sweep,    
     }
+
+dt = 0.001
+duration = 0.2

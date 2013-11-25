@@ -54,9 +54,8 @@ def reflectivity_type(str_input):
         type=reflectivity_type, help='... ', default='zoeppritz',
         choices=MODELS.keys())
      
-    '''
-    from modelr.reflectivity import MODELS
-    return MODELS[str_input]
+    ''' 
+    return REFLECTION_MODELS[str_input]
 
 
     

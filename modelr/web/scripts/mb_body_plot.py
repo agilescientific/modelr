@@ -1,17 +1,18 @@
-# -*- coding: utf-8 -*-
 '''
 Created on Apr 30, 2012
 
 @author: Sean Ross-Ross, Matt Hall, Evan Bianco
 '''
-import numpy as np
+import nmumpy as np
 import matplotlib
+
 import matplotlib.pyplot as plt
 
 from argparse import ArgumentParser
 from modelr.web.defaults import default_parsers
 from modelr.web.urlargparse import rock_properties_type
 
+from modelr.constants import dt, duration
 from modelr.web.util import wiggle
 from modelr.web.util import get_figure_data
 
@@ -39,21 +40,24 @@ def add_arguments(parser):
     
     parser.add_argument('Rock0',
                         type=rock_properties_type, 
-                        help='Rock properties of upper rock [Vp,Vs, rho]',
+                        help='Rock properties of upper rock '+ '
+                        [Vp,Vs, rho]',
                         required=True,
                         default='2000,1000,2200'
                         )
                         
     parser.add_argument('Rock1',
                         type=rock_properties_type, 
-                        help='Rock properties of middle rock [Vp, Vs, rho]',
+                        help='Rock properties of middle rock ' +
+                        '[Vp, Vs, rho]',
                         required=True,
                         default='2200,1100,2300'
                         )
     
     parser.add_argument('Rock2',
                         type=rock_properties_type, 
-                        help='Rock properties of lower rock [Vp, Vs, rho]',
+                        help='Rock properties of lower rock ' +
+                        '[Vp, Vs, rho]',
                         required=False,
                         default='2500,1200,2600'
                         )
@@ -103,12 +107,12 @@ def run_script(args):
     
     traces = args.ntraces
     
-    model = mb.body(traces = traces,
-                   pad = args.pad,
-                   margin=args.margin,
-                   left = left,
-                   right = right,
-                   layers = (args.Rock0,args.Rock1,args.Rock2)
+    model = mb.body( traces = traces,
+                     pad = args.pad,
+                     margin=args.margin,
+                     left = left,
+                     right = right,
+                     layers = (args.Rock0,args.Rock1,args.Rock2)
                    )
 
     model_aspect = float(model.shape[1]) / model.shape[0]
@@ -158,18 +162,19 @@ def run_script(args):
     
     ############################
     # Get reflectivities
-    reflectivity = get_reflectivity(data=model_to_convolve,
-                                    colourmap = colourmap,
-                                    theta = theta,
-                                    reflectivity_method = args.reflectivity_method
+    reflectivity = get_reflectivity( data=model_to_convolve,
+                                     colourmap=colourmap,
+                                     theta=theta,
+                                     reflectivity_method = \
+                                       args.reflectivity_method
                                     )
 
     # Do convolution
-    warray_amp = do_convolve(args.wavelet, f, reflectivity)
-
-    
+    wavelet = args.wavelet( duration, dt, f )
+    warray_amp = do_convolve( args.wavelet, reflectivity )
+ 
     nsamps, ntraces = warray_amp.shape
-    dt = 0.001 #sample rate of model (has to match wavelet)
+
     dx = 10    #trace offset (in metres)
     
     #################################
@@ -202,7 +207,8 @@ def run_script(args):
     # This doesn't work well for non-spatial slices
     #aspect = float(warray_amp.shape[1]) / warray_amp.shape[0]                                        
     
-    # This is *better* for non-spatial slices, but can't have overlays
+    # This is *better* for non-spatial slices, but can't have
+    # overlays
     aspect = model_aspect
     
     pad = np.ceil((warray_amp.shape[0] - model.shape[0]) / 2)
@@ -232,7 +238,8 @@ def run_script(args):
         ax = fig.add_subplot(1,l,p+1)
             
         # Each plot can have two layers (maybe more later?)
-        # Display the two layers by looping over the non-blank elements
+        # Display the two layers by looping over the non-blank
+        # elements
         # of the tuple
         for layer in filter(None, plot):
             
@@ -243,7 +250,8 @@ def run_script(args):
             else:
                 alpha = 1.0
             
-            # Now find out what sort of plot we're making on this loop...        
+            # Now find out what sort of plot we're making on this
+            # loop...        
             if layer == 'earth-model':
                 ax.imshow(model,
                            cmap = plt.get_cmap('gist_earth'),
