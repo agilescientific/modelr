@@ -3,7 +3,7 @@ Created on Apr 30, 2012
 
 @author: Sean Ross-Ross, Matt Hall, Evan Bianco
 '''
-import nmumpy as np
+import numpy as np
 import matplotlib
 
 import matplotlib.pyplot as plt
@@ -40,8 +40,8 @@ def add_arguments(parser):
     
     parser.add_argument('Rock0',
                         type=rock_properties_type, 
-                        help='Rock properties of upper rock '+ '
-                        [Vp,Vs, rho]',
+                        help='Rock properties of upper rock '+
+                        '[Vp,Vs, rho]',
                         required=True,
                         default='2000,1000,2200'
                         )
