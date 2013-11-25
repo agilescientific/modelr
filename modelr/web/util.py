@@ -29,7 +29,8 @@ def get_figure_data(transparent=False):
     
     return data
 
-def wiggle(data, dt=1, line_colour='black', fill_colour='blue', opacity=0.5, skipt=0, gain=1, lwidth=.5):
+def wiggle(data, dt=1, line_colour='black', fill_colour='blue',
+           opacity=0.5, skipt=0, gain=1, lwidth=.5):
     """
     Make a wiggle trace.
     param: data: as array      
@@ -52,9 +53,11 @@ def wiggle(data, dt=1, line_colour='black', fill_colour='blue', opacity=0.5, ski
         trace[0]=0
         trace[-1]=0  
         new_trace = gain*(trace/np.amax(data))  
-        plt.plot(i+new_trace, t, color=line_colour, linewidth=lwidth, alpha=opacity)
+        plt.plot(i+new_trace, t, color=line_colour, linewidth=lwidth,
+                 alpha=opacity)
         #fill_index = np.greater(new_trace,np.zeros(trace.shape))
-        plt.fill_betweenx(t,i+new_trace, i ,  new_trace > 0, color=fill_colour, alpha=opacity, lw=0)
+        plt.fill_betweenx(t,i+new_trace, i ,  new_trace > 0,
+                          color=fill_colour, alpha=opacity, lw=0)
     
     plt.axis('tight')
 

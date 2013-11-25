@@ -1,7 +1,8 @@
 from argparse import ArgumentParser
 import matplotlib
 import matplotlib.pyplot as plt
-from modelr.web.urlargparse import rock_properties_type, reflectivity_type_hack
+from modelr.web.urlargparse import rock_properties_type,\
+      reflectivity_type_hack
 from modelr.web.defaults import default_parsers
 from modelr.reflectivity import FUNCTIONS
 
@@ -11,7 +12,8 @@ from scipy import arcsin
 
 
 short_description = (
-    "Make a stochastic avo plot using monte carlo simulation around the rock property uncertainties."
+    "Make a stochastic avo plot using monte carlo " +
+    "simulation around the rock property uncertainties."
     )
 
 def add_arguments(parser):
@@ -24,11 +26,15 @@ def add_arguments(parser):
                             
 
     parser.add_argument('Rpp0', type=rock_properties_type, 
-                        help='rock properties of upper rock: Vp, Rho, Vs, Vp std. dev., Rho std. dev., Vs std. dev.)',
+                        help=('rock properties of upper rock: Vp, '+
+                              'Rho, Vs, Vp std. dev., Rho std. dev.,'+
+                              'Vs std. dev.'),
                         required=True)
     
     parser.add_argument('Rpp1', type=rock_properties_type, 
-                        help='rock properties of lower rock: Vp, Rho, Vs, Vp std. dev., Rho std. dev., Vs std. dev.',
+                        help=('rock properties of lower rock: Vp, ' +
+                              'Rho, Vs, Vp std. dev., Rho std. dev.,'+
+                              'Vs std. dev.'),
                         required=True)
                         
     parser.add_argument( 'iterations', type=int, default=1000, 
