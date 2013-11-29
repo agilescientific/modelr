@@ -42,15 +42,29 @@ def check_file(path_to_file, attempts=0, timeout=5, sleep_int=5):
 ###########################################
 # Image converters
 
-def png2array(infile, colours=2):
+def png2array(infile, colours=0, minimum=None, maximum=None):
     """
     Turns a PNG into a numpy array.
     
     Give it a PNG file name.
     Returns a NumPy array.
     """
+    
+    if colours == 0: colours = 1024
+    
     im = np.array(Image.open(infile.name).convert('P',palette=Image.ADAPTIVE, colors=colours),'f')
-    return np.array(im,dtype=np.uint8)
+    
+    ar = np.array(im,dtype=np.uint16)
+    
+    if minimum and maximum and (maximum > minimum):
+        amin = ar.min()
+        amax = ar.max()
+        ar -= amin
+        ar *= maximum - minimum
+        ar /= amax - amin
+        ar += minimum
+        
+    return ar
     
 def svg2png(infile, colours=2):
     """
@@ -58,6 +72,9 @@ def svg2png(infile, colours=2):
     Give it the file object.
     Get back a file path to a PNG.
     """
+    
+    if colours == 0: colours = 65536
+
     # Write the PNG output
     outfile = tempfile.NamedTemporaryFile(suffix='.png')
 
@@ -70,7 +87,7 @@ def svg2png(infile, colours=2):
 def svg2array(infile, colours=2):
     return png2array(svg2png(infile, colours),colours)
     
-def web2array(url,colours=2):
+def web2array(url,colours=0, minimum=None, maximum=None):
     '''
     Given a URL string, make an SVG or PNG on the web into a NumPy array.
     Returns an array.
@@ -86,9 +103,9 @@ def web2array(url,colours=2):
             
     # Call the correct converter
     if suffix == '.png':
-        return png2array(outfile,colours)
+        return png2array(outfile,colours, minimum, maximum)
     elif suffix == '.svg':
-        return svg2array(outfile,colours)
+        return svg2array(outfile,colours, minimum, maximum)
     else:
         pass # Throw an error
         

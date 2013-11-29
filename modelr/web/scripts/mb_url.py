@@ -68,13 +68,26 @@ def add_arguments(parser):
     parser.add_argument('url',
                         type=str, 
                         help='a URL for an image with 3 colours',
-                        required=True
+                        required=True,
+                        default='http://www.subsurfwiki.org/mediawiki/images/4/41/Modelr_test_ellipse.png'
                         )
     
     parser.add_argument('rocks',
                         type=int, 
                         help='the number of rocks in the model',
-                        required=True
+                        required=False
+                        )
+    
+    parser.add_argument('minimum',
+                        type=int, 
+                        help='the minimum impedance (or use Rocks)',
+                        required=False
+                        )
+    
+    parser.add_argument('maximum',
+                        type=int, 
+                        help='the maximum impedance (or use Rocks)',
+                        required=False
                         )
     
     return parser
@@ -89,26 +102,49 @@ def run_script(args):
     Rprop2 = args.Rock2
     Rprop3 = args.Rock3
     
+    colourmap = {}
+
+    if isinstance(Rprop0, str):
+        Rprop0 = None
+    else:
+        colourmap[0] = Rprop0 
+        
+    if isinstance(Rprop1, str):
+        Rprop1 = None
+    else:
+        colourmap[1] = Rprop1 
+        
     if isinstance(Rprop2, str):
         Rprop2 = None
-    
-    model = mb.web2array(args.url, colours=args.rocks)
-
-    colourmap = {0: Rprop0, 1: Rprop1}
-    if Rprop2:
-        colourmap[2] = Rprop2
-    if Rprop3:
-        colourmap[3] = Rprop3
+    else:
+        colourmap[2] = Rprop2 
         
-    reflectivity = get_reflectivity(data=model,
+    if isinstance(Rprop3, str):
+        Rprop3 = None
+    else:
+        colourmap[3] = Rprop3 
+        
+    method = args.reflectivity_method
+    
+    if not isinstance(args.rocks, int):
+        colours = 0
+    else:
+        colours = args.rocks
+
+    model = mb.web2array(args.url,
+                         colours = colours,
+                         minimum = args.minimum,
+                         maximum = args.maximum
+                         )
+
+    reflectivity = get_reflectivity(data = model,
                                     colourmap = colourmap,
                                     theta = args.theta,
-                                    reflectivity_method = \
-                                      args.reflectivity_method
+                                    reflectivity_method = method
                                     )
-    
+
     warray_amp = do_convolve(args.wavelet, args.f, reflectivity, traces=args.ntraces)
-    
+
     #################################
     # Build the plot(s)
        
