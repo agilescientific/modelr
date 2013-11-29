@@ -41,13 +41,8 @@ def wiggle(data, dt=1, line_colour='black', fill_colour='blue',
     """  
     
     t = np.arange(data.shape[0])*dt
-    #t_rev = np.flipud(t)
     for i in range(0,data.shape[1],skipt+1):
-    #               trace=zeros(SH['ns']+2)
-    #               dtrace=Data[:,i]
-    #               trace[1:SH['ns']]=Data[:,i]
-    #               trace[SH['ns']+1]=0
-        #trace=np.roll(data[:,i], int(50*np.sin(12*np.pi*(i/180.))) )
+
         trace = data[:,i]
         
         trace[0]=0
@@ -55,7 +50,7 @@ def wiggle(data, dt=1, line_colour='black', fill_colour='blue',
         new_trace = gain*(trace/np.amax(data))  
         plt.plot(i+new_trace, t, color=line_colour, linewidth=lwidth,
                  alpha=opacity)
-        #fill_index = np.greater(new_trace,np.zeros(trace.shape))
+    
         plt.fill_betweenx(t,i+new_trace, i ,  new_trace > 0,
                           color=fill_colour, alpha=opacity, lw=0)
     

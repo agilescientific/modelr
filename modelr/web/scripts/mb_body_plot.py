@@ -118,11 +118,9 @@ def run_script(args):
     model_aspect = float(model.shape[1]) / model.shape[0]
 
     if args.slice == 'spatial':
-        model_to_convolve = model
+        traces = range( arfs.ntraces )
     else:
-        model_to_convolve = model[:,args.trace]
-        m = model_to_convolve.reshape((1,model.shape[0])).T
-        model = np.tile(m,(1,traces))
+        traces = args.trace
         
     if args.slice == 'angle':
         theta0 = args.theta[0]
@@ -134,7 +132,7 @@ def run_script(args):
             theta_step = 1
         
         theta = np.arange(theta0, theta1, theta_step)
-        traces = np.size(theta)
+        
 
     else:
         try:
@@ -155,14 +153,17 @@ def run_script(args):
         
     else:
         f = args.f
-        
+
+
+    model = model[:, traces]
+    model = np.reshape( model, model.shape[0], np.size(traces) )
     colourmap = { 0: args.Rock0, 1: args.Rock1 }
     if not isinstance(args.Rock2, str):
         colourmap[2] = args.Rock2
     
     ############################
     # Get reflectivities
-    reflectivity = get_reflectivity( data=model_to_convolve,
+    reflectivity = get_reflectivity( data=model,
                                      colourmap=colourmap,
                                      theta=theta,
                                      reflectivity_method = \
@@ -171,9 +172,9 @@ def run_script(args):
 
     # Do convolution
     wavelet = args.wavelet( duration, dt, f )
-    warray_amp = do_convolve( args.wavelet, reflectivity )
- 
-    nsamps, ntraces = warray_amp.shape
+    warray_amp = do_convolve( wavelet, reflectivity )
+
+    nsamps, ntraces, ntheta, n_wavelets = warray_amp.shape
 
     dx = 10    #trace offset (in metres)
     
@@ -183,6 +184,7 @@ def run_script(args):
     # Simplify the plot request a bit
     # This will need to be a loop if we want to cope with
     # an arbitrary number of base plots; or allow up to 6 (say)
+    
     base1 = args.base1
     
     if args.overlay1 == 'none':
@@ -202,6 +204,23 @@ def run_script(args):
     
     plots = [(base1, overlay1), (base2, overlay2)]
 
+    if( args.slice == 'spatial' ):
+        plot_data = warray_amp[ :, traces, 0,0]
+        reflectivity = reflectivity[:,traces,0]
+        xlabel = 'trace'
+    elif( args.slice == 'angle' ):
+        plot_data = warray_amp[ :, traces, :, 0 ]
+        reflectivity = warray_amp[ :, traces, : ]
+        xlabel = 'theta'
+    elif( args.slice == 'frequency' ):
+        plot_data = warray_amp[ :, traces, 0, : ]
+        reflectivity = warray_amp[ :, traces, 0 ]
+        xlabel = 'frequency'
+    else:
+        # Default to spatial
+        plot_data = warray_amp[ :, traces, 0, 0 ]
+
+    print( warray_amp.shape )
     # Calculate some basic stuff
     
     # This doesn't work well for non-spatial slices
@@ -211,7 +230,7 @@ def run_script(args):
     # overlays
     aspect = model_aspect
     
-    pad = np.ceil((warray_amp.shape[0] - model.shape[0]) / 2)
+    pad = np.ceil((plot_data.shape[0] - model.shape[0]) / 2)
 
     # Work out the size of the figure
     each_width = 5
@@ -220,8 +239,8 @@ def run_script(args):
 
     # First, set up the matplotlib figure
     fig = plt.figure(figsize=(width, height))
-    #plt.imshow( warray_amp)
-        
+
+    
     # Start a loop for the figures...
     for plot in plots:
         
@@ -254,23 +273,24 @@ def run_script(args):
             # loop...        
             if layer == 'earth-model':
                 ax.imshow(model,
-                           cmap = plt.get_cmap('gist_earth'),
-                           vmin = np.amin(model)-np.amax(model)/2,
-                           vmax = np.amax(model)+np.amax(model)/2,
-                           alpha = alpha,
-                           aspect='auto',
-                           extent=[0,warray_amp.shape[1],
-                                   warray_amp.shape[0]*dt,0],
-                           origin = 'upper'  
+                          cmap = plt.get_cmap('gist_earth'),
+                          vmin = np.amin(model)-np.amax(model)/2,
+                          vmax = np.amax(model)+np.amax(model)/2,
+                          alpha = alpha,
+                          aspect='auto',
+                          extent=[0,plot_data.shape[1],
+                                   plot_data.shape[0]*dt,0],
+                          origin = 'upper'  
                            )
             
             elif layer == 'variable-density':
-                ax.imshow(warray_amp[pad:-pad,:],
+                
+                ax.imshow(plot_data,
                            cmap = args.colourmap,
                            alpha = alpha,
                            aspect='auto',
-                           extent=[0,warray_amp.shape[1],
-                                   warray_amp.shape[0]*dt,0], 
+                           extent=[0,plot_data.shape[1],
+                                   plot_data.shape[0]*dt,0], 
                            origin = 'upper'
                            )
     
@@ -279,14 +299,14 @@ def run_script(args):
                 ax.imshow(reflectivity,
                            cmap = plt.get_cmap('Greys'),
                            aspect='auto',
-                           extent=[0,warray_amp.shape[1],
-                                   warray_amp.shape[0]*dt,0],
+                           extent=[0,plot_data.shape[1],
+                                   plot_data.shape[0]*dt,0],
                            origin = 'upper' 
                            )
 
             elif layer == 'wiggle':
             # wiggle needs an alpha setting too
-                wiggle(warray_amp[pad:-pad,:],
+                wiggle(plot_data,
                        dt = dt,
                        skipt = args.wiggle_skips,
                        gain = args.wiggle_skips + 1,
@@ -301,12 +321,13 @@ def run_script(args):
             else:
                 # We should never get here
                 continue     
-        ax.set_xlabel('trace')
+        ax.set_xlabel(xlabel)
         ax.set_ylabel('time [s]')
         ax.set_title(args.title % locals())
-        
+ 
     fig.tight_layout()
 
+    
     return get_figure_data()
 
 # For now let's just try to get one base + overlay working

@@ -10,6 +10,8 @@ Basic methods for creating models.
 import numpy as np
 import scipy
 from agilegeo import avo as reflection
+from itertools import product
+
 
 ###################
 # New style functions
@@ -32,9 +34,11 @@ def rock_reflectivity( Rp0, Rp1, theta=0.0,
     :returns the p-wave reflection coefficients for each value of
              theta.
     """
+    ref = method( Rp0.vp, Rp0.vs, Rp0.rho,
+                  Rp1.vp, Rp1.vs, Rp1.rho,
+                  theta )
 
-    return method( Rp0.vp, Rp0.vs, Rp0.rho, Rp1.vp,
-                   Rp1.vs, Rp1.rho, theta )
+    return ref
 
 
 
@@ -60,49 +64,37 @@ def get_reflectivity(data,
                                   See agilegeo.avo for methods.
 
     :returns The vp reflectivity coefficients corresponding to the
-             earth model.
+             earth model. Data will be indexed as
+             [sample, trace, theta]
     '''
 
-    if np.size(theta) > 1:
-        array_shape = list(data.shape)
-        array_shape.append(np.size(theta))
-        array_amp = np.zeros(array_shape)
-
+    if( data.ndim == 1 ):
+        reflect_data = np.zeros( (data.size, 1, np.size( theta )) )
+        data = np.reshape( data, ( data.size, 1 ) )
     else:
-        array_amp = np.zeros( data.shape )
+        reflect_data = np.zeros( ( data.shape[0], data.shape[1],
+                                   np.size( theta ) ) )
 
     # Make an array that only has the boundaries in it
-    # This is a hack to reduce the number of times we call
-    # reflectivity_method
-    boundaries = np.where( np.diff(data, axis=0) )
+    boundaries = np.transpose(
+        np.diff(data, axis=0).nonzero())
+
     
     # Note that this array has one less row than data array,
     # the first row is 'missing'
-    
-    # Now iterate over this array, with index flags turned on
-    i = np.nditer( boundaries,
-                   flags=['multi_index'] )
-    while not i.finished:
-        
-        # These are the indices in data
-        sample = i.multi_index[0]
-        next_sample = list(i.multi_index[:])
-        next_sample[0] += 1
-        next_sample = tuple(next_sample)
-        
-        ref = rock_reflectivity( colourmap[data[i.multi_index]],
-                                 colourmap[data[next_sample]],
-                                 theta=theta,
-                                 method=reflectivity_method)
-            
-        if( np.size(theta) ==1 ):
-            array_amp[i.multi_index] = ref
-        else:
-            array_amp[i.multi_index, :] = ref
-                
-        i.iternext()
+    for i in boundaries:
 
-    return array_amp
+        # These are the indices in data
+        j = i.copy()
+        j[0] += 1
+        reflect_data[i[0],i[1],:] = \
+          rock_reflectivity( colourmap[data[ i[0],i[1] ]],
+                             colourmap[data[j[0], j[1]]],
+                             theta=theta,
+                             method=reflectivity_method )
+
+    
+    return reflect_data
 
 def do_convolve( wavelets, data,
                  traces=None ):
@@ -126,28 +118,28 @@ def do_convolve( wavelets, data,
     nsamps = data.shape[0]
     
     if( traces == None ):
-        traces = range( data.shape[1] )
-        n_traces = traces.size
-        data = np.reshape( data.shape[0], n_traces )
+        traces = np.arange( data.shape[1] )
+    ntraces = traces.size
+    ntheta = data.shape[2]
     
-    if ( np.size( wavelets.shape ) > 1 ):
+    if ( wavelets.ndim  > 1 ):
         n_wavelets = wavelets.shape[1]
     else:
         n_wavelets = 1
         wavelets = np.reshape( wavelets.size, n_wavelets )
 
     # Initialize the output
-    output = np.zeros( (nsamps, traces.size, n_wavelets ) )
+    output = np.zeros( ( nsamps, ntraces, ntheta,
+                         n_wavelets ) )
 
-    # Loop through traces
-    for trace in traces:
-        # Loop through wavelets
-        for wave in range( n_wavelets ):
-            
-            output[:,trace, wave] = \
-              np.convolve( data[:,trace],
-                           wavelet[:,wave],
-                           mode='same')
+
+    for iters in \
+      product( traces, range( ntheta), range( n_wavelets ) ):
+      
+        output[:,iters[0],iters[1], iters[2]] = \
+            np.convolve( data[:,iters[0], iters[1]],
+                              wavelets[:,iters[2]], mode='same')
+
     
     return (output)
 
