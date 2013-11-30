@@ -11,7 +11,7 @@ from argparse import ArgumentParser
 from modelr.web.defaults import default_parsers
 from modelr.web.urlargparse import rock_properties_type
 
-from modelr.constants import dt, duration
+
 from modelr.web.util import wiggle
 from modelr.web.util import get_figure_data
 
@@ -90,7 +90,7 @@ def add_arguments(parser):
     return parser
 
 def run_script(args):
-    
+    from modelr.constants import dt, duration
     matplotlib.interactive(False)
     
     """if args.transparent == 'False' or args.transparent == 'No':
@@ -163,6 +163,8 @@ def run_script(args):
                                     )
 
     # Do convolution
+    if ( ( duration / dt ) > ( reflectivity.shape[0] ) ):
+        duration = reflectivity.shape[0] * dt
     wavelet = args.wavelet( duration, dt, f )
     warray_amp = do_convolve( wavelet, reflectivity )
 
