@@ -105,9 +105,8 @@ def run_script(args):
     left = (args.left[0], args.left[1])
     right = (args.right[0], args.right[1])
     
-    traces = args.ntraces
     
-    model = mb.body( traces = traces,
+    model = mb.body( traces = args.ntraces,
                      pad = args.pad,
                      margin=args.margin,
                      left = left,
@@ -118,7 +117,7 @@ def run_script(args):
     model_aspect = float(model.shape[1]) / model.shape[0]
 
     if args.slice == 'spatial':
-        traces = range( arfs.ntraces )
+        traces = range( args.ntraces )
     else:
         traces = args.trace
         
@@ -156,7 +155,7 @@ def run_script(args):
 
 
     model = model[:, traces]
-    model = np.reshape( model, model.shape[0], np.size(traces) )
+    model = np.reshape( model, (model.shape[0], np.size(traces)) )
     colourmap = { 0: args.Rock0, 1: args.Rock1 }
     if not isinstance(args.Rock2, str):
         colourmap[2] = args.Rock2
@@ -205,22 +204,21 @@ def run_script(args):
     plots = [(base1, overlay1), (base2, overlay2)]
 
     if( args.slice == 'spatial' ):
-        plot_data = warray_amp[ :, traces, 0,0]
-        reflectivity = reflectivity[:,traces,0]
+        plot_data = warray_amp[ :, :, 0,0]
+        reflectivity = reflectivity[:,0,0]
         xlabel = 'trace'
     elif( args.slice == 'angle' ):
-        plot_data = warray_amp[ :, traces, :, 0 ]
-        reflectivity = warray_amp[ :, traces, : ]
+        plot_data = warray_amp[ :, 0, :, 0 ]
+        reflectivity = warray_amp[ :, 0, : ]
         xlabel = 'theta'
     elif( args.slice == 'frequency' ):
-        plot_data = warray_amp[ :, traces, 0, : ]
-        reflectivity = warray_amp[ :, traces, 0 ]
+        plot_data = warray_amp[ :, 0, 0, : ]
+        reflectivity = warray_amp[ :, 0, 0 ]
         xlabel = 'frequency'
     else:
         # Default to spatial
-        plot_data = warray_amp[ :, traces, 0, 0 ]
+        plot_data = warray_amp[ :, :, 0, 0 ]
 
-    print( warray_amp.shape )
     # Calculate some basic stuff
     
     # This doesn't work well for non-spatial slices

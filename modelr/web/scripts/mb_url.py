@@ -14,6 +14,7 @@ from modelr.web.urlargparse import rock_properties_type
 from modelr.web.util import wiggle
 from modelr.web.util import get_figure_data
 
+
 from modelr.reflectivity import get_reflectivity, do_convolve
 import modelr.modelbuilder as mb
 
@@ -22,7 +23,6 @@ short_description = 'Use a model from a file on the web.'
 def add_arguments(parser):
     
     default_parser_list = ['ntraces',
-                           'pad',
                            'reflectivity_method',
                            'title',
                            'theta',
@@ -76,12 +76,25 @@ def add_arguments(parser):
                         help='the number of rocks in the model',
                         required=True
                         )
+
+    parser.add_argument('slice',
+                        type=str,
+                        help='Slice to return',
+                        default='spatial',
+                        choices=['spatial', 'angle', 'frequency']
+                        )
+                        
+    parser.add_argument('trace',
+                        type=int,
+                        help='Trace to use for non-spatial slice',
+                        default=0
+                        )
     
     return parser
 
 
 def run_script(args):
-    
+    from modelr.constants import dt, duration
     matplotlib.interactive(False)
  
     Rprop0 = args.Rock0 
@@ -99,15 +112,69 @@ def run_script(args):
         colourmap[2] = Rprop2
     if Rprop3:
         colourmap[3] = Rprop3
+
+    model_aspect = float(model.shape[1]) / model.shape[0]
+
+    if args.slice == 'spatial':
+        traces = range( args.ntraces )
+    else:
+        traces = args.trace
         
-    reflectivity = get_reflectivity(data=model,
-                                    colourmap = colourmap,
-                                    theta = args.theta,
-                                    reflectivity_method = \
-                                      args.reflectivity_method
-                                    )
+    if args.slice == 'angle':
+        theta0 = args.theta[0]
+        theta1 = args.theta[1]
+        
+        try:
+            theta_step = args.theta[2]
+        except:
+            theta_step = 1
+        
+        theta = np.arange(theta0, theta1, theta_step)
+        
+
+    else:
+        try:
+            theta = args.theta[0]
+        except:
+            theta = args.theta
     
-    warray_amp = do_convolve(args.wavelet, args.f, reflectivity, traces=args.ntraces)
+    if args.slice == 'frequency':
+        f0 = args.f[0]
+        f1 = args.f[1]
+        
+        try:
+            f_step = args.f[2]
+        except:
+            f_step = 1
+        
+        f = np.arange(f0, f1, f_step)
+        
+    else:
+        f = args.f
+
+
+    model = model[:, traces]
+    model = np.reshape( model, (model.shape[0], np.size(traces)) )
+    
+    ############################
+    # Get reflectivities
+    reflectivity = get_reflectivity( data=model,
+                                     colourmap=colourmap,
+                                     theta=theta,
+                                     reflectivity_method = \
+                                       args.reflectivity_method
+                                    )
+
+    # Do convolution
+    if ( ( duration / dt ) > ( reflectivity.shape[0] ) ):
+        duration = reflectivity.shape[0] * dt
+    
+    wavelet = args.wavelet( duration, dt, f )
+    warray_amp = do_convolve( wavelet, reflectivity )
+
+    nsamps, ntraces, ntheta, n_wavelets = warray_amp.shape
+
+    dx = 10    #trace offset (in metres)
     
     #################################
     # Build the plot(s)
@@ -115,6 +182,7 @@ def run_script(args):
     # Simplify the plot request a bit
     # This will need to be a loop if we want to cope with
     # an arbitrary number of base plots; or allow up to 6 (say)
+    
     base1 = args.base1
     
     if args.overlay1 == 'none':
@@ -134,17 +202,42 @@ def run_script(args):
     
     plots = [(base1, overlay1), (base2, overlay2)]
 
+    if( args.slice == 'spatial' ):
+        plot_data = warray_amp[ :, :, 0,0]
+        reflectivity = reflectivity[:,0,0]
+        xlabel = 'trace'
+    elif( args.slice == 'angle' ):
+        plot_data = warray_amp[ :, 0, :, 0 ]
+        reflectivity = warray_amp[ :, 0, : ]
+        xlabel = 'theta'
+    elif( args.slice == 'frequency' ):
+        plot_data = warray_amp[ :, 0, 0, : ]
+        reflectivity = warray_amp[ :, 0, 0 ]
+        xlabel = 'frequency'
+    else:
+        # Default to spatial
+        plot_data = warray_amp[ :, :, 0, 0 ]
+
     # Calculate some basic stuff
-    aspect = float(warray_amp.shape[1]) / warray_amp.shape[0]                                        
-    pad = np.ceil((warray_amp.shape[0] - model.shape[0]) / 2)
+    
+    # This doesn't work well for non-spatial slices
+    #aspect = float(warray_amp.shape[1]) / warray_amp.shape[0]                                        
+    
+    # This is *better* for non-spatial slices, but can't have
+    # overlays
+    aspect = model_aspect
+    
+    pad = np.ceil((plot_data.shape[0] - model.shape[0]) / 2)
 
     # Work out the size of the figure
-    width = 10
+    each_width = 5
+    width = each_width*len(plots)
     height = width/aspect
 
     # First, set up the matplotlib figure
     fig = plt.figure(figsize=(width, height))
-        
+
+    
     # Start a loop for the figures...
     for plot in plots:
         
@@ -161,7 +254,8 @@ def run_script(args):
         ax = fig.add_subplot(1,l,p+1)
             
         # Each plot can have two layers (maybe more later?)
-        # Display the two layers by looping over the non-blank elements
+        # Display the two layers by looping over the non-blank
+        # elements
         # of the tuple
         for layer in filter(None, plot):
             
@@ -172,55 +266,67 @@ def run_script(args):
             else:
                 alpha = 1.0
             
-            # Now find out what sort of plot we're making on this loop...        
+            # Now find out what sort of plot we're making on this
+            # loop...        
             if layer == 'earth-model':
                 ax.imshow(model,
-                           aspect = aspect,
-                           cmap = plt.get_cmap('gist_earth'),
-                           vmin = np.amin(model)-np.amax(model)/2,
-                           vmax = np.amax(model)+np.amax(model)/2,
-                           alpha = alpha
+                          cmap = plt.get_cmap('gist_earth'),
+                          vmin = np.amin(model)-np.amax(model)/2,
+                          vmax = np.amax(model)+np.amax(model)/2,
+                          alpha = alpha,
+                          aspect='auto',
+                          extent=[0,plot_data.shape[1],
+                                   plot_data.shape[0]*dt,0],
+                          origin = 'upper'  
                            )
             
             elif layer == 'variable-density':
-                ax.imshow(warray_amp[pad:-pad,:],
-                           aspect = aspect,
+                
+                ax.imshow(plot_data,
                            cmap = args.colourmap,
-                           alpha = alpha
+                           alpha = alpha,
+                           aspect='auto',
+                           extent=[0,plot_data.shape[1],
+                                   plot_data.shape[0]*dt,0], 
+                           origin = 'upper'
                            )
     
             elif layer == 'reflectivity':
                 # Show unconvolved reflectivities
                 ax.imshow(reflectivity,
-                           aspect = aspect,
                            cmap = plt.get_cmap('Greys'),
-                           alpha = alpha
+                           aspect='auto',
+                           extent=[0,plot_data.shape[1],
+                                   plot_data.shape[0]*dt,0],
+                           origin = 'upper' 
                            )
 
             elif layer == 'wiggle':
-                wiggle(warray_amp[pad:-pad,:],
-                       dt = 1, # Not sure what this is for?
+            # wiggle needs an alpha setting too
+                wiggle(plot_data,
+                       dt = dt,
                        skipt = args.wiggle_skips,
                        gain = args.wiggle_skips + 1,
                        line_colour = 'black',
                        fill_colour = 'black',
                        opacity = 0.5
-                       )
+                       )    
                 if plot.index(layer) == 0:
                     # then we're in an base layer so...
                     ax.set_ylim(max(ax.set_ylim()),min(ax.set_ylim()))
 
             else:
                 # We should never get here
-                continue
-        
-        ax.set_xlabel('trace')
-        ax.set_ylabel('time [ms]')
+                continue     
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel('time [s]')
         ax.set_title(args.title % locals())
-
+ 
     fig.tight_layout()
 
+    
     return get_figure_data()
+  
     
 def main():
     parser = ArgumentParser(usage=short_description,
