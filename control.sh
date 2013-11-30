@@ -15,6 +15,10 @@ do
              echo Killed server
              break
         ;;
+      clean ) python setup.py clean --all > modelr-server.log 2>&1
+              echo Cleaned build
+              break
+        ;;
       start ) python setup.py clean --all > modelr-server.log 2>&1
               echo Cleaned build
               python setup.py install >> modelr-server.log 2>&1
