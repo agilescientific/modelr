@@ -130,6 +130,9 @@ def modelr_plot( model, colourmap, args ):
     if ( ( duration / dt ) > ( reflectivity.shape[0] ) ):
         duration = reflectivity.shape[0] * dt
     wavelet = args.wavelet( duration, dt, f )
+    if( wavelet.ndim == 1 ): wavelet = \
+      wavelet.reshape( ( wavelet.size, 1 ) )
+     
     warray_amp = do_convolve( wavelet, reflectivity )
 
     nsamps, ntraces, ntheta, n_wavelets = warray_amp.shape
