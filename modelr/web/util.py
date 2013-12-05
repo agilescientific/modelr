@@ -31,7 +31,7 @@ def get_figure_data(transparent=False):
     return data
 
 def wiggle(data, dt=1, line_colour='black', fill_colour='blue',
-           opacity=0.5, skipt=0, gain=1, lwidth=.5):
+           opacity= 0.5, skipt=0, gain=1, lwidth=.5):
     """
     Make a wiggle trace.
     param: data: as array      
@@ -272,7 +272,7 @@ def modelr_plot( model, colourmap, args ):
                        gain = args.wiggle_skips + 1,
                        line_colour = 'black',
                        fill_colour = 'black',
-                       opacity = 0.5
+                       opacity = args.opacity
                        )    
                 if plot.index(layer) == 0:
                     # then we're in an base layer so...
