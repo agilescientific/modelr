@@ -31,7 +31,7 @@ def get_figure_data(transparent=False):
     return data
 
 def wiggle(data, dt=1, line_colour='black', fill_colour='blue',
-           opacity= 0.5, skipt=0, gain=1, lwidth=.5):
+           opacity= 0.5, skipt=0, gain=1, lwidth=.5, xax=1):
     """
     Make a wiggle trace.
     param: data: as array      
@@ -39,6 +39,7 @@ def wiggle(data, dt=1, line_colour='black', fill_colour='blue',
     param: skipt: number of traces to skip
     param: gain: scaling factor
     param: lwidth: width of line
+    param: xax: scaler of axis to match image plot
     """  
     
     t = np.arange(data.shape[0])*dt
@@ -49,10 +50,11 @@ def wiggle(data, dt=1, line_colour='black', fill_colour='blue',
         trace[0]=0
         trace[-1]=0  
         new_trace = gain*(trace/np.amax(data))  
-        plt.plot(i+new_trace, t, color=line_colour, linewidth=lwidth,
-                 alpha=opacity)
+        scaler = (max(xax)-min(xax))/len(xax)
+        plt.plot( (i + new_trace) * scaler + min(xax), t, color=line_colour, 
+                linewidth=lwidth,alpha=opacity)
     
-        plt.fill_betweenx(t,i+new_trace, i ,  new_trace > 0,
+        plt.fill_betweenx(t, ((i + new_trace) * scaler)+min(xax), (i * scaler)+min(xax) ,  new_trace > 0,
                           color=fill_colour, alpha=opacity, lw=0)
     
     plt.axis('tight')
@@ -89,7 +91,7 @@ def modelr_plot( model, colourmap, args ):
         except:
             theta_step = 1
         
-        theta = np.arange(theta0, theta1, theta_step)
+        theta = np.linspace(theta0, theta1, int((theta1-theta0) / theta_step))
         
 
     else:
@@ -107,7 +109,7 @@ def modelr_plot( model, colourmap, args ):
         except:
             f_step = 1
         
-        f = np.arange(f0, f1, f_step)
+        f = np.linspace(f0, f1, (int((f1-f0)/f_step)) )
         
     else:
         f = args.f
@@ -168,14 +170,17 @@ def modelr_plot( model, colourmap, args ):
     if( args.slice == 'spatial' ):
         plot_data = warray_amp[ :, :, 0,0]
         reflectivity = reflectivity[:,:,0]
+        xax = traces
         xlabel = 'trace'
     elif( args.slice == 'angle' ):
         plot_data = warray_amp[ :, 0, :, 0 ]
         reflectivity = warray_amp[ :, 0, : ]
-        xlabel = 'theta'
+        xax = theta
+        xlabel = 'angle'
     elif( args.slice == 'frequency' ):
         plot_data = warray_amp[ :, 0, 0, : ]
         reflectivity = warray_amp[ :, 0, 0 ]
+        xax = f
         xlabel = 'frequency'
     else:
         # Default to spatial
@@ -238,7 +243,7 @@ def modelr_plot( model, colourmap, args ):
                           vmax = np.amax(model)+np.amax(model)/2,
                           alpha = alpha,
                           aspect='auto',
-                          extent=[0,plot_data.shape[1],
+                          extent=[min(xax),max(xax),
                                    plot_data.shape[0]*dt,0],
                           origin = 'upper'  
                            )
@@ -249,7 +254,7 @@ def modelr_plot( model, colourmap, args ):
                            cmap = args.colourmap,
                            alpha = alpha,
                            aspect='auto',
-                           extent=[0,plot_data.shape[1],
+                           extent=[min(xax),max(xax),
                                    plot_data.shape[0]*dt,0], 
                            origin = 'upper'
                            )
@@ -264,7 +269,7 @@ def modelr_plot( model, colourmap, args ):
                 ax.imshow(masked_refl,
                            cmap = plt.get_cmap('Greys'),
                            aspect='auto',
-                           extent=[0,plot_data.shape[1],
+                           extent=[min(xax),max(xax),
                                    plot_data.shape[0]*dt,0],
                            origin = 'upper' ,
                            vmin = np.amin( masked_refl ),
@@ -279,7 +284,8 @@ def modelr_plot( model, colourmap, args ):
                        gain = args.wiggle_skips + 1,
                        line_colour = 'black',
                        fill_colour = 'black',
-                       opacity = args.opacity
+                       opacity = args.opacity,
+                       xax = xax
                        )    
                 if plot.index(layer) == 0:
                     # then we're in an base layer so...

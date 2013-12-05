@@ -43,7 +43,7 @@ def default_parsers(parser, list_of_parsers):
                                 
     if 'theta' in list_of_parsers:
         parser.add_argument('theta',
-                            type=int,
+                            type=float,
                             action='list',
                             help='Angle of incidence',
                             default=0
@@ -51,7 +51,7 @@ def default_parsers(parser, list_of_parsers):
                             
     if 'f' in list_of_parsers:
         parser.add_argument('f',
-                            type=int,
+                            type=float,
                             action='list',
                             help='Frequency of wavelet',
                             default=25
