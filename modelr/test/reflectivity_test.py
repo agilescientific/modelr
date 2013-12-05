@@ -84,14 +84,12 @@ class ReflectivityTest( unittest.TestCase ):
             truth[:wavelets.shape[0], 50, i, :] += wavelets
         
                  
-        truth = np.roll( truth, 400, axis=0 )
+        truth = np.roll( truth, 401, axis=0 )
 
-
-        fig = plt.figure()
+        """fig = plt.figure()
         plt.plot( truth[:, 50, 0,0] )
         plt.plot( con[:, 50, 0,0])
-
-        plt.show()
+        plt.show()"""
         self.assertTrue( np.allclose( truth, con ) )
      
         
