@@ -69,7 +69,7 @@ def default_parsers(parser, list_of_parsers):
         parser.add_argument('wiggle_skips',
                             type=int,
                             help='Wiggle traces to skip',
-                            default=0
+                            default=10
                             )
                                                     
     if 'base1' in list_of_parsers:

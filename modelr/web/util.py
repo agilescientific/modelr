@@ -256,12 +256,19 @@ def modelr_plot( model, colourmap, args ):
     
             elif layer == 'reflectivity':
                 # Show unconvolved reflectivities
-                ax.imshow(reflectivity,
+                #
+                #TO DO:put transparent when null / zero
+                #
+                masked_refl = np.ma.masked_where(reflectivity == 0.0, reflectivity)
+                
+                ax.imshow(masked_refl,
                            cmap = plt.get_cmap('Greys'),
                            aspect='auto',
                            extent=[0,plot_data.shape[1],
                                    plot_data.shape[0]*dt,0],
-                           origin = 'upper' 
+                           origin = 'upper' ,
+                           vmin = np.amin( masked_refl ),
+                           vmax = np.amax( masked_refl )
                            )
 
             elif layer == 'wiggle':
