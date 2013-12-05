@@ -1,0 +1,3 @@
+v 0.2.2-alpha
+A lot of clean up to bring back to life.
+Four working scripts, body, channel, avo, and url
