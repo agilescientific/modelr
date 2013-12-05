@@ -132,7 +132,6 @@ def do_convolve( wavelets, data,
     output = np.zeros( ( nsamps, ntraces, ntheta,
                          n_wavelets ) )
 
-    print( data.shape, wavelets.shape )
     for iters in \
       product( traces, range( ntheta), range( n_wavelets ) ):
       

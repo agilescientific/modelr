@@ -164,7 +164,7 @@ def modelr_plot( model, colourmap, args ):
 
     if( args.slice == 'spatial' ):
         plot_data = warray_amp[ :, :, 0,0]
-        reflectivity = reflectivity[:,0,0]
+        reflectivity = reflectivity[:,:,0]
         xlabel = 'trace'
     elif( args.slice == 'angle' ):
         plot_data = warray_amp[ :, 0, :, 0 ]
