@@ -30,7 +30,8 @@ import requests
 # make adding fluids easy, by intersecting with body?
 
 def check_file(path_to_file, attempts=0, timeout=5, sleep_int=5):
-    if attempts < timeout and os.path.exists(path_to_file) and os.path.isfile(path_to_file): 
+    if attempts < timeout and os.path.exists(path_to_file) and \
+      os.path.isfile(path_to_file): 
         try:
             f = open(path_to_file)
             f.close()
@@ -52,7 +53,9 @@ def png2array(infile, colours=0, minimum=None, maximum=None):
     
     if colours == 0: colours = 1024
     
-    im = np.array(Image.open(infile.name).convert('P',palette=Image.ADAPTIVE, colors=colours),'f')
+    im = np.array(Image.open(infile.name).convert('P',
+                                            palette=Image.ADAPTIVE,
+                                            colors=colours),'f')
     
     ar = np.array(im,dtype=np.uint16)
     
@@ -76,9 +79,10 @@ def svg2png(infile, colours=2):
     if colours == 0: colours = 65536
 
     # Write the PNG output
-    outfile = tempfile.NamedTemporaryFile(suffix='.png')
+    outfile = tempfile.NamedTemporaryFile( suffix='.png' )
 
-    command = ['convert', '-colors', str(colours), infile.name, outfile.name]
+    command = ['convert', '-colors', str(colours), infile.name,
+               outfile.name]
     subprocess.call(command)
     
     outfile.seek(0)
@@ -89,7 +93,8 @@ def svg2array(infile, colours=2):
     
 def web2array(url,colours=0, minimum=None, maximum=None):
     '''
-    Given a URL string, make an SVG or PNG on the web into a NumPy array.
+    Given a URL string, make an SVG or PNG on the web into a
+    NumPy array.
     Returns an array.
     '''
     # Get the file type from the URL
@@ -129,19 +134,27 @@ def channel_svg(pad, thickness, traces, layers, fluid):
     width = traces
     height = 2.5*pad + thickness
     
-    dwg = svgwrite.Drawing(outfile.name, size=(width,height), profile='tiny')
-    #dwg = svgwrite.Drawing('not_used.svg', size=(width,height), profile='tiny')
+    dwg = svgwrite.Drawing(outfile.name, size=(width,height),
+                           profile='tiny')
+    #dwg = svgwrite.Drawing('not_used.svg', size=(width,height),
+    # profile='tiny')
     
     # Draw the bottom layer
-    bottom_layer = svgwrite.shapes.Rect(insert=(0,0), size=(width,height)).fill(bottom_colour)
+    bottom_layer = \
+      svgwrite.shapes.Rect(insert=(0,0),
+                            size=(width,height)).fill(bottom_colour)
     dwg.add(bottom_layer)
     
     # Draw the body
-    body = svgwrite.shapes.Ellipse(center=(width/2,pad/2), r=(0.3*width,pad+thickness)).fill(body_colour)
+    body = \
+      svgwrite.shapes.Ellipse(center=(width/2,pad/2),
+                        r=(0.3*width,pad+thickness)).fill(body_colour)
     dwg.add(body)
 
     # Draw the top layer
-    top_layer = svgwrite.shapes.Rect(insert=(0,0), size=(width,pad)).fill(top_colour)
+    top_layer = \
+      svgwrite.shapes.Rect(insert=(0,0),
+                           size=(width,pad)).fill(top_colour)
     dwg.add(top_layer)
 
     # Do this for a string
@@ -156,7 +169,8 @@ def channel_svg(pad, thickness, traces, layers, fluid):
 def body_svg(pad, margin, left, right, traces, layers, fluid):
     """
     Makes a body. Used for tilted slabs and wedges.
-    Give it pad, left and right thickness, traces, and an iterable of layers.
+    Give it pad, left and right thickness, traces, and an iterable of
+    layers.
     Returns an SVG file name.
     """    
     
@@ -165,7 +179,8 @@ def body_svg(pad, margin, left, right, traces, layers, fluid):
     width = traces
     height = 2 * pad + max(left[1],right[1])
     
-    dwg = svgwrite.Drawing(outfile.name, size=(width,height), profile='tiny')
+    dwg = svgwrite.Drawing(outfile.name, size=(width,height),
+                           profile='tiny')
     
     
     p1 = (0, pad + left[0])
@@ -204,13 +219,15 @@ def body(pad, margin, left, right, traces, layers, fluid=None):
     colours = len(layers)
     if fluid:
         colours += 1
-    return svg2array(body_svg(pad, margin, left, right, traces, layers, fluid),colours)
+    return svg2array(body_svg(pad, margin, left, right, traces,
+                              layers, fluid),colours)
     
 def channel(pad, thickness, traces, layers, fluid=None):
     colours = len(layers)
     if fluid:
         colours += 1
-    return svg2array(channel_svg(pad,thickness,traces,layers,fluid),colours)
+    return svg2array(channel_svg(pad,thickness,traces,layers,fluid),
+                     colours)
 
 # No scripts call these, but we'll leave them here for now;
 # they are both just special cases of body.   
@@ -219,13 +236,16 @@ def wedge(pad, margin, thickness, traces, layers, fluid=None):
     if fluid:
         colours += 1
     #We are just usin body_svg for everything
-    return svg2array(body_svg(pad, margin, (0,0), (0,thickness), traces, layers, fluid),colours)
+    return svg2array(body_svg(pad, margin, (0,0), (0,thickness),
+                              traces, layers, fluid),colours)
     
 def tilted(pad, thickness, traces, layers, fluid=None):
     colours = len(layers)
     if fluid:
         colours += 1
-    return svg2array(body_svg(pad, 0, (0,thickness),(1.5*thickness,2.5*thickness), traces, layers, fluid),colours)
+    return svg2array(body_svg(pad, 0, (0,thickness),
+                              (1.5*thickness,2.5*thickness), traces,
+                              layers, fluid),colours)
     
     
 ###########################################
