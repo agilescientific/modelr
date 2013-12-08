@@ -12,6 +12,7 @@ installed with pip.
 from PIL import Image
 import numpy as np
 import svgwrite
+from svgwrite import rgb
 import subprocess
 import tempfile
 import urllib
@@ -52,10 +53,10 @@ def png2array(infile, colours=0, minimum=None, maximum=None):
     """
     
     if colours == 0: colours = 1024
-    
-    im = np.array(Image.open(infile.name).convert('P',
-                                            palette=Image.ADAPTIVE,
-                                            colors=colours),'f')
+
+    img = Image.open(infile.name)
+    im = np.array(img.getdata(),
+                  np.uint8).reshape(img.size[1], img.size[0], 3)
     
     ar = np.array(im,dtype=np.uint16)
     
@@ -69,19 +70,19 @@ def png2array(infile, colours=0, minimum=None, maximum=None):
         
     return ar
     
-def svg2png(infile, colours=2):
+def svg2png(infile, colours=3):
     """
     Convert SVG file to PNG file.
     Give it the file object.
     Get back a file path to a PNG.
     """
-    
-    if colours == 0: colours = 65536
 
     # Write the PNG output
     outfile = tempfile.NamedTemporaryFile( suffix='.png' )
 
-    command = ['convert', '-colors', str(colours), infile.name,
+    command = ['convert', '-antialias', '-interpolate',
+               'nearest-neighbor', '-colors', str(colours),
+               infile.name,
                outfile.name]
     subprocess.call(command)
     
@@ -166,7 +167,7 @@ def channel_svg(pad, thickness, traces, layers, fluid):
     
     return outfile
      
-def body_svg(pad, margin, left, right, traces, layers, fluid):
+def body_svg(pad, margin, left, right, traces, layers):
     """
     Makes a body. Used for tilted slabs and wedges.
     Give it pad, left and right thickness, traces, and an iterable of
@@ -182,6 +183,14 @@ def body_svg(pad, margin, left, right, traces, layers, fluid):
     dwg = svgwrite.Drawing(outfile.name, size=(width,height),
                            profile='tiny')
     
+    # Draw the first layer
+    p1 = (0,0)
+    p2 = (width, 0)
+    p3 = (width, pad+right[0] )
+    p4 = (0, pad+right[0] )
+    points = (p1,p2,p3,p4)
+    dwg.add( svgwrite.shapes.Polygon(points).fill(
+        rgb(layers[0][0],layers[0][1], layers[0][2])))
     
     p1 = (0, pad + left[0])
     p2 = (margin, pad + left[0])
@@ -193,15 +202,18 @@ def body_svg(pad, margin, left, right, traces, layers, fluid):
     p8 = (0, pad + left[1])
     
     # If we have 3 layers, draw the bottom layer
-    if len(layers) > 2:
+    if (len(layers)) > 2:
         points = [p8, p7, p6, p5, (width, height), (0,height)]
-        subwedge = svgwrite.shapes.Polygon(points).fill('blue')
+        subwedge = \
+          svgwrite.shapes.Polygon(points).fill(
+              rgb(layers[2][0],layers[2][1], layers[2][2]))
         dwg.add(subwedge)
     
     # Draw the body
     points = [p1, p2, p3, p4, p5, p6, p7, p8]
               
-    wedge = svgwrite.shapes.Polygon(points).fill('red')
+    wedge = svgwrite.shapes.Polygon(points).fill(
+        rgb(layers[1][0],layers[1][1], layers[1][2]))
     dwg.add(wedge)
     
     # Do this for a string
