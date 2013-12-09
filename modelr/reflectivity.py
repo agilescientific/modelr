@@ -11,10 +11,21 @@ import numpy as np
 import scipy
 from agilegeo import avo as reflection
 from itertools import product
-
+from svgwrite import rgb
 
 ###################
 # New style functions
+
+def get_boundaries( data ):
+    """
+    Finds interfaces in the earth model
+    """
+    diff = np.absolute( np.diff(data, axis=0) )
+    d1 = np.sum(diff , axis=2 )
+    boundaries = np.transpose(
+        d1.nonzero())
+    return( boundaries )
+
 def rock_reflectivity( Rp0, Rp1, theta=0.0,
                        method=reflection.zoeppritz ):
     """
@@ -53,8 +64,8 @@ def get_reflectivity(data,
     and use the specified reflectivity method to calculate the Vp
     reflection coefficient.
     
-    :param data: The image data of the earth model. A 2D array indexed
-                 as [samples, traces].
+    :param data: The image data of the earth model. A 3D array indexed
+                 as [samples, traces, colour].
     :param colourmap: A lookup table (dict) that maps colour values to
                       rock property structures.
     
@@ -68,16 +79,15 @@ def get_reflectivity(data,
              [sample, trace, theta]
     '''
 
-    if( data.ndim == 1 ):
+    if( data.ndim == 2 ):
         reflect_data = np.zeros( (data.size, 1, np.size( theta )) )
-        data = np.reshape( data, ( data.size, 1 ) )
+        data = np.reshape( data, ( data.shape[0], 1, 3 ) )
     else:
         reflect_data = np.zeros( ( data.shape[0], data.shape[1],
                                    np.size( theta ) ) )
 
     # Make an array that only has the boundaries in it
-    boundaries = np.transpose(
-        np.diff(data, axis=0).nonzero())
+    boundaries = get_boundaries( data )
 
     
     # Note that this array has one less row than data array,
@@ -87,9 +97,15 @@ def get_reflectivity(data,
         # These are the indices in data
         j = i.copy()
         j[0] += 1
+
+        c1 = rgb( data[ i[0],i[1],0 ],  data[ i[0],i[1],1 ],
+                  data[ i[0],i[1],2 ] )
+        c2 = rgb( data[ j[0],j[1],0 ],  data[ j[0],j[1],1 ],
+                  data[ j[0],j[1],2 ] )
+        
         reflect_data[i[0],i[1],:] = \
-          rock_reflectivity( colourmap[data[ i[0],i[1] ]],
-                             colourmap[data[j[0], j[1]]],
+          rock_reflectivity( colourmap[c1],
+                             colourmap[c2],
                              theta=theta,
                              method=reflectivity_method )
 

@@ -3,9 +3,10 @@ from agilegeo import avo
 import numpy as np
 from modelr.rock_properties import RockProperties
 from modelr.reflectivity import rock_reflectivity, get_reflectivity, \
-     do_convolve
+     do_convolve, get_boundaries
 from agilegeo.wavelet import ricker
 
+from svgwrite import rgb
 from matplotlib import pyplot as plt
 
 class ReflectivityTest( unittest.TestCase ):
@@ -39,15 +40,30 @@ class ReflectivityTest( unittest.TestCase ):
         
         self.assertEqual( ref, ref_wrap )
 
-    
+
+    def test_get_boundaries( self ):
+
+        data = np.zeros( (100,100,3 ) )
+
+        data[:50,:,:] += [150,100,100]
+        data[50:,:,:] += [100,150,100]
+
+   
+        boundaries = get_boundaries( data )
+
+        # Check for the right number of interface indices
+        self.assertEqual( boundaries.shape, (100,2))
+        for i in range( boundaries.shape[0] ):
+            self.assertEquals( boundaries[i,0], 49 )
+        
     def test_get_reflectivity( self ):
 
-        cmap = {1:self.Rp0, 2:self.Rp1}
+        cmap = {rgb(150,100,100):self.Rp0, rgb( 100,150,100):self.Rp1}
         theta = 15.0
-        data = np.zeros( (100,100 ) )
+        data = np.zeros( (100,100,3 ) )
 
-        data[:50,:] = 1
-        data[50:,:] = 2
+        data[:50,:,:] += [150,100,100]
+        data[50:,:,:] += [100,150,100]
 
         reflectivity = \
           get_reflectivity( data, cmap, theta,
@@ -91,13 +107,7 @@ class ReflectivityTest( unittest.TestCase ):
         plt.plot( con[:, 50, 0,0])
         plt.show()"""
         self.assertTrue( np.allclose( truth, con ) )
-     
-        
-        
-        
-        
-        
-        
+
 if __name__ == '__main__':
 
     suite = \
