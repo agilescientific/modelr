@@ -56,7 +56,8 @@ def png2array(infile, colours=0, minimum=None, maximum=None):
 
     img = Image.open(infile.name)
     im = np.array(img.getdata(),
-                  np.uint8).reshape(img.size[1], img.size[0], 3)
+                  np.uint8)
+    im = im.reshape(img.size[1], img.size[0], 3)
     
     ar = np.array(im,dtype=np.uint16)
     
@@ -81,7 +82,7 @@ def svg2png(infile, colours=3):
     outfile = tempfile.NamedTemporaryFile( suffix='.png' )
 
     command = ['convert', '-antialias', '-interpolate',
-               'nearest-neighbor', '-colors', str(colours),
+               'nearest-neighbor', '-colors', str( colours ),
                infile.name,
                outfile.name]
     subprocess.call(command)
@@ -119,7 +120,7 @@ def web2array(url,colours=0, minimum=None, maximum=None):
 ###########################################
 # Code to generate geometries
 
-def channel_svg(pad, thickness, traces, layers, fluid):
+def channel_svg(pad, thickness, traces, layers):
     """
     Makes a wedge.
     Give it pad, thickness, traces, and an iterable of layers.
@@ -128,9 +129,10 @@ def channel_svg(pad, thickness, traces, layers, fluid):
     
     outfile = tempfile.NamedTemporaryFile(suffix='.svg')
     
-    top_colour = 'white'
-    body_colour = 'red'
-    bottom_colour = 'blue'
+    top_colour = rgb( layers[0][0],layers[0][1], layers[0][2] )
+    body_colour = rgb( layers[1][0],layers[1][1], layers[1][2] )
+    bottom_colour = rgb( layers[2][0],layers[2][1], layers[2][2] )
+
     
     width = traces
     height = 2.5*pad + thickness
