@@ -82,7 +82,8 @@ def svg2png(infile, colours=3):
     outfile = tempfile.NamedTemporaryFile( suffix='.png' )
 
     command = ['convert', '-interpolate',
-               'nearest-neighbor', '-colors', str( colours ),
+               'nearest-neighbor', '-colors',
+               str( colours ),
                infile.name,
                outfile.name]
     subprocess.call(command)

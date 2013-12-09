@@ -75,14 +75,12 @@ class ModelBuilderTest( unittest.TestCase ):
         self.assertTrue(np.array_equal( array[ pad+1 , 150,: ],
                                          l2 ) )
         
-        
-        
     def test_web2array( self ):
         wparray =  \
-          mb.web2array('http://www.subsurfwiki.org'+
+          mb.web2array('http://www.subsurfwiki.org' +
                     '/mediawiki/images/8/84/Modelr_test_ellipse.svg',
                     colours=3)
-
+      
 if __name__ == '__main__':
 
     suite = \
