@@ -15,6 +15,8 @@ from modelr.web.util import modelr_plot
 
 import modelr.modelbuilder as mb
 
+from svgwrite import rgb
+
 # This is required for Script help
 short_description = 'Create a simple wedge model.'
 
@@ -95,18 +97,24 @@ def run_script(args):
     else:
         transparent = True"""
     transparent = False
+    # This is a hack to conserve colors
+    l1 = (150,110,110)
+    l2 = (110,150,110)
+    l3 = (110,110,150)
+    layers= [l1,l2]
+    colourmap = { rgb(150,110,110): args.Rock0,
+                  rgb(110,150,110): args.Rock1 }
     
+    if not isinstance(args.Rock2, str):
+        colourmap[rgb( 110,110,150)] = args.Rock2
+        layers.append( l3 )
     # Get the physical model (an array of rocks)    
     model = mb.channel(pad = args.pad,
                        thickness = args.thickness,
                        traces = args.ntraces,
-                       layers = (args.Rock0,
-                                 args.Rock1,
-                                 args.Rock2)
+                       layers = layers
                    )
-    colourmap = { 0: args.Rock0, 1: args.Rock1 }
-    if not isinstance(args.Rock2, str):
-        colourmap[2] = args.Rock2
+
     
     return modelr_plot( model, colourmap, args )
   

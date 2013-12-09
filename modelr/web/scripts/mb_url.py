@@ -3,6 +3,7 @@ Created on Apr 30, 2012
 
 @author: Sean Ross-Ross, Matt Hall, Evan Bianco
 '''
+
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt

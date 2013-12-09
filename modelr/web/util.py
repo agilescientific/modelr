@@ -91,7 +91,8 @@ def modelr_plot( model, colourmap, args ):
         except:
             theta_step = 1
         
-        theta = np.linspace(theta0, theta1, int((theta1-theta0) / theta_step))
+        theta = np.linspace(theta0, theta1,
+                            int((theta1-theta0) / theta_step))
         
 
     else:
@@ -115,8 +116,8 @@ def modelr_plot( model, colourmap, args ):
         f = args.f
 
 
-    model = model[:, traces]
-    model = np.reshape( model, (model.shape[0], np.size(traces)) )
+    model = model[:, traces, :]
+    model = np.reshape( model, (model.shape[0], np.size(traces),3) )
 
     
     ############################

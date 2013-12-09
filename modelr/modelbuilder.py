@@ -81,7 +81,7 @@ def svg2png(infile, colours=3):
     # Write the PNG output
     outfile = tempfile.NamedTemporaryFile( suffix='.png' )
 
-    command = ['convert', '-antialias', '-interpolate',
+    command = ['convert', '-interpolate',
                'nearest-neighbor', '-colors', str( colours ),
                infile.name,
                outfile.name]
@@ -230,17 +230,17 @@ def body_svg(pad, margin, left, right, traces, layers):
 # Wrappers
 
 def body(pad, margin, left, right, traces, layers, fluid=None):
-    colours = len(layers)
+    colours = len( layers )
     if fluid:
         colours += 1
     return svg2array(body_svg(pad, margin, left, right, traces,
-                              layers, fluid),colours)
+                              layers),colours)
     
 def channel(pad, thickness, traces, layers, fluid=None):
     colours = len(layers)
     if fluid:
         colours += 1
-    return svg2array(channel_svg(pad,thickness,traces,layers,fluid),
+    return svg2array(channel_svg(pad,thickness,traces,layers),
                      colours)
 
 # No scripts call these, but we'll leave them here for now;
