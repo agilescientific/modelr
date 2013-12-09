@@ -102,10 +102,7 @@ class ReflectivityTest( unittest.TestCase ):
                  
         truth = np.roll( truth, 401, axis=0 )
 
-        """fig = plt.figure()
-        plt.plot( truth[:, 50, 0,0] )
-        plt.plot( con[:, 50, 0,0])
-        plt.show()"""
+    
         self.assertTrue( np.allclose( truth, con ) )
 
 if __name__ == '__main__':
