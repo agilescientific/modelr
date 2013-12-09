@@ -44,7 +44,7 @@ def check_file(path_to_file, attempts=0, timeout=5, sleep_int=5):
 ###########################################
 # Image converters
 
-def png2array(infile, colours=0, minimum=None, maximum=None):
+def png2array(infile):
     """
     Turns a PNG into a numpy array.
     
@@ -52,7 +52,7 @@ def png2array(infile, colours=0, minimum=None, maximum=None):
     Returns a NumPy array.
     """
     
-    if colours == 0: colours = 1024
+    #if colours == 0: colours = 1024
 
     img = Image.open(infile.name)
     im = np.array(img.getdata(),
@@ -61,13 +61,13 @@ def png2array(infile, colours=0, minimum=None, maximum=None):
     
     ar = np.array(im,dtype=np.uint16)
     
-    if minimum and maximum and (maximum > minimum):
-        amin = ar.min()
-        amax = ar.max()
-        ar -= amin
-        ar *= maximum - minimum
-        ar /= amax - amin
-        ar += minimum
+    ## if minimum and maximum and (maximum > minimum):
+    ##     amin = ar.min()
+    ##     amax = ar.max()
+    ##     ar -= amin
+    ##     ar *= maximum - minimum
+    ##     ar /= amax - amin
+    ##     ar += minimum
         
     return ar
     
@@ -91,7 +91,7 @@ def svg2png(infile, colours=3):
     return outfile
     
 def svg2array(infile, colours=2):
-    return png2array(svg2png(infile, colours),colours)
+    return png2array(svg2png(infile, colours))
     
 def web2array(url,colours=0, minimum=None, maximum=None):
     '''
@@ -110,9 +110,9 @@ def web2array(url,colours=0, minimum=None, maximum=None):
             
     # Call the correct converter
     if suffix == '.png':
-        return png2array(outfile,colours, minimum, maximum)
+        return png2array(outfile)
     elif suffix == '.svg':
-        return svg2array(outfile,colours, minimum, maximum)
+        return svg2array(outfile,colours)
     else:
         pass # Throw an error
         
@@ -261,12 +261,3 @@ def tilted(pad, thickness, traces, layers, fluid=None):
                               (1.5*thickness,2.5*thickness), traces,
                               layers, fluid),colours)
     
-    
-###########################################
-# Test suite
-
-if __name__ == '__main__':
-    # This does not work when run in Canopy, I don't know why
-    wparray =  web2array('http://www.subsurfwiki.org/mediawiki/images/8/84/Modelr_test_ellipse.svg',colours=3)
-    print wparray
-    print np.unique(wparray)
