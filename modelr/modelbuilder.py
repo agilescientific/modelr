@@ -54,9 +54,9 @@ def png2array(infile):
     """
     
     png_reader = png.Reader( filename = infile.name )
-    img = png_reader.asRGB()
+    img = png_reader.asDirect()
 
-    im = np.hstack(itertools.imap(np.uint16, img[2]))
+    im = np.hstack(itertools.imap(np.uint8, img[2]))
     im = np.reshape(im, (img[1], img[0], 3) )
         
     return im
@@ -70,41 +70,37 @@ def svg2png(infile, layers):
 
     # Write the PNG output
     cmapfile = tempfile.NamedTemporaryFile( suffix='.png' )
-    tmpfile = '/home/ben/temp.png'
     cmap = png.from_array( layers,mode='RGB' )
     cmap.save( cmapfile.name )
-    
+    tmpfile = tempfile.NamedTemporaryFile( suffix='.png' )
     outfile = tempfile.NamedTemporaryFile( suffix='.png' )
 
     command = ['convert',
                '+antialias',
                '-interpolate', 'integer',
                 infile.name,
-                tmpfile]
+                tmpfile.name]
     subprocess.call(command)
 
     # Make sure no new colours were added
-    command = ['convert', tmpfile,
+    command = ['convert', tmpfile.name,
                '+dither','-remap', cmapfile.name,
                 outfile.name]
     subprocess.call(command)
 
-    command = ['convert', tmpfile,
-               '+dither','-remap', cmapfile.name,
-                '/home/ben/tempout.png']
-    subprocess.call(command)
     outfile.seek(0)
     return outfile
     
 def svg2array(infile, layers):
     return png2array(svg2png(infile, layers))
     
-def web2array(url,colours=0, minimum=None, maximum=None):
+def web2array(url,colours):
     '''
     Given a URL string, make an SVG or PNG on the web into a
     NumPy array.
     Returns an array.
     '''
+    
     # Get the file type from the URL
     suffix = '.' + url.split('.')[-1]
     
@@ -113,10 +109,22 @@ def web2array(url,colours=0, minimum=None, maximum=None):
 
     # Get the file from the web and save into the new temp file name
     urllib.urlretrieve(url,outfile.name)
-            
-    # Call the correct converter
+
+    
+    #
     if suffix == '.png':
-        return png2array(outfile)
+        # Write the PNG cmap
+        cmapfile = tempfile.NamedTemporaryFile( suffix='.png' )
+        cmap = png.from_array( colours,mode='RGB' )
+        tmpfile = tempfile.NamedTemporaryFile( suffix='.png' )
+        cmap.save( cmapfile.name )
+
+        command = ['convert', outfile.name,
+                   '+dither','-remap', cmapfile.name,
+                   tmpfile.name]
+        subprocess.call(command)
+        
+        return png2array(tmpfile)
     elif suffix == '.svg':
         return svg2array(outfile,colours)
     else:

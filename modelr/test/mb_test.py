@@ -76,12 +76,20 @@ class ModelBuilderTest( unittest.TestCase ):
         # Upper and Body
         self.assertTrue(np.array_equal( array[ pad+1 , 150,: ],
                                          l2 ) )
-        
-    def test_web2array( self ):
-        wparray =  \
-          mb.web2array('http://www.subsurfwiki.org' +
-                    '/mediawiki/images/8/84/Modelr_test_ellipse.svg')
     """
+       
+    def test_web2array( self ):
+
+        colours = ((255,0,0),(255,255,255),(0,0,255) )
+        wparray =  \
+          mb.web2array(url = 'http://www.subsurfwiki.org/mediawiki/'+
+                       'images/4/41/Modelr_test_ellipse.png',
+              colours = colours)
+
+        # Test to make sure only valid colours made it in.
+        for i in wparray[:,100,:]:
+            self.assertTrue( (i[0],i[1],i[2]) in colours )
+      
 if __name__ == '__main__':
 
     suite = \

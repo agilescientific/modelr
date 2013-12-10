@@ -17,6 +17,7 @@ from modelr.web.util import modelr_plot
 
 from modelr.reflectivity import get_reflectivity, do_convolve
 import modelr.modelbuilder as mb
+from svgwrite import rgb
 
 short_description = 'Use a model from a file on the web.'
 
@@ -120,17 +121,17 @@ def run_script(args):
     if isinstance(Rprop0, str):
         Rprop0 = None
     else:
-        colourmap[0] = Rprop0 
+        colourmap[rgb(255,255,255)] = Rprop0 
         
     if isinstance(Rprop1, str):
         Rprop1 = None
     else:
-        colourmap[1] = Rprop1 
+        colourmap[rgb( 255,0,0 )] = Rprop1 
         
     if isinstance(Rprop2, str):
         Rprop2 = None
     else:
-        colourmap[2] = Rprop2 
+        colourmap[rgb( 0,0,255 )] = Rprop2 
         
     if isinstance(Rprop3, str):
         Rprop3 = None
@@ -143,10 +144,9 @@ def run_script(args):
         colours = args.rocks
 
 
+    colours = ((255,255,255),(255,0,0), (0,0,255) )
     model = mb.web2array(args.url,
-                         colours = colours,
-                         minimum = args.minimum,
-                         maximum = args.maximum
+                         colours = colours
                          )
     
     return modelr_plot( model, colourmap, args )
