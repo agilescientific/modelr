@@ -102,6 +102,9 @@ def get_reflectivity(data,
                   data[ i[0],i[1],2 ] )
         c2 = rgb( data[ j[0],j[1],0 ],  data[ j[0],j[1],1 ],
                   data[ j[0],j[1],2 ] )
+
+        if( ( c1 not in colourmap ) or ( c2 not in colourmap ) ):
+            continue
         
         reflect_data[i[0],i[1],:] = \
           rock_reflectivity( colourmap[c1],

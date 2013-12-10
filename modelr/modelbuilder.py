@@ -20,7 +20,8 @@ import time
 from cStringIO import StringIO
 import os
 import requests
-
+import png
+import itertools
 # Try cairosvg again on EC2 server
 #import cairosvg
 
@@ -52,26 +53,15 @@ def png2array(infile):
     Returns a NumPy array.
     """
     
-    #if colours == 0: colours = 1024
+    png_reader = png.Reader( filename = infile.name )
+    img = png_reader.asRGB()
 
-    img = Image.open(infile.name)
-    im = np.array(img.getdata(),
-                  np.uint8)
-    im = im.reshape(img.size[1], img.size[0], 3)
-    
-    ar = np.array(im,dtype=np.uint16)
-    
-    ## if minimum and maximum and (maximum > minimum):
-    ##     amin = ar.min()
-    ##     amax = ar.max()
-    ##     ar -= amin
-    ##     ar *= maximum - minimum
-    ##     ar /= amax - amin
-    ##     ar += minimum
+    im = np.hstack(itertools.imap(np.uint16, img[2]))
+    im = np.reshape(im, (img[1], img[0], 3) )
         
-    return ar
+    return im
     
-def svg2png(infile, colours=3):
+def svg2png(infile, layers):
     """
     Convert SVG file to PNG file.
     Give it the file object.
@@ -79,20 +69,35 @@ def svg2png(infile, colours=3):
     """
 
     # Write the PNG output
+    cmapfile = tempfile.NamedTemporaryFile( suffix='.png' )
+    tmpfile = '/home/ben/temp.png'
+    cmap = png.from_array( layers,mode='RGB' )
+    cmap.save( cmapfile.name )
+    
     outfile = tempfile.NamedTemporaryFile( suffix='.png' )
 
-    command = ['convert', '-interpolate',
-               'nearest-neighbor', '-colors',
-               str( colours ),
-               infile.name,
-               outfile.name]
+    command = ['convert',
+               '+antialias',
+               '-interpolate', 'integer',
+                infile.name,
+                tmpfile]
     subprocess.call(command)
-    
+
+    # Make sure no new colours were added
+    command = ['convert', tmpfile,
+               '+dither','-remap', cmapfile.name,
+                outfile.name]
+    subprocess.call(command)
+
+    command = ['convert', tmpfile,
+               '+dither','-remap', cmapfile.name,
+                '/home/ben/tempout.png']
+    subprocess.call(command)
     outfile.seek(0)
     return outfile
     
-def svg2array(infile, colours=2):
-    return png2array(svg2png(infile, colours))
+def svg2array(infile, layers):
+    return png2array(svg2png(infile, layers))
     
 def web2array(url,colours=0, minimum=None, maximum=None):
     '''
@@ -224,6 +229,7 @@ def body_svg(pad, margin, left, right, traces, layers):
     
     # Do this for a file
     dwg.save()
+
     
     return outfile
 
@@ -235,14 +241,13 @@ def body(pad, margin, left, right, traces, layers, fluid=None):
     if fluid:
         colours += 1
     return svg2array(body_svg(pad, margin, left, right, traces,
-                              layers),colours)
+                              layers), layers)
     
 def channel(pad, thickness, traces, layers, fluid=None):
     colours = len(layers)
     if fluid:
         colours += 1
-    return svg2array(channel_svg(pad,thickness,traces,layers),
-                     colours)
+    return svg2array(channel_svg(pad,thickness,traces,layers))
 
 # No scripts call these, but we'll leave them here for now;
 # they are both just special cases of body.   

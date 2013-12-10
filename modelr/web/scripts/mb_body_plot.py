@@ -112,11 +112,11 @@ def run_script(args):
     layers= [l1,l2]
 
     # This is a hack to conserve colors
-    colourmap = { rgb(150,110,110): args.Rock0,
-                  rgb(111,150,111): args.Rock1 }
+    colourmap = { rgb(l1[0],l1[1],l1[2]): args.Rock0,
+                  rgb(l2[0],l2[1],l2[2]): args.Rock1 }
     
     if not isinstance(args.Rock2, str):
-        colourmap[rgb( 110,110,150)] = args.Rock2
+        colourmap[rgb( l3[0],l3[1],l3[2])] = args.Rock2
         layers.append( l3 )
     
     model = mb.body( traces = args.ntraces,
