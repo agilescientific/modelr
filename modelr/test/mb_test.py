@@ -51,7 +51,7 @@ class ModelBuilderTest( unittest.TestCase ):
                                                -1,:], l3 ) )
         
         
-    """def test_channel( self ):
+    def test_channel( self ):
 
         pad = 150
         thickness = 50
@@ -63,10 +63,9 @@ class ModelBuilderTest( unittest.TestCase ):
 
         svg_file = mb.channel_svg( pad, thickness,
                                    traces, layers )
-        png_file = mb.svg2png( svg_file )
+        png_file = mb.svg2png( svg_file, layers )
         array = mb.png2array( png_file )
 
-        print( array[ pad-1 , 0, : ] )
         # Upper
         self.assertTrue( np.array_equal( array[ pad-1 , 0, : ],
                                         l1 ) )
@@ -76,7 +75,7 @@ class ModelBuilderTest( unittest.TestCase ):
         # Upper and Body
         self.assertTrue(np.array_equal( array[ pad+1 , 150,: ],
                                          l2 ) )
-    """
+    
        
     def test_web2array( self ):
 

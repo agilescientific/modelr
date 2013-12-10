@@ -253,9 +253,8 @@ def body(pad, margin, left, right, traces, layers, fluid=None):
     
 def channel(pad, thickness, traces, layers, fluid=None):
     colours = len(layers)
-    if fluid:
-        colours += 1
-    return svg2array(channel_svg(pad,thickness,traces,layers))
+    return svg2array(channel_svg(pad,thickness,traces,layers),
+                     layers)
 
 # No scripts call these, but we'll leave them here for now;
 # they are both just special cases of body.   
