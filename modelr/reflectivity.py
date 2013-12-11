@@ -19,11 +19,17 @@ from svgwrite import rgb
 def get_boundaries( data ):
     """
     Finds interfaces in the earth model
+
+    :param data: A numpy array of RGB values, indexed as
+                 (sample, trace, (R,G,B) )
+    :returns a list of indices where a boundary occurs.
     """
+    
     diff = np.absolute( np.diff(data, axis=0) )
     d1 = np.sum(diff , axis=2 )
     boundaries = np.transpose(
         d1.nonzero())
+    
     return( boundaries )
 
 def rock_reflectivity( Rp0, Rp1, theta=0.0,
@@ -79,6 +85,7 @@ def get_reflectivity(data,
              [sample, trace, theta]
     '''
 
+    # Check if we only have one trace of data, and reform the array
     if( data.ndim == 2 ):
         reflect_data = np.zeros( (data.size, 1, np.size( theta )) )
         data = np.reshape( data, ( data.shape[0], 1, 3 ) )
@@ -89,23 +96,24 @@ def get_reflectivity(data,
     # Make an array that only has the boundaries in it
     boundaries = get_boundaries( data )
 
-    
-    # Note that this array has one less row than data array,
-    # the first row is 'missing'
     for i in boundaries:
 
         # These are the indices in data
         j = i.copy()
         j[0] += 1
 
+        # Get the colourmap dictionary keys
         c1 = rgb( data[ i[0],i[1],0 ],  data[ i[0],i[1],1 ],
                   data[ i[0],i[1],2 ] )
         c2 = rgb( data[ j[0],j[1],0 ],  data[ j[0],j[1],1 ],
                   data[ j[0],j[1],2 ] )
 
+        # Don't calculate if not in the cmap. If the model was
+        # build properly this shouldn't happen.
         if( ( c1 not in colourmap ) or ( c2 not in colourmap ) ):
             continue
-        
+
+        # Get the reflectivity
         reflect_data[i[0],i[1],:] = \
           rock_reflectivity( colourmap[c1],
                              colourmap[c2],
@@ -134,6 +142,7 @@ def do_convolve( wavelets, data,
              [samples, traces, wavelet]. 
     """
 
+    # Set up the right dimensionality
     nsamps = data.shape[0]
     
     if( traces == None ):
@@ -151,6 +160,7 @@ def do_convolve( wavelets, data,
     output = np.zeros( ( nsamps, ntraces, ntheta,
                          n_wavelets ) )
 
+    # Loop through each combination of wavelet, trace, and theta
     for iters in \
       product( traces, range( ntheta), range( n_wavelets ) ):
       

@@ -40,7 +40,7 @@ def main():
         description='Web Service like google charts API',
         long_description=long_description,
         license='BSD',
-        install_requires=['agilegeo','jinja2'],
+        install_requires=['agilegeo','jinja2', 'pypng', 'requests'],
         entry_points={
                     'console_scripts': [
                             'modelr-server = modelr.web.server:main',
