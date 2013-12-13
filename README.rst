@@ -17,7 +17,7 @@ Prerequisites
    You will need scientific python (numpy, scipy, matplotlib), which come with
    Enthought Canopy:  `<http://www.enthought.com>`_
 
-   They can be alternatively be installed via pip, aptitude, ports,
+   They can alternatively be installed via pip, aptitude, ports,
    or sourced from git.
 
    Additionally, ImageMagick will need to be installed in order to
