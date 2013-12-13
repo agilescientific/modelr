@@ -1,0 +1,455 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>modelr.modelbuilder &mdash; Modelr 0.2.2-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2.2-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Modelr 0.2.2-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Modelr 0.2.2-alpha documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for modelr.modelbuilder</h1><div class="highlight"><pre>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">=====================</span>
+<span class="sd">modelr.modelbuilder</span>
+<span class="sd">=====================</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="c"># Import what we need</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">svgwrite</span>
+<span class="kn">from</span> <span class="nn">svgwrite</span> <span class="kn">import</span> <span class="n">rgb</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">urllib</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">cStringIO</span> <span class="kn">import</span> <span class="n">StringIO</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">png</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="c"># Try cairosvg again on EC2 server</span>
+<span class="c">#import cairosvg</span>
+
+<span class="c"># TODO</span>
+<span class="c"># Add os.path for files</span>
+<span class="c"># fix cairosvg</span>
+<span class="c"># make &#39;body&#39; generic</span>
+<span class="c"># make adding fluids easy, by intersecting with body?</span>
+
+<span class="k">def</span> <span class="nf">check_file</span><span class="p">(</span><span class="n">path_to_file</span><span class="p">,</span> <span class="n">attempts</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sleep_int</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">attempts</span> <span class="o">&lt;</span> <span class="n">timeout</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path_to_file</span><span class="p">)</span> <span class="ow">and</span> \
+      <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path_to_file</span><span class="p">):</span> 
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">path_to_file</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">path_to_file</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">sleep_int</span><span class="p">)</span>
+            <span class="n">check_file</span><span class="p">(</span><span class="n">path_to_file</span><span class="p">,</span> <span class="n">attempts</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            
+<span class="c">###########################################</span>
+<span class="c"># Image converters</span>
+
+<div class="viewcode-block" id="png2array"><a class="viewcode-back" href="../../reflectivity.html#modelr.modelbuilder.png2array">[docs]</a><span class="k">def</span> <span class="nf">png2array</span><span class="p">(</span><span class="n">infile</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Turns a PNG into a numpy array.</span>
+
+<span class="sd">    :param infile: Path to PNG file</span>
+<span class="sd">    :returns: a NumPy array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">png_reader</span> <span class="o">=</span> <span class="n">png</span><span class="o">.</span><span class="n">Reader</span><span class="p">(</span> <span class="n">filename</span> <span class="o">=</span> <span class="n">infile</span><span class="o">.</span><span class="n">name</span> <span class="p">)</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">png_reader</span><span class="o">.</span><span class="n">asDirect</span><span class="p">()</span>
+
+    <span class="n">im</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">imap</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">,</span> <span class="n">img</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="p">(</span><span class="n">img</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">img</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">3</span><span class="p">)</span> <span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">im</span>
+    </div>
+<div class="viewcode-block" id="svg2png"><a class="viewcode-back" href="../../reflectivity.html#modelr.modelbuilder.svg2png">[docs]</a><span class="k">def</span> <span class="nf">svg2png</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">layers</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert an SVG file to PNG file. Uses calls to Imagemagick for the</span>
+<span class="sd">    conversion.</span>
+<span class="sd">    </span>
+<span class="sd">    :param infile: File object output from tempfile.NamedTemporaryFile</span>
+<span class="sd">                   containing the path to the SVG file.</span>
+<span class="sd">    :param layers: An array or tuple of RGB values allowed in the</span>
+<span class="sd">                   output PNG. Should correspond to the number of</span>
+<span class="sd">                   rocks used in the SVG earth model.</span>
+<span class="sd">                   ((R,G,B),(R,G,B,))</span>
+<span class="sd">                   </span>
+<span class="sd">    :returns: a tempfile.NamedTemporaryFile containing the png of the</span>
+<span class="sd">             of the model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Map the allowed colourmap for the output PNG</span>
+    <span class="n">cmapfile</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span> <span class="n">suffix</span><span class="o">=</span><span class="s">&#39;.png&#39;</span> <span class="p">)</span>
+    <span class="n">cmap</span> <span class="o">=</span> <span class="n">png</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span> <span class="n">layers</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s">&#39;RGB&#39;</span> <span class="p">)</span>
+    <span class="n">cmap</span><span class="o">.</span><span class="n">save</span><span class="p">(</span> <span class="n">cmapfile</span><span class="o">.</span><span class="n">name</span> <span class="p">)</span>
+
+    <span class="c"># Make the intermediate and output tempfiles</span>
+    <span class="n">tmpfile</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span> <span class="n">suffix</span><span class="o">=</span><span class="s">&#39;.png&#39;</span> <span class="p">)</span>
+    <span class="n">outfile</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span> <span class="n">suffix</span><span class="o">=</span><span class="s">&#39;.png&#39;</span> <span class="p">)</span>
+
+    <span class="c"># Convert to PNG</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;convert&#39;</span><span class="p">,</span>
+               <span class="s">&#39;+antialias&#39;</span><span class="p">,</span>
+               <span class="s">&#39;-interpolate&#39;</span><span class="p">,</span> <span class="s">&#39;integer&#39;</span><span class="p">,</span>
+                <span class="n">infile</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">tmpfile</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+    <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+    <span class="c"># Make sure no new colours were added(ie colour interpolation)</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;convert&#39;</span><span class="p">,</span> <span class="n">tmpfile</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+               <span class="s">&#39;+dither&#39;</span><span class="p">,</span><span class="s">&#39;-remap&#39;</span><span class="p">,</span> <span class="n">cmapfile</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">outfile</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+    <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+    <span class="n">outfile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">outfile</span>
+    </div>
+<div class="viewcode-block" id="svg2array"><a class="viewcode-back" href="../../reflectivity.html#modelr.modelbuilder.svg2array">[docs]</a><span class="k">def</span> <span class="nf">svg2array</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">layers</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Wrapper for svg2png and png2array.</span>
+
+<span class="sd">    :param infile: File object output from tempfile.NamedTemporaryFile</span>
+<span class="sd">                   containing the path to the SVG file.</span>
+<span class="sd">    :param layers: An array or tuple of RGB values allowed in the</span>
+<span class="sd">                   output PNG. Should correspond to the number of</span>
+<span class="sd">                   rocks used in the SVG earth model.</span>
+<span class="sd">                   ((R,G,B),(R,G,B,))</span>
+
+<span class="sd">    :returns: a numpy array of the RGB levels from the svg.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">return</span> <span class="n">png2array</span><span class="p">(</span><span class="n">svg2png</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">layers</span><span class="p">))</span>
+    </div>
+<div class="viewcode-block" id="web2array"><a class="viewcode-back" href="../../reflectivity.html#modelr.modelbuilder.web2array">[docs]</a><span class="k">def</span> <span class="nf">web2array</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="n">colours</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Given a URL string, make an SVG or PNG on the web into a</span>
+<span class="sd">    NumPy array.</span>
+
+<span class="sd">    :param url: The url path to the SVG or PNG image.</span>
+<span class="sd">    :param colours: An array or tuple of RGB values allowed in the</span>
+<span class="sd">                    image ((R,G,B),(R,G,B), ....). Should map to the</span>
+<span class="sd">                    rocks in the model.</span>
+<span class="sd">                    </span>
+<span class="sd">    Returns an array of RGB values.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="c"># Get the file type from the URL</span>
+    <span class="n">suffix</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span> <span class="o">+</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    
+    <span class="c"># Make a tempfile with the correct extension</span>
+    <span class="n">outfile</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">)</span>
+
+    <span class="c"># Get the file from the web and save into the new temp file name</span>
+    <span class="n">urllib</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="n">outfile</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    
+    <span class="c">#</span>
+    <span class="k">if</span> <span class="n">suffix</span> <span class="o">==</span> <span class="s">&#39;.png&#39;</span><span class="p">:</span>
+        
+        <span class="c"># Write the PNG cmap to remove interpolated colours.</span>
+        <span class="n">cmapfile</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span> <span class="n">suffix</span><span class="o">=</span><span class="s">&#39;.png&#39;</span> <span class="p">)</span>
+        <span class="n">cmap</span> <span class="o">=</span> <span class="n">png</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span> <span class="n">colours</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s">&#39;RGB&#39;</span> <span class="p">)</span>
+        <span class="n">tmpfile</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span> <span class="n">suffix</span><span class="o">=</span><span class="s">&#39;.png&#39;</span> <span class="p">)</span>
+        <span class="n">cmap</span><span class="o">.</span><span class="n">save</span><span class="p">(</span> <span class="n">cmapfile</span><span class="o">.</span><span class="n">name</span> <span class="p">)</span>
+
+        <span class="n">command</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;convert&#39;</span><span class="p">,</span> <span class="n">outfile</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                   <span class="s">&#39;+dither&#39;</span><span class="p">,</span><span class="s">&#39;-remap&#39;</span><span class="p">,</span> <span class="n">cmapfile</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                   <span class="n">tmpfile</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">png2array</span><span class="p">(</span><span class="n">tmpfile</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">suffix</span> <span class="o">==</span> <span class="s">&#39;.svg&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">svg2array</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span><span class="n">colours</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span> <span class="c"># Throw an error</span>
+        
+        
+<span class="c">###########################################</span>
+<span class="c"># Code to generate geometries</span>
+</div>
+<div class="viewcode-block" id="channel_svg"><a class="viewcode-back" href="../../reflectivity.html#modelr.modelbuilder.channel_svg">[docs]</a><span class="k">def</span> <span class="nf">channel_svg</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="n">thickness</span><span class="p">,</span> <span class="n">traces</span><span class="p">,</span> <span class="n">layers</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Makes a rounded channel.</span>
+<span class="sd">    Give it pad, thickness, traces, and an iterable of layers.</span>
+<span class="sd">    Returns an SVG file.</span>
+
+<span class="sd">    :param pad: The number (n) of points on top of the channel.</span>
+<span class="sd">    :param: thickness: The radius of the channel (npoints).</span>
+<span class="sd">    :param traces: The number of traces in the channel model.</span>
+<span class="sd">    :param layers: An 3X3 array or tuple of RGB values corresponding</span>
+<span class="sd">                   to each rock layer. ((R,G,B),(R,G,B),(R,G,B)).</span>
+<span class="sd">                   Indexed as (top, channel, bottom ).</span>
+
+<span class="sd">    :returns: a tempfile object pointed to the model svg file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    
+    <span class="n">outfile</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s">&#39;.svg&#39;</span><span class="p">)</span>
+    
+    <span class="n">top_colour</span> <span class="o">=</span> <span class="n">rgb</span><span class="p">(</span> <span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="p">)</span>
+    <span class="n">body_colour</span> <span class="o">=</span> <span class="n">rgb</span><span class="p">(</span> <span class="n">layers</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">layers</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">layers</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="p">)</span>
+    <span class="n">bottom_colour</span> <span class="o">=</span> <span class="n">rgb</span><span class="p">(</span> <span class="n">layers</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">layers</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">layers</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="p">)</span>
+
+    
+    <span class="n">width</span> <span class="o">=</span> <span class="n">traces</span>
+    <span class="n">height</span> <span class="o">=</span> <span class="mf">2.5</span><span class="o">*</span><span class="n">pad</span> <span class="o">+</span> <span class="n">thickness</span>
+    
+    <span class="n">dwg</span> <span class="o">=</span> <span class="n">svgwrite</span><span class="o">.</span><span class="n">Drawing</span><span class="p">(</span><span class="n">outfile</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">width</span><span class="p">,</span><span class="n">height</span><span class="p">),</span>
+                           <span class="n">profile</span><span class="o">=</span><span class="s">&#39;tiny&#39;</span><span class="p">)</span>
+    
+    <span class="c"># Draw the bottom layer</span>
+    <span class="n">bottom_layer</span> <span class="o">=</span> \
+      <span class="n">svgwrite</span><span class="o">.</span><span class="n">shapes</span><span class="o">.</span><span class="n">Rect</span><span class="p">(</span><span class="n">insert</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
+                            <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">width</span><span class="p">,</span><span class="n">height</span><span class="p">))</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">bottom_colour</span><span class="p">)</span>
+    <span class="n">dwg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">bottom_layer</span><span class="p">)</span>
+    
+    <span class="c"># Draw the body</span>
+    <span class="n">body</span> <span class="o">=</span> \
+      <span class="n">svgwrite</span><span class="o">.</span><span class="n">shapes</span><span class="o">.</span><span class="n">Ellipse</span><span class="p">(</span><span class="n">center</span><span class="o">=</span><span class="p">(</span><span class="n">width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">pad</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>
+                        <span class="n">r</span><span class="o">=</span><span class="p">(</span><span class="mf">0.3</span><span class="o">*</span><span class="n">width</span><span class="p">,</span><span class="n">pad</span><span class="o">+</span><span class="n">thickness</span><span class="p">))</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">body_colour</span><span class="p">)</span>
+    <span class="n">dwg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+
+    <span class="c"># Draw the top layer</span>
+    <span class="n">top_layer</span> <span class="o">=</span> \
+      <span class="n">svgwrite</span><span class="o">.</span><span class="n">shapes</span><span class="o">.</span><span class="n">Rect</span><span class="p">(</span><span class="n">insert</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
+                           <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">width</span><span class="p">,</span><span class="n">pad</span><span class="p">))</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">top_colour</span><span class="p">)</span>
+    <span class="n">dwg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">top_layer</span><span class="p">)</span>
+    
+    <span class="c"># Do this for a file</span>
+    <span class="n">dwg</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="n">outfile</span>
+     </div>
+<div class="viewcode-block" id="body_svg"><a class="viewcode-back" href="../../reflectivity.html#modelr.modelbuilder.body_svg">[docs]</a><span class="k">def</span> <span class="nf">body_svg</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="n">margin</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">traces</span><span class="p">,</span> <span class="n">layers</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Makes a body. Used for tilted slabs and wedges.</span>
+<span class="sd">    Give it pad, left and right thickness, traces, and an iterable of</span>
+<span class="sd">    layers.</span>
+<span class="sd">    Returns an SVG file name.</span>
+
+<span class="sd">    :param pad: The amount of samples before the first interface.</span>
+<span class="sd">                Essentially the thickness of the first layer.</span>
+<span class="sd">    :param margin: The symmetric bottom vertices for the slab. For</span>
+<span class="sd">                   example, a value of zero would be vertices at the</span>
+<span class="sd">                   first and last trace, a value of traces/2 would</span>
+<span class="sd">                   put a vertex in the center, making a triangular</span>
+<span class="sd">                   shape. Anything in between is trapezoidal.</span>
+<span class="sd">    :param left: The depths of the wedge interface at the left edge of</span>
+<span class="sd">                 the plot. A two element tuple(d1,d2) whose difference</span>
+<span class="sd">                 defines the thickness of the wedge at the left edge.</span>
+<span class="sd">    :param right: The depths of the wedge interface at the right edge</span>
+<span class="sd">                  of the plot. A two element tuple(d1,d2) whose</span>
+<span class="sd">                  difference defines the thickness of the wedge at the</span>
+<span class="sd">                  right edge.</span>
+<span class="sd">    :param traces: The number of traces to use in the model.</span>
+<span class="sd">    :param layers: An array/list/tuple of RGB values that will be</span>
+<span class="sd">                   mapped to each layer. Indexed as</span>
+<span class="sd">                   (top, slab, bottom) as RGB values</span>
+<span class="sd">                   ((R,G,B),(R,G,B), (R,G,B) ).</span>
+
+<span class="sd">    :returns: a tempfile object holding the output svg filename.</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    
+    <span class="n">outfile</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s">&#39;.svg&#39;</span><span class="p">)</span>
+    
+    <span class="n">width</span> <span class="o">=</span> <span class="n">traces</span>
+    <span class="n">height</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pad</span> <span class="o">+</span> <span class="nb">max</span><span class="p">(</span><span class="n">left</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">right</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    
+    <span class="n">dwg</span> <span class="o">=</span> <span class="n">svgwrite</span><span class="o">.</span><span class="n">Drawing</span><span class="p">(</span><span class="n">outfile</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">width</span><span class="p">,</span><span class="n">height</span><span class="p">),</span>
+                           <span class="n">profile</span><span class="o">=</span><span class="s">&#39;tiny&#39;</span><span class="p">)</span>
+    
+    <span class="c"># Draw the first layer</span>
+    <span class="n">p1</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">p2</span> <span class="o">=</span> <span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">p3</span> <span class="o">=</span> <span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">pad</span><span class="o">+</span><span class="n">right</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">)</span>
+    <span class="n">p4</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">pad</span><span class="o">+</span><span class="n">right</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">)</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="p">(</span><span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="p">,</span><span class="n">p3</span><span class="p">,</span><span class="n">p4</span><span class="p">)</span>
+    <span class="n">dwg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span> <span class="n">svgwrite</span><span class="o">.</span><span class="n">shapes</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span><span class="n">points</span><span class="p">)</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span>
+        <span class="n">rgb</span><span class="p">(</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">])))</span>
+    
+    <span class="n">p1</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">pad</span> <span class="o">+</span> <span class="n">left</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">p2</span> <span class="o">=</span> <span class="p">(</span><span class="n">margin</span><span class="p">,</span> <span class="n">pad</span> <span class="o">+</span> <span class="n">left</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">p3</span> <span class="o">=</span> <span class="p">(</span><span class="n">width</span> <span class="o">-</span> <span class="n">margin</span><span class="p">,</span> <span class="n">pad</span> <span class="o">+</span> <span class="n">right</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">p4</span> <span class="o">=</span> <span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">pad</span> <span class="o">+</span> <span class="n">right</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">p5</span> <span class="o">=</span> <span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">pad</span> <span class="o">+</span> <span class="n">right</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">p6</span> <span class="o">=</span> <span class="p">(</span><span class="n">width</span> <span class="o">-</span> <span class="n">margin</span><span class="p">,</span> <span class="n">pad</span> <span class="o">+</span> <span class="n">right</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">p7</span> <span class="o">=</span> <span class="p">(</span><span class="n">margin</span><span class="p">,</span> <span class="n">pad</span> <span class="o">+</span> <span class="n">left</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">p8</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">pad</span> <span class="o">+</span> <span class="n">left</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    
+    <span class="c"># If we have 3 layers, draw the bottom layer</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">layers</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="p">[</span><span class="n">p8</span><span class="p">,</span> <span class="n">p7</span><span class="p">,</span> <span class="n">p6</span><span class="p">,</span> <span class="n">p5</span><span class="p">,</span> <span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">height</span><span class="p">)]</span>
+        <span class="n">subwedge</span> <span class="o">=</span> \
+          <span class="n">svgwrite</span><span class="o">.</span><span class="n">shapes</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span><span class="n">points</span><span class="p">)</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span>
+              <span class="n">rgb</span><span class="p">(</span><span class="n">layers</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">layers</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">layers</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="n">dwg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">subwedge</span><span class="p">)</span>
+    
+    <span class="c"># Draw the body</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="p">[</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">p4</span><span class="p">,</span> <span class="n">p5</span><span class="p">,</span> <span class="n">p6</span><span class="p">,</span> <span class="n">p7</span><span class="p">,</span> <span class="n">p8</span><span class="p">]</span>
+              
+    <span class="n">wedge</span> <span class="o">=</span> <span class="n">svgwrite</span><span class="o">.</span><span class="n">shapes</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span><span class="n">points</span><span class="p">)</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span>
+        <span class="n">rgb</span><span class="p">(</span><span class="n">layers</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">layers</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">layers</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]))</span>
+    <span class="n">dwg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">wedge</span><span class="p">)</span>
+    
+    <span class="c"># Do this for a file</span>
+    <span class="n">dwg</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+    
+    <span class="k">return</span> <span class="n">outfile</span>
+
+<span class="c">###########################################</span>
+<span class="c"># Wrappers</span>
+</div>
+<div class="viewcode-block" id="body"><a class="viewcode-back" href="../../reflectivity.html#modelr.modelbuilder.body">[docs]</a><span class="k">def</span> <span class="nf">body</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="n">margin</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">traces</span><span class="p">,</span> <span class="n">layers</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Makes a 3 layer earth model with the slabs defined by the user</span>
+<span class="sd">    parameters.</span>
+<span class="sd">    </span>
+<span class="sd">    :param pad: The amount of samples before the first interface.</span>
+<span class="sd">                Essentially the thickness of the first layer.</span>
+<span class="sd">    :param margin: The symmetric bottom vertices for the slab. For</span>
+<span class="sd">                   example, a value of zero would be vertices at the</span>
+<span class="sd">                   first and last trace, a value of traces/2 would</span>
+<span class="sd">                   put a vertex in the center, making a triangular</span>
+<span class="sd">                   shape. Anything in between is trapezoidal.</span>
+<span class="sd">    :param left: The depths of the wedge interface at the left edge of</span>
+<span class="sd">                 the plot. A two element tuple(d1,d2) whose difference</span>
+<span class="sd">                 defines the thickness of the wedge at the left edge.</span>
+<span class="sd">    :param right: The depths of the wedge interface at the right edge</span>
+<span class="sd">                  of the plot. A two element tuple(d1,d2) whose</span>
+<span class="sd">                  difference defines the thickness of the wedge at the</span>
+<span class="sd">                  right edge.</span>
+<span class="sd">    :param traces: The number of traces to use in the model.</span>
+<span class="sd">    :param layers: An array/list/tuple of RGB values that will be</span>
+<span class="sd">                   mapped to each layer. Indexed as</span>
+<span class="sd">                   (top, slab, bottom) as RGB values</span>
+<span class="sd">                   ((R,G,B),(R,G,B), (R,G,B) ).</span>
+<span class="sd">                   </span>
+<span class="sd">    :returns: A numpy array of RGB values for the earth model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">svg2array</span><span class="p">(</span><span class="n">body_svg</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="n">margin</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">traces</span><span class="p">,</span>
+                              <span class="n">layers</span><span class="p">),</span> <span class="n">layers</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="channel"><a class="viewcode-back" href="../../reflectivity.html#modelr.modelbuilder.channel">[docs]</a><span class="k">def</span> <span class="nf">channel</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="n">thickness</span><span class="p">,</span> <span class="n">traces</span><span class="p">,</span> <span class="n">layers</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Makes a rounded channel.</span>
+<span class="sd">    Give it pad, thickness, traces, and an iterable of layers.</span>
+<span class="sd">    Returns an SVG file.</span>
+<span class="sd">    </span>
+<span class="sd">    :param pad: The number (n) of points on top of the channel.</span>
+<span class="sd">    :param: thickness: The radius of the channel (npoints).</span>
+<span class="sd">    :param traces: The number of traces in the channel model.</span>
+<span class="sd">    :param layers: An 3X3 array or tuple of RGB values corresponding</span>
+<span class="sd">                   to each rock layer. ((R,G,B),(R,G,B),(R,G,B)).</span>
+<span class="sd">                   Indexed as (top, channel, bottom ).</span>
+
+<span class="sd">    :returns: a numpy array of the RGB values for the data model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+
+    <span class="k">return</span> <span class="n">svg2array</span><span class="p">(</span><span class="n">channel_svg</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span><span class="n">thickness</span><span class="p">,</span><span class="n">traces</span><span class="p">,</span><span class="n">layers</span><span class="p">),</span> <span class="n">layers</span><span class="p">)</span>
+
+<span class="c"># No scripts call these, but we&#39;ll leave them here for now;</span>
+<span class="c"># they are both just special cases of body. Note, they have not been</span>
+<span class="c"># updated and are likely broken.  </span></div>
+<span class="k">def</span> <span class="nf">wedge</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="n">margin</span><span class="p">,</span> <span class="n">thickness</span><span class="p">,</span> <span class="n">traces</span><span class="p">,</span> <span class="n">layers</span><span class="p">):</span>
+    <span class="n">colours</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">fluid</span><span class="p">:</span>
+        <span class="n">colours</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="c">#We are just usin body_svg for everything</span>
+    <span class="k">return</span> <span class="n">svg2array</span><span class="p">(</span><span class="n">body_svg</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="n">margin</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">thickness</span><span class="p">),</span>
+                              <span class="n">traces</span><span class="p">,</span> <span class="n">layers</span><span class="p">,</span> <span class="n">fluid</span><span class="p">),</span><span class="n">colours</span><span class="p">)</span>
+    
+<span class="k">def</span> <span class="nf">tilted</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="n">thickness</span><span class="p">,</span> <span class="n">traces</span><span class="p">,</span> <span class="n">layers</span><span class="p">,</span> <span class="n">fluid</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">colours</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">fluid</span><span class="p">:</span>
+        <span class="n">colours</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">svg2array</span><span class="p">(</span><span class="n">body_svg</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">thickness</span><span class="p">),</span>
+                              <span class="p">(</span><span class="mf">1.5</span><span class="o">*</span><span class="n">thickness</span><span class="p">,</span><span class="mf">2.5</span><span class="o">*</span><span class="n">thickness</span><span class="p">),</span> <span class="n">traces</span><span class="p">,</span>
+                              <span class="n">layers</span><span class="p">,</span> <span class="n">fluid</span><span class="p">),</span><span class="n">colours</span><span class="p">)</span>
+    
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Modelr 0.2.2-alpha documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Sean Ross-Ross, Evan Bianco, Ben Bougher, Matt Hall.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>modelr.web.server &mdash; Modelr 0.2.2-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.2.2-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Modelr 0.2.2-alpha documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">Modelr 0.2.2-alpha documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for modelr.web.server</h1><div class="highlight"><pre>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">===================</span>
+<span class="sd">modelr.web.server</span>
+<span class="sd">===================</span>
+
+<span class="sd">Main program to strat a web server.</span>
+
+<span class="sd">Created on Apr 30, 2012</span>
+
+<span class="sd">@author: sean</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">from</span> <span class="nn">jinja2</span> <span class="kn">import</span> <span class="n">Environment</span><span class="p">,</span> <span class="n">PackageLoader</span>
+<span class="kn">from</span> <span class="nn">BaseHTTPServer</span> <span class="kn">import</span> <span class="n">BaseHTTPRequestHandler</span><span class="p">,</span> <span class="n">HTTPServer</span>
+<span class="kn">from</span> <span class="nn">argparse</span> <span class="kn">import</span> <span class="n">ArgumentParser</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">listdir</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">isfile</span><span class="p">,</span> <span class="n">join</span><span class="p">,</span> <span class="n">dirname</span>
+<span class="kn">from</span> <span class="nn">urlparse</span> <span class="kn">import</span> <span class="n">urlparse</span><span class="p">,</span> <span class="n">parse_qs</span>
+<span class="kn">from</span> <span class="nn">modelr.web.urlargparse</span> <span class="kn">import</span> <span class="n">SendHelp</span><span class="p">,</span> <span class="n">ArgumentError</span><span class="p">,</span> \
+     <span class="n">URLArgumentParser</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<div class="viewcode-block" id="MyHandler"><a class="viewcode-back" href="../../../web_framework.html#modelr.web.server.MyHandler">[docs]</a><span class="k">class</span> <span class="nc">MyHandler</span><span class="p">(</span><span class="n">BaseHTTPRequestHandler</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Handles a single request.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+<div class="viewcode-block" id="MyHandler.terminate"><a class="viewcode-back" href="../../../web_framework.html#modelr.web.server.MyHandler.terminate">[docs]</a>    <span class="k">def</span> <span class="nf">terminate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        shut down the application</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">print</span> <span class="s">&quot;terminate requested&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_header</span><span class="p">(</span><span class="s">&#39;Content-type&#39;</span><span class="p">,</span> <span class="s">&#39;text/html&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_headers</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Shutting down...&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">_BaseServer__shutdown_request</span> <span class="o">=</span> <span class="bp">True</span>
+        </div>
+<div class="viewcode-block" id="MyHandler.eval_script"><a class="viewcode-back" href="../../../web_framework.html#modelr.web.server.MyHandler.eval_script">[docs]</a>    <span class="k">def</span> <span class="nf">eval_script</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">script</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Evaluate a script in the scripts directory.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        
+        <span class="c"># If no script was passed, then tell the user</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">script</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">script</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_script_error</span><span class="p">(</span><span class="s">&quot;argument &#39;script&#39; was omitted or malformed (got </span><span class="si">%r</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">script</span><span class="p">))</span>
+            <span class="k">return</span>
+        
+        <span class="c"># Otherwise, run the script</span>
+        <span class="n">dirn</span> <span class="o">=</span> <span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">)</span>
+        <span class="n">script_path</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">dirn</span><span class="p">,</span> <span class="s">&#39;scripts&#39;</span><span class="p">,</span> <span class="n">script</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">isfile</span><span class="p">(</span><span class="n">script_path</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_script_error</span><span class="p">(</span><span class="s">&quot;argument &#39;script&#39; &#39;</span><span class="si">%r</span><span class="s">&#39; was is not a valid script &quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">script</span><span class="p">[</span><span class="mi">0</span><span class="p">],))</span>
+            <span class="k">return</span>
+        
+        <span class="n">namespace</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">script_path</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fd</span><span class="p">:</span>
+            <span class="k">exec</span> <span class="n">fd</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="ow">in</span> <span class="n">namespace</span>
+            
+        <span class="k">return</span> <span class="n">namespace</span>
+</div>
+    <span class="k">def</span> <span class="nf">do_OPTIONS</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_header</span><span class="p">(</span><span class="s">&#39;Allow&#39;</span><span class="p">,</span> <span class="s">&#39;GET, OPTIONS&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_header</span><span class="p">(</span><span class="s">&#39;Access-Control-Allow-Origin&#39;</span><span class="p">,</span> <span class="s">&#39;*&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_header</span><span class="p">(</span><span class="s">&#39;Access-Control-Allow-Headers&#39;</span><span class="p">,</span> <span class="s">&#39;X-Request, X-Requested-With&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_header</span><span class="p">(</span><span class="s">&#39;Content-Length&#39;</span><span class="p">,</span> <span class="s">&#39;0&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_headers</span><span class="p">()</span>
+
+    
+<div class="viewcode-block" id="MyHandler.do_GET"><a class="viewcode-back" href="../../../web_framework.html#modelr.web.server.MyHandler.do_GET">[docs]</a>    <span class="k">def</span> <span class="nf">do_GET</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        handle a get request.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">print</span> <span class="s">&quot;my do GET&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">uri</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+            
+            <span class="n">parameters</span> <span class="o">=</span> <span class="n">parse_qs</span><span class="p">(</span><span class="n">uri</span><span class="o">.</span><span class="n">query</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">uri</span><span class="o">.</span><span class="n">path</span> <span class="o">==</span> <span class="s">&#39;/terminate&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                <span class="k">return</span>
+            
+            <span class="k">if</span> <span class="n">uri</span><span class="o">.</span><span class="n">path</span> <span class="o">==</span> <span class="s">&#39;/script_help.json&#39;</span><span class="p">:</span>
+                
+                <span class="n">script</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;script&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+                <span class="n">namespace</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_script</span><span class="p">(</span><span class="n">script</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">namespace</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span><span class="mi">400</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">end_headers</span><span class="p">()</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">send_header</span><span class="p">(</span><span class="s">&#39;Access-Control-Allow-Origin&#39;</span><span class="p">,</span> <span class="s">&#39;*&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">send_header</span><span class="p">(</span><span class="s">&#39;Access-Control-Allow-Headers&#39;</span><span class="p">,</span> <span class="s">&#39;X-Request, X-Requested-With&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">send_header</span><span class="p">(</span><span class="s">&#39;Content-type&#39;</span><span class="p">,</span> <span class="s">&#39;application/json&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">end_headers</span><span class="p">()</span>
+                
+                <span class="n">script_main</span> <span class="o">=</span> <span class="n">namespace</span><span class="p">[</span><span class="s">&#39;run_script&#39;</span><span class="p">]</span>
+                <span class="n">add_arguments</span> <span class="o">=</span> <span class="n">namespace</span><span class="p">[</span><span class="s">&#39;add_arguments&#39;</span><span class="p">]</span>
+                <span class="n">short_description</span> <span class="o">=</span> <span class="n">namespace</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;short_description&#39;</span><span class="p">,</span> <span class="s">&#39;No description&#39;</span><span class="p">)</span>
+
+                <span class="n">parser</span> <span class="o">=</span> <span class="n">URLArgumentParser</span><span class="p">(</span><span class="n">short_description</span><span class="p">)</span>
+                <span class="n">add_arguments</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+                
+                <span class="bp">self</span><span class="o">.</span><span class="n">wfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">json_data</span><span class="p">)</span>
+                
+                <span class="k">return</span>
+            
+            <span class="k">if</span> <span class="n">uri</span><span class="o">.</span><span class="n">path</span> <span class="o">==</span> <span class="s">&#39;/available_scripts.json&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">send_header</span><span class="p">(</span><span class="s">&#39;Access-Control-Allow-Origin&#39;</span><span class="p">,</span> <span class="s">&#39;*&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">send_header</span><span class="p">(</span><span class="s">&#39;Access-Control-Allow-Headers&#39;</span><span class="p">,</span> <span class="s">&#39;X-Request, X-Requested-With&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">send_header</span><span class="p">(</span><span class="s">&#39;Content-type&#39;</span><span class="p">,</span> <span class="s">&#39;application/json&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">end_headers</span><span class="p">()</span>
+                
+                <span class="n">all_scripts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_available_scripts</span><span class="p">()</span>
+                
+                <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">all_scripts</span><span class="p">)</span>
+                
+                <span class="bp">self</span><span class="o">.</span><span class="n">wfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                
+                <span class="k">return</span>
+            
+            <span class="k">if</span> <span class="n">uri</span><span class="o">.</span><span class="n">path</span> <span class="o">!=</span> <span class="s">&#39;/plot.jpeg&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">send_error</span><span class="p">(</span><span class="mi">404</span><span class="p">,</span> <span class="s">&#39;File Not Found: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+                <span class="k">return</span>
+            
+            <span class="n">script</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;script&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            
+            <span class="n">namespace</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_script</span><span class="p">(</span><span class="n">script</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">namespace</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">return</span>
+                
+            <span class="n">script_main</span> <span class="o">=</span> <span class="n">namespace</span><span class="p">[</span><span class="s">&#39;run_script&#39;</span><span class="p">]</span>
+            <span class="n">add_arguments</span> <span class="o">=</span> <span class="n">namespace</span><span class="p">[</span><span class="s">&#39;add_arguments&#39;</span><span class="p">]</span>
+            <span class="n">short_description</span> <span class="o">=</span> <span class="n">namespace</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;short_description&#39;</span><span class="p">,</span> <span class="s">&#39;No description&#39;</span><span class="p">)</span>
+            
+            <span class="k">print</span> <span class="s">&quot;parameters&quot;</span><span class="p">,</span> <span class="n">parameters</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">run_script</span><span class="p">(</span><span class="n">script</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">script_main</span><span class="p">,</span> <span class="n">add_arguments</span><span class="p">,</span> <span class="n">short_description</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span><span class="mi">400</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_header</span><span class="p">(</span><span class="s">&#39;Content-type&#39;</span><span class="p">,</span> <span class="s">&#39;text/html&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">end_headers</span><span class="p">()</span>
+
+            <span class="n">tb</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+            
+            <span class="n">tb</span> <span class="o">=</span> <span class="s">&#39;&lt;/br&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tb</span><span class="p">)</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">wfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&lt;b&gt;Python Error&lt;/b&gt;&lt;/br&gt;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&lt;div&gt;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">tb</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&lt;/div&gt;&#39;</span><span class="p">)</span>
+            
+            <span class="k">raise</span>
+        </div>
+<div class="viewcode-block" id="MyHandler.run_script"><a class="viewcode-back" href="../../../web_framework.html#modelr.web.server.MyHandler.run_script">[docs]</a>    <span class="k">def</span> <span class="nf">run_script</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">script</span><span class="p">,</span> <span class="n">script_main</span><span class="p">,</span> <span class="n">add_arguments</span><span class="p">,</span> <span class="n">short_description</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Run a script </span>
+<span class="sd">        </span>
+<span class="sd">        :param script_main: the main method of the script</span>
+<span class="sd">        :param add_arguments: poplate an argument parser</span>
+<span class="sd">        :param short_description: a short description of the script</span>
+<span class="sd">        :param parameters: the parameters from the get request</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">URLArgumentParser</span><span class="p">(</span><span class="n">short_description</span><span class="p">)</span>
+        <span class="n">add_arguments</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_params</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">SendHelp</span> <span class="k">as</span> <span class="n">helper</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_header</span><span class="p">(</span><span class="s">&#39;Content-type&#39;</span><span class="p">,</span> <span class="s">&#39;text/html&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">end_headers</span><span class="p">()</span>
+            
+            <span class="n">template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">jenv</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s">&#39;ScriptHelp.html&#39;</span><span class="p">)</span>
+            
+            <span class="k">print</span> <span class="n">parameters</span>
+            <span class="n">html</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">script</span><span class="o">=</span><span class="n">script</span><span class="p">,</span> <span class="n">parser</span><span class="o">=</span><span class="n">parser</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">except</span> <span class="n">ArgumentError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span><span class="mi">400</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_header</span><span class="p">(</span><span class="s">&#39;Content-type&#39;</span><span class="p">,</span> <span class="s">&#39;text/html&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">end_headers</span><span class="p">()</span>
+                
+            <span class="bp">self</span><span class="o">.</span><span class="n">wfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&lt;p&gt;&lt;b&gt;Error:&lt;/b&gt; </span><span class="si">%s</span><span class="s">&lt;/p&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">err</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">help_html</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="n">jpeg_data</span> <span class="o">=</span> <span class="n">script_main</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> 
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_header</span><span class="p">(</span><span class="s">&#39;Content-type&#39;</span><span class="p">,</span> <span class="s">&#39;image/jpeg&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_headers</span><span class="p">()</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">wfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">jpeg_data</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="MyHandler.get_available_scripts"><a class="viewcode-back" href="../../../web_framework.html#modelr.web.server.MyHandler.get_available_scripts">[docs]</a>    <span class="k">def</span> <span class="nf">get_available_scripts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns a list of all the scripts in the scripts directory.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">scripts_dir</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s">&#39;scripts&#39;</span><span class="p">)</span>
+
+        <span class="n">available_scripts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">script</span> <span class="ow">in</span> <span class="n">listdir</span><span class="p">(</span><span class="n">scripts_dir</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">script</span> <span class="o">==</span> <span class="s">&#39;__init__.py&#39;</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">elif</span> <span class="ow">not</span> <span class="n">script</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;.py&#39;</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                
+                <span class="n">namespace</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">scripts_dir</span><span class="p">,</span> <span class="n">script</span><span class="p">),</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fd</span><span class="p">:</span>
+                    <span class="k">exec</span> <span class="n">fd</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="ow">in</span> <span class="n">namespace</span>
+                <span class="n">short_doc</span> <span class="o">=</span> <span class="n">namespace</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;short_description&#39;</span><span class="p">,</span> <span class="s">&#39;No doc&#39;</span><span class="p">)</span>
+                <span class="k">print</span> <span class="n">script</span><span class="p">,</span> <span class="n">namespace</span>
+                <span class="n">available_scripts</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">script</span><span class="p">,</span> <span class="n">short_doc</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">print</span> <span class="n">script</span><span class="p">,</span> <span class="n">e</span>
+            
+        <span class="k">return</span> <span class="n">available_scripts</span>
+            </div>
+<div class="viewcode-block" id="MyHandler.send_script_error"><a class="viewcode-back" href="../../../web_framework.html#modelr.web.server.MyHandler.send_script_error">[docs]</a>    <span class="k">def</span> <span class="nf">send_script_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Send an error related to the script.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        
+        <span class="n">template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">jenv</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s">&#39;ScriptError.html&#39;</span><span class="p">)</span>
+        
+            
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span><span class="mi">400</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_header</span><span class="p">(</span><span class="s">&#39;Content-type&#39;</span><span class="p">,</span> <span class="s">&#39;text/html&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_headers</span><span class="p">()</span>
+        
+        <span class="n">html</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">,</span> <span class="n">available_scripts</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_available_scripts</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
+        
+        </div>
+    <span class="k">def</span> <span class="nf">do_POST</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_error</span><span class="p">(</span><span class="mi">404</span><span class="p">,</span> <span class="s">&#39;Post request not supportd yet: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../web_framework.html#modelr.web.server.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Main method starts a server and exits on </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="n">__doc__</span><span class="p">)</span>
+    
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;--host&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-p&#39;</span><span class="p">,</span> <span class="s">&#39;--port&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">80</span><span class="p">)</span>
+
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">server</span> <span class="o">=</span> <span class="n">HTTPServer</span><span class="p">((</span><span class="n">args</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">port</span><span class="p">),</span> <span class="n">MyHandler</span><span class="p">)</span>
+        <span class="n">server</span><span class="o">.</span><span class="n">jenv</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span><span class="n">loader</span><span class="o">=</span><span class="n">PackageLoader</span><span class="p">(</span><span class="s">&#39;modelr&#39;</span><span class="p">,</span>
+                                                    <span class="s">&#39;web/templates&#39;</span><span class="p">))</span>
+        
+        <span class="k">print</span> <span class="s">&#39;started httpserver...&#39;</span>
+        <span class="n">server</span><span class="o">.</span><span class="n">serve_forever</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&#39;^C received, shutting down server&#39;</span>
+        <span class="n">server</span><span class="o">.</span><span class="n">socket</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+    
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">Modelr 0.2.2-alpha documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Sean Ross-Ross, Evan Bianco, Ben Bougher, Matt Hall.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

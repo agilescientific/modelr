@@ -1,0 +1,274 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Web Framework &mdash; Modelr 0.2.2-alpha documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.2.2-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Modelr 0.2.2-alpha documentation" href="index.html" />
+    <link rel="next" title="Models and Calculations" href="reflectivity.html" />
+    <link rel="prev" title="Getting Started" href="getting_started.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="reflectivity.html" title="Models and Calculations"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="getting_started.html" title="Getting Started"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Modelr 0.2.2-alpha documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-modelr.web">
+<span id="web-framework"></span><h1>Web Framework<a class="headerlink" href="#module-modelr.web" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="modelr-web">
+<h2>modelr.web<a class="headerlink" href="#modelr-web" title="Permalink to this headline">¶</a></h2>
+<p>This module contains the Web specific parts of modelr.</p>
+</div>
+<span class="target" id="module-modelr.web.server"></span><div class="section" id="modelr-web-server">
+<h2>modelr.web.server<a class="headerlink" href="#modelr-web-server" title="Permalink to this headline">¶</a></h2>
+<p>Main program to strat a web server.</p>
+<p>Created on Apr 30, 2012</p>
+<p>&#64;author: sean</p>
+<dl class="class">
+<dt id="modelr.web.server.MyHandler">
+<em class="property">class </em><tt class="descclassname">modelr.web.server.</tt><tt class="descname">MyHandler</tt><big>(</big><em>request</em>, <em>client_address</em>, <em>server</em><big>)</big><a class="reference internal" href="_modules/modelr/web/server.html#MyHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.web.server.MyHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles a single request.</p>
+<dl class="method">
+<dt id="modelr.web.server.MyHandler.do_GET">
+<tt class="descname">do_GET</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/modelr/web/server.html#MyHandler.do_GET"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.web.server.MyHandler.do_GET" title="Permalink to this definition">¶</a></dt>
+<dd><p>handle a get request.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="modelr.web.server.MyHandler.eval_script">
+<tt class="descname">eval_script</tt><big>(</big><em>script</em><big>)</big><a class="reference internal" href="_modules/modelr/web/server.html#MyHandler.eval_script"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.web.server.MyHandler.eval_script" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate a script in the scripts directory.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="modelr.web.server.MyHandler.get_available_scripts">
+<tt class="descname">get_available_scripts</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/modelr/web/server.html#MyHandler.get_available_scripts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.web.server.MyHandler.get_available_scripts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of all the scripts in the scripts directory.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="modelr.web.server.MyHandler.run_script">
+<tt class="descname">run_script</tt><big>(</big><em>script</em>, <em>script_main</em>, <em>add_arguments</em>, <em>short_description</em>, <em>parameters</em><big>)</big><a class="reference internal" href="_modules/modelr/web/server.html#MyHandler.run_script"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.web.server.MyHandler.run_script" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run a script</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>script_main</strong> &#8211; the main method of the script</li>
+<li><strong>add_arguments</strong> &#8211; poplate an argument parser</li>
+<li><strong>short_description</strong> &#8211; a short description of the script</li>
+<li><strong>parameters</strong> &#8211; the parameters from the get request</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="modelr.web.server.MyHandler.send_script_error">
+<tt class="descname">send_script_error</tt><big>(</big><em>msg</em><big>)</big><a class="reference internal" href="_modules/modelr/web/server.html#MyHandler.send_script_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.web.server.MyHandler.send_script_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send an error related to the script.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="modelr.web.server.MyHandler.terminate">
+<tt class="descname">terminate</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/modelr/web/server.html#MyHandler.terminate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.web.server.MyHandler.terminate" title="Permalink to this definition">¶</a></dt>
+<dd><p>shut down the application</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="modelr.web.server.main">
+<tt class="descclassname">modelr.web.server.</tt><tt class="descname">main</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/modelr/web/server.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.web.server.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main method starts a server and exits on</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-modelr.web.urlargparse"></span><div class="section" id="modelr-web-urlparse">
+<h2>modelr.web.urlparse<a class="headerlink" href="#modelr-web-urlparse" title="Permalink to this headline">¶</a></h2>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference external" href="http://docs.python.org/dev/library/argparse.html">http://docs.python.org/dev/library/argparse.html</a></p>
+</div>
+<dl class="class">
+<dt id="modelr.web.urlargparse.Argument">
+<em class="property">class </em><tt class="descclassname">modelr.web.urlargparse.</tt><tt class="descname">Argument</tt><big>(</big><em>name</em>, <em>required=False</em>, <em>default=None</em>, <em>type=&lt;type 'str'&gt;</em>, <em>action='store'</em>, <em>help=''</em>, <em>choices=None</em><big>)</big><a class="reference internal" href="_modules/modelr/web/urlargparse.html#Argument"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.web.urlargparse.Argument" title="Permalink to this definition">¶</a></dt>
+<dd><p>A place holder for a url argument.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="modelr.web.urlargparse.ArgumentError">
+<em class="property">exception </em><tt class="descclassname">modelr.web.urlargparse.</tt><tt class="descname">ArgumentError</tt><a class="reference internal" href="_modules/modelr/web/urlargparse.html#ArgumentError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.web.urlargparse.ArgumentError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exception to be called when arguments are not as expected by the
+parser.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="modelr.web.urlargparse.SendHelp">
+<em class="property">exception </em><tt class="descclassname">modelr.web.urlargparse.</tt><tt class="descname">SendHelp</tt><big>(</big><em>html</em><big>)</big><a class="reference internal" href="_modules/modelr/web/urlargparse.html#SendHelp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.web.urlargparse.SendHelp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exception to be called when the help argument is found.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="modelr.web.urlargparse.URLArgumentParser">
+<em class="property">class </em><tt class="descclassname">modelr.web.urlargparse.</tt><tt class="descname">URLArgumentParser</tt><big>(</big><em>description</em><big>)</big><a class="reference internal" href="_modules/modelr/web/urlargparse.html#URLArgumentParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.web.urlargparse.URLArgumentParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a key=value arguments in a url string.</p>
+<p>Modeled after <a class="reference external" href="http://docs.python.org/dev/library/argparse.html">http://docs.python.org/dev/library/argparse.html</a></p>
+<dl class="method">
+<dt id="modelr.web.urlargparse.URLArgumentParser.add_argument">
+<tt class="descname">add_argument</tt><big>(</big><em>name</em>, <em>required=False</em>, <em>default=None</em>, <em>type=&lt;type 'str'&gt;</em>, <em>action='store'</em>, <em>help=''</em>, <em>choices=None</em><big>)</big><a class="reference internal" href="_modules/modelr/web/urlargparse.html#URLArgumentParser.add_argument"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.web.urlargparse.URLArgumentParser.add_argument" title="Permalink to this definition">¶</a></dt>
+<dd><p>add an argument</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="modelr.web.urlargparse.URLArgumentParser.parse_params">
+<tt class="descname">parse_params</tt><big>(</big><em>params</em><big>)</big><a class="reference internal" href="_modules/modelr/web/urlargparse.html#URLArgumentParser.parse_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.web.urlargparse.URLArgumentParser.parse_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>parse the arguments gotten by urlparse.parse_qs</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="modelr.web.urlargparse.URLArgumentParser.parse_ulr">
+<tt class="descname">parse_ulr</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/modelr/web/urlargparse.html#URLArgumentParser.parse_ulr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.web.urlargparse.URLArgumentParser.parse_ulr" title="Permalink to this definition">¶</a></dt>
+<dd><p>parse a url into its argument.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="modelr.web.urlargparse.reflectivity_type">
+<tt class="descclassname">modelr.web.urlargparse.</tt><tt class="descname">reflectivity_type</tt><big>(</big><em>str_input</em><big>)</big><a class="reference internal" href="_modules/modelr/web/urlargparse.html#reflectivity_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.web.urlargparse.reflectivity_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>To be used as the &#8216;type&#8217; value in an Argument.</p>
+<p>Takes a string as input and returns an arbitrary value.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;reflectivity_model&#39;</span><span class="p">,</span>
+<span class="nb">type</span><span class="o">=</span><span class="n">reflectivity_type</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;... &#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;zoeppritz&#39;</span><span class="p">,</span>
+<span class="n">choices</span><span class="o">=</span><span class="n">MODELS</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="modelr.web.urlargparse.wavelet_type">
+<tt class="descclassname">modelr.web.urlargparse.</tt><tt class="descname">wavelet_type</tt><big>(</big><em>str_input</em><big>)</big><a class="reference internal" href="_modules/modelr/web/urlargparse.html#wavelet_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.web.urlargparse.wavelet_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>To be used as the &#8216;type&#8217; value in an Argument.</p>
+<p>Takes a string as input and returns an arbitrary value.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;wavelet&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">wavelet_type</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;... &#39;</span><span class="p">,</span>
+                    <span class="n">default</span><span class="o">=</span><span class="s">&#39;ricker&#39;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">WAVELETS</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Web Framework</a><ul>
+<li><a class="reference internal" href="#modelr-web">modelr.web</a></li>
+<li><a class="reference internal" href="#modelr-web-server">modelr.web.server</a></li>
+<li><a class="reference internal" href="#modelr-web-urlparse">modelr.web.urlparse</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="getting_started.html"
+                        title="previous chapter">Getting Started</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="reflectivity.html"
+                        title="next chapter">Models and Calculations</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/web_framework.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="reflectivity.html" title="Models and Calculations"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="getting_started.html" title="Getting Started"
+             >previous</a> |</li>
+        <li><a href="index.html">Modelr 0.2.2-alpha documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Sean Ross-Ross, Evan Bianco, Ben Bougher, Matt Hall.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

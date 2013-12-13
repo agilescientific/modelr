@@ -1,0 +1,231 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Channel Plot – models a rounded channel in the earth &mdash; Modelr 0.2.2-alpha documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.2.2-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Modelr 0.2.2-alpha documentation" href="index.html" />
+    <link rel="up" title="modelr User’s Manual" href="manual.html" />
+    <link rel="next" title="URL Plot – uses a png or svg from a url as an earth model" href="url_plot.html" />
+    <link rel="prev" title="Body Plot – models generic slabs of a 3 rock earth" href="body_plot.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="url_plot.html" title="URL Plot – uses a png or svg from a url as an earth model"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="body_plot.html" title="Body Plot – models generic slabs of a 3 rock earth"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Modelr 0.2.2-alpha documentation</a> &raquo;</li>
+          <li><a href="manual.html" accesskey="U">modelr User&#8217;s Manual</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="channel-plot-models-a-rounded-channel-in-the-earth">
+<h1>Channel Plot &#8211; models a rounded channel in the earth<a class="headerlink" href="#channel-plot-models-a-rounded-channel-in-the-earth" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="rock0">
+<h2>Rock0<a class="headerlink" href="#rock0" title="Permalink to this headline">¶</a></h2>
+<p>The properties of the first rock in the earth model( Vp, Vs, Rho ).</p>
+</div>
+<div class="section" id="rock1">
+<h2>Rock1<a class="headerlink" href="#rock1" title="Permalink to this headline">¶</a></h2>
+<p>The rock properties of the channel( Vp, Vs, Rho ).</p>
+</div>
+<div class="section" id="rock2">
+<h2>Rock2<a class="headerlink" href="#rock2" title="Permalink to this headline">¶</a></h2>
+<p>Rock properties underneath the channel( Vp,Vs,Rho ). Optional argument that will default to Rock1.</p>
+</div>
+<div class="section" id="thickness">
+<h2>Thickness<a class="headerlink" href="#thickness" title="Permalink to this headline">¶</a></h2>
+<p>The depth of the channel. TODO( in what units?????)</p>
+</div>
+<div class="section" id="margin">
+<h2>margin<a class="headerlink" href="#margin" title="Permalink to this headline">¶</a></h2>
+<p>TODO????????????</p>
+</div>
+<div class="section" id="slice">
+<h2>slice<a class="headerlink" href="#slice" title="Permalink to this headline">¶</a></h2>
+<p>Specify which type of cross-section to plot.</p>
+</div>
+<div class="section" id="trace">
+<h2>trace<a class="headerlink" href="#trace" title="Permalink to this headline">¶</a></h2>
+<p>If not using a spatial slice, specify which trace to view a cross section of.</p>
+</div>
+<div class="section" id="title">
+<h2>title<a class="headerlink" href="#title" title="Permalink to this headline">¶</a></h2>
+<p>Text string used for the figure title</p>
+</div>
+<div class="section" id="ntraces">
+<h2>ntraces<a class="headerlink" href="#ntraces" title="Permalink to this headline">¶</a></h2>
+<p>The number of traces to use in the model. This is equivalent to the number of lateral samples in the earth model.</p>
+</div>
+<div class="section" id="pad">
+<h2>pad<a class="headerlink" href="#pad" title="Permalink to this headline">¶</a></h2>
+<p>The amount of earth before the feature of interest. This becomes the depth of the first rock layer.</p>
+</div>
+<div class="section" id="reflectivity-method">
+<h2>reflectivity_method<a class="headerlink" href="#reflectivity-method" title="Permalink to this headline">¶</a></h2>
+<p>The reflectivity model to use when calculating the AVO response.</p>
+</div>
+<div class="section" id="theta">
+<h2>theta<a class="headerlink" href="#theta" title="Permalink to this headline">¶</a></h2>
+<p>The angle to use for the reflectivity calculation. For multiple angles, enter text as start,end, spacing.</p>
+</div>
+<div class="section" id="wavelet">
+<h2>wavelet<a class="headerlink" href="#wavelet" title="Permalink to this headline">¶</a></h2>
+<p>The type of wavelet to use as the impulse. Additionally controlled by the f argument.</p>
+</div>
+<div class="section" id="f">
+<h2>f<a class="headerlink" href="#f" title="Permalink to this headline">¶</a></h2>
+<p>The frequency(ies) of the wavelet. Ormsby requires four(comma delimited), sweep requires two, and ricker requires one. A wavelet bank of ricker wavelets can be generated by using a frequency list: start, stop, step.</p>
+</div>
+<div class="section" id="colourmap">
+<h2>colourmap<a class="headerlink" href="#colourmap" title="Permalink to this headline">¶</a></h2>
+<p>A matplotlib colour map to use for earthmodels.</p>
+</div>
+<div class="section" id="wiggle-skips">
+<h2>wiggle_skips<a class="headerlink" href="#wiggle-skips" title="Permalink to this headline">¶</a></h2>
+<p>Using a wiggle overlay can crowd the plot, so setting a number wiggles to skip will reduce the number of wiggles displayed.</p>
+</div>
+<div class="section" id="base1">
+<h2>base1<a class="headerlink" href="#base1" title="Permalink to this headline">¶</a></h2>
+<p>The base plot for the first plot pane. Overlays will be plotted on top of this plot.</p>
+</div>
+<div class="section" id="overlay1">
+<h2>overlay1<a class="headerlink" href="#overlay1" title="Permalink to this headline">¶</a></h2>
+<p>Overlay plot for the first plot plane. Plot will draw over base1 plot.</p>
+</div>
+<div class="section" id="base2">
+<h2>base2<a class="headerlink" href="#base2" title="Permalink to this headline">¶</a></h2>
+<p>The base plot for the first plot pane. Overlays will be plotted on top of this plot.</p>
+</div>
+<div class="section" id="overlay2">
+<h2>overlay2<a class="headerlink" href="#overlay2" title="Permalink to this headline">¶</a></h2>
+<p>Overlay plot for the first plot plane. Plot will draw over base2 plot.</p>
+</div>
+<div class="section" id="opacity">
+<h2>opacity<a class="headerlink" href="#opacity" title="Permalink to this headline">¶</a></h2>
+<p>Set the opacity of the overlay plots.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Channel Plot &#8211; models a rounded channel in the earth</a><ul>
+<li><a class="reference internal" href="#rock0">Rock0</a></li>
+<li><a class="reference internal" href="#rock1">Rock1</a></li>
+<li><a class="reference internal" href="#rock2">Rock2</a></li>
+<li><a class="reference internal" href="#thickness">Thickness</a></li>
+<li><a class="reference internal" href="#margin">margin</a></li>
+<li><a class="reference internal" href="#slice">slice</a></li>
+<li><a class="reference internal" href="#trace">trace</a></li>
+<li><a class="reference internal" href="#title">title</a></li>
+<li><a class="reference internal" href="#ntraces">ntraces</a></li>
+<li><a class="reference internal" href="#pad">pad</a></li>
+<li><a class="reference internal" href="#reflectivity-method">reflectivity_method</a></li>
+<li><a class="reference internal" href="#theta">theta</a></li>
+<li><a class="reference internal" href="#wavelet">wavelet</a></li>
+<li><a class="reference internal" href="#f">f</a></li>
+<li><a class="reference internal" href="#colourmap">colourmap</a></li>
+<li><a class="reference internal" href="#wiggle-skips">wiggle_skips</a></li>
+<li><a class="reference internal" href="#base1">base1</a></li>
+<li><a class="reference internal" href="#overlay1">overlay1</a></li>
+<li><a class="reference internal" href="#base2">base2</a></li>
+<li><a class="reference internal" href="#overlay2">overlay2</a></li>
+<li><a class="reference internal" href="#opacity">opacity</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="body_plot.html"
+                        title="previous chapter">Body Plot &#8211; models generic slabs of a 3 rock earth</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="url_plot.html"
+                        title="next chapter">URL Plot &#8211; uses a png or svg from a url as an earth model</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/channel_plot.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="url_plot.html" title="URL Plot – uses a png or svg from a url as an earth model"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="body_plot.html" title="Body Plot – models generic slabs of a 3 rock earth"
+             >previous</a> |</li>
+        <li><a href="index.html">Modelr 0.2.2-alpha documentation</a> &raquo;</li>
+          <li><a href="manual.html" >modelr User&#8217;s Manual</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Sean Ross-Ross, Evan Bianco, Ben Bougher, Matt Hall.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>modelr.reflectivity &mdash; Modelr 0.2.2-alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2.2-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Modelr 0.2.2-alpha documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Modelr 0.2.2-alpha documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for modelr.reflectivity</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">=====================</span>
+<span class="sd">modelr.reflectivity </span>
+<span class="sd">=====================</span>
+
+<span class="sd">Basic methods for creating models.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+<span class="kn">from</span> <span class="nn">agilegeo</span> <span class="kn">import</span> <span class="n">avo</span> <span class="k">as</span> <span class="n">reflection</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
+<span class="kn">from</span> <span class="nn">svgwrite</span> <span class="kn">import</span> <span class="n">rgb</span>
+
+<span class="c">###################</span>
+<span class="c"># New style functions</span>
+
+<div class="viewcode-block" id="get_boundaries"><a class="viewcode-back" href="../../reflectivity.html#modelr.reflectivity.get_boundaries">[docs]</a><span class="k">def</span> <span class="nf">get_boundaries</span><span class="p">(</span> <span class="n">data</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds interfaces in the earth model</span>
+
+<span class="sd">    :param data: A numpy array of RGB values, indexed as</span>
+<span class="sd">                 (sample, trace, (R,G,B) )</span>
+<span class="sd">    :returns: a list of indices where a boundary occurs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">d1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">diff</span> <span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span> <span class="p">)</span>
+    <span class="n">boundaries</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span>
+        <span class="n">d1</span><span class="o">.</span><span class="n">nonzero</span><span class="p">())</span>
+    
+    <span class="k">return</span><span class="p">(</span> <span class="n">boundaries</span> <span class="p">)</span>
+</div>
+<div class="viewcode-block" id="rock_reflectivity"><a class="viewcode-back" href="../../reflectivity.html#modelr.reflectivity.rock_reflectivity">[docs]</a><span class="k">def</span> <span class="nf">rock_reflectivity</span><span class="p">(</span> <span class="n">Rp0</span><span class="p">,</span> <span class="n">Rp1</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+                       <span class="n">method</span><span class="o">=</span><span class="n">reflection</span><span class="o">.</span><span class="n">zoeppritz</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A wrapper function for calling any of the reflection methods using</span>
+<span class="sd">    rock property structures.</span>
+
+<span class="sd">    :param Rp0: A rock properties structure for the top medium.</span>
+<span class="sd">                Struct must contain vp, vs, rho.</span>
+<span class="sd">    :param Rp1: A rock properties structure for the bottom medium.</span>
+<span class="sd">                Struct must contain vp, vs, rho.</span>
+<span class="sd">                </span>
+<span class="sd">    :keyword theta: A single angle or an array of angles to calculate</span>
+<span class="sd">                    angle dependent reflectivity. Defaults to 0.</span>
+<span class="sd">    :keyword method: The reflectivity method to use. See agilegeo.avo</span>
+<span class="sd">                     for available functions. Defaults to zoeppreitz.</span>
+
+<span class="sd">    :returns: the p-wave reflection coefficients for each value of</span>
+<span class="sd">             theta.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ref</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span> <span class="n">Rp0</span><span class="o">.</span><span class="n">vp</span><span class="p">,</span> <span class="n">Rp0</span><span class="o">.</span><span class="n">vs</span><span class="p">,</span> <span class="n">Rp0</span><span class="o">.</span><span class="n">rho</span><span class="p">,</span>
+                  <span class="n">Rp1</span><span class="o">.</span><span class="n">vp</span><span class="p">,</span> <span class="n">Rp1</span><span class="o">.</span><span class="n">vs</span><span class="p">,</span> <span class="n">Rp1</span><span class="o">.</span><span class="n">rho</span><span class="p">,</span>
+                  <span class="n">theta</span> <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ref</span>
+
+
+</div>
+<div class="viewcode-block" id="get_reflectivity"><a class="viewcode-back" href="../../reflectivity.html#modelr.reflectivity.get_reflectivity">[docs]</a><span class="k">def</span> <span class="nf">get_reflectivity</span><span class="p">(</span><span class="n">data</span><span class="p">,</span>
+                     <span class="n">colourmap</span><span class="p">,</span>
+                     <span class="n">theta</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                     <span class="n">reflectivity_method</span><span class="o">=</span><span class="n">reflection</span><span class="o">.</span><span class="n">zoeppritz</span>
+                     <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Create reflectivities from an image of an earth model and a</span>
+<span class="sd">    mapping of colours to rock properties. Will find each interface</span>
+<span class="sd">    and use the specified reflectivity method to calculate the Vp</span>
+<span class="sd">    reflection coefficient.</span>
+<span class="sd">    </span>
+<span class="sd">    :param data: The image data of the earth model. A 3D array indexed</span>
+<span class="sd">                 as [samples, traces, colour].</span>
+<span class="sd">    :param colourmap: A lookup table (dict) that maps colour values to</span>
+<span class="sd">                      rock property structures.</span>
+<span class="sd">    </span>
+<span class="sd">    :keyword theta: Angle of incidence to use reflectivity. Can be a</span>
+<span class="sd">                  float or an array of angles [deg].</span>
+<span class="sd">    :keyword reflectivity_method: The reflectivity algorithm to use.</span>
+<span class="sd">                                  See agilegeo.avo for methods.</span>
+
+<span class="sd">    :returns: The vp reflectivity coefficients corresponding to the</span>
+<span class="sd">             earth model. Data will be indexed as</span>
+<span class="sd">             [sample, trace, theta]</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="c"># Check if we only have one trace of data, and reform the array</span>
+    <span class="k">if</span><span class="p">(</span> <span class="n">data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span> <span class="p">):</span>
+        <span class="n">reflect_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span> <span class="n">theta</span> <span class="p">))</span> <span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span> <span class="n">data</span><span class="p">,</span> <span class="p">(</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span> <span class="p">)</span> <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">reflect_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span> <span class="p">(</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                   <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span> <span class="n">theta</span> <span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+
+    <span class="c"># Make an array that only has the boundaries in it</span>
+    <span class="n">boundaries</span> <span class="o">=</span> <span class="n">get_boundaries</span><span class="p">(</span> <span class="n">data</span> <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">boundaries</span><span class="p">:</span>
+
+        <span class="c"># These are the indices in data</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">i</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c"># Get the colourmap dictionary keys</span>
+        <span class="n">c1</span> <span class="o">=</span> <span class="n">rgb</span><span class="p">(</span> <span class="n">data</span><span class="p">[</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="mi">0</span> <span class="p">],</span>  <span class="n">data</span><span class="p">[</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="mi">1</span> <span class="p">],</span>
+                  <span class="n">data</span><span class="p">[</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="mi">2</span> <span class="p">]</span> <span class="p">)</span>
+        <span class="n">c2</span> <span class="o">=</span> <span class="n">rgb</span><span class="p">(</span> <span class="n">data</span><span class="p">[</span> <span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">j</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="mi">0</span> <span class="p">],</span>  <span class="n">data</span><span class="p">[</span> <span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">j</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="mi">1</span> <span class="p">],</span>
+                  <span class="n">data</span><span class="p">[</span> <span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">j</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="mi">2</span> <span class="p">]</span> <span class="p">)</span>
+
+        <span class="c"># Don&#39;t calculate if not in the cmap. If the model was</span>
+        <span class="c"># build properly this shouldn&#39;t happen.</span>
+        <span class="k">if</span><span class="p">(</span> <span class="p">(</span> <span class="n">c1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">colourmap</span> <span class="p">)</span> <span class="ow">or</span> <span class="p">(</span> <span class="n">c2</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">colourmap</span> <span class="p">)</span> <span class="p">):</span>
+            <span class="k">continue</span>
+
+        <span class="c"># Get the reflectivity</span>
+        <span class="n">reflect_data</span><span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">],:]</span> <span class="o">=</span> \
+          <span class="n">rock_reflectivity</span><span class="p">(</span> <span class="n">colourmap</span><span class="p">[</span><span class="n">c1</span><span class="p">],</span>
+                             <span class="n">colourmap</span><span class="p">[</span><span class="n">c2</span><span class="p">],</span>
+                             <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span>
+                             <span class="n">method</span><span class="o">=</span><span class="n">reflectivity_method</span> <span class="p">)</span>
+
+    
+    <span class="k">return</span> <span class="n">reflect_data</span>
+</div>
+<div class="viewcode-block" id="do_convolve"><a class="viewcode-back" href="../../reflectivity.html#modelr.reflectivity.do_convolve">[docs]</a><span class="k">def</span> <span class="nf">do_convolve</span><span class="p">(</span> <span class="n">wavelets</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span>
+                 <span class="n">traces</span><span class="o">=</span><span class="bp">None</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convolves wavelets against a reflectivity dataset.</span>
+
+<span class="sd">    :param wavelets: An array of wavelets to convolve with the</span>
+<span class="sd">                     dataset. The array must be indexed as</span>
+<span class="sd">                     [samples, wavelet].</span>
+<span class="sd">    :param: data: An array of reflectivity data to convolve against.</span>
+<span class="sd">                  Must be indexed as [samples, traces ].</span>
+
+<span class="sd">    :keyword traces: Indexes of of traces to convolve. If none are</span>
+<span class="sd">                     specified, convolutions will be calculated for</span>
+<span class="sd">                     every trace.</span>
+
+<span class="sd">    :returns: an array of synthetic seismic traces, indexed as</span>
+<span class="sd">             [samples, traces, wavelet]. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Set up the right dimensionality</span>
+    <span class="n">nsamps</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="k">if</span><span class="p">(</span> <span class="n">traces</span> <span class="o">==</span> <span class="bp">None</span> <span class="p">):</span>
+        <span class="n">traces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span>
+    <span class="n">ntraces</span> <span class="o">=</span> <span class="n">traces</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">ntheta</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    
+    <span class="k">if</span> <span class="p">(</span> <span class="n">wavelets</span><span class="o">.</span><span class="n">ndim</span>  <span class="o">&gt;</span> <span class="mi">1</span> <span class="p">):</span>
+        <span class="n">n_wavelets</span> <span class="o">=</span> <span class="n">wavelets</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">n_wavelets</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">wavelets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span> <span class="n">wavelets</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">n_wavelets</span> <span class="p">)</span>
+
+    <span class="c"># Initialize the output</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span> <span class="p">(</span> <span class="n">nsamps</span><span class="p">,</span> <span class="n">ntraces</span><span class="p">,</span> <span class="n">ntheta</span><span class="p">,</span>
+                         <span class="n">n_wavelets</span> <span class="p">)</span> <span class="p">)</span>
+
+    <span class="c"># Loop through each combination of wavelet, trace, and theta</span>
+    <span class="k">for</span> <span class="n">iters</span> <span class="ow">in</span> \
+      <span class="n">product</span><span class="p">(</span> <span class="n">traces</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span> <span class="n">ntheta</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span> <span class="n">n_wavelets</span> <span class="p">)</span> <span class="p">):</span>
+      
+        <span class="n">output</span><span class="p">[:,</span><span class="n">iters</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">iters</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">iters</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> \
+            <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span> <span class="n">data</span><span class="p">[:,</span><span class="n">iters</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">iters</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+                              <span class="n">wavelets</span><span class="p">[:,</span><span class="n">iters</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;same&#39;</span><span class="p">)</span>
+
+    
+    <span class="k">return</span> <span class="p">(</span><span class="n">output</span><span class="p">)</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Modelr 0.2.2-alpha documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Sean Ross-Ross, Evan Bianco, Ben Bougher, Matt Hall.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,468 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Models and Calculations &mdash; Modelr 0.2.2-alpha documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.2.2-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Modelr 0.2.2-alpha documentation" href="index.html" />
+    <link rel="next" title="Scientific Code" href="wavelet.html" />
+    <link rel="prev" title="Web Framework" href="web_framework.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="wavelet.html" title="Scientific Code"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="web_framework.html" title="Web Framework"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Modelr 0.2.2-alpha documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-modelr.reflectivity">
+<span id="models-and-calculations"></span><h1>Models and Calculations<a class="headerlink" href="#module-modelr.reflectivity" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="modelr-reflectivity">
+<h2>modelr.reflectivity<a class="headerlink" href="#modelr-reflectivity" title="Permalink to this headline">¶</a></h2>
+<p>Basic methods for creating models.</p>
+<dl class="function">
+<dt id="modelr.reflectivity.do_convolve">
+<tt class="descclassname">modelr.reflectivity.</tt><tt class="descname">do_convolve</tt><big>(</big><em>wavelets</em>, <em>data</em>, <em>traces=None</em><big>)</big><a class="reference internal" href="_modules/modelr/reflectivity.html#do_convolve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.reflectivity.do_convolve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convolves wavelets against a reflectivity dataset.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>wavelets</strong> &#8211; An array of wavelets to convolve with the
+dataset. The array must be indexed as
+[samples, wavelet].</li>
+<li><strong>traces</strong> &#8211; Indexes of of traces to convolve. If none are
+specified, convolutions will be calculated for
+every trace.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Param:</th><td class="field-body"><p class="first">data: An array of reflectivity data to convolve against.
+Must be indexed as [samples, traces ].</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">an array of synthetic seismic traces, indexed as
+[samples, traces, wavelet].</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="modelr.reflectivity.get_boundaries">
+<tt class="descclassname">modelr.reflectivity.</tt><tt class="descname">get_boundaries</tt><big>(</big><em>data</em><big>)</big><a class="reference internal" href="_modules/modelr/reflectivity.html#get_boundaries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.reflectivity.get_boundaries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds interfaces in the earth model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; A numpy array of RGB values, indexed as
+(sample, trace, (R,G,B) )</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list of indices where a boundary occurs.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="modelr.reflectivity.get_reflectivity">
+<tt class="descclassname">modelr.reflectivity.</tt><tt class="descname">get_reflectivity</tt><big>(</big><em>data</em>, <em>colourmap</em>, <em>theta=0</em>, <em>reflectivity_method=&lt;function zoeppritz at 0x53ee488&gt;</em><big>)</big><a class="reference internal" href="_modules/modelr/reflectivity.html#get_reflectivity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.reflectivity.get_reflectivity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create reflectivities from an image of an earth model and a
+mapping of colours to rock properties. Will find each interface
+and use the specified reflectivity method to calculate the Vp
+reflection coefficient.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> &#8211; The image data of the earth model. A 3D array indexed
+as [samples, traces, colour].</li>
+<li><strong>colourmap</strong> &#8211; A lookup table (dict) that maps colour values to
+rock property structures.</li>
+<li><strong>theta</strong> &#8211; Angle of incidence to use reflectivity. Can be a
+float or an array of angles [deg].</li>
+<li><strong>reflectivity_method</strong> &#8211; The reflectivity algorithm to use.
+See agilegeo.avo for methods.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The vp reflectivity coefficients corresponding to the
+earth model. Data will be indexed as
+[sample, trace, theta]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="modelr.reflectivity.rock_reflectivity">
+<tt class="descclassname">modelr.reflectivity.</tt><tt class="descname">rock_reflectivity</tt><big>(</big><em>Rp0</em>, <em>Rp1</em>, <em>theta=0.0</em>, <em>method=&lt;function zoeppritz at 0x53ee488&gt;</em><big>)</big><a class="reference internal" href="_modules/modelr/reflectivity.html#rock_reflectivity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.reflectivity.rock_reflectivity" title="Permalink to this definition">¶</a></dt>
+<dd><p>A wrapper function for calling any of the reflection methods using
+rock property structures.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Rp0</strong> &#8211; A rock properties structure for the top medium.
+Struct must contain vp, vs, rho.</li>
+<li><strong>Rp1</strong> &#8211; A rock properties structure for the bottom medium.
+Struct must contain vp, vs, rho.</li>
+<li><strong>theta</strong> &#8211; A single angle or an array of angles to calculate
+angle dependent reflectivity. Defaults to 0.</li>
+<li><strong>method</strong> &#8211; The reflectivity method to use. See agilegeo.avo
+for available functions. Defaults to zoeppreitz.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the p-wave reflection coefficients for each value of
+theta.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<span class="target" id="module-modelr.modelbuilder"></span><div class="section" id="modelr-modelbuilder">
+<h2>modelr.modelbuilder<a class="headerlink" href="#modelr-modelbuilder" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="modelr.modelbuilder.body">
+<tt class="descclassname">modelr.modelbuilder.</tt><tt class="descname">body</tt><big>(</big><em>pad</em>, <em>margin</em>, <em>left</em>, <em>right</em>, <em>traces</em>, <em>layers</em><big>)</big><a class="reference internal" href="_modules/modelr/modelbuilder.html#body"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.modelbuilder.body" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a 3 layer earth model with the slabs defined by the user
+parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pad</strong> &#8211; The amount of samples before the first interface.
+Essentially the thickness of the first layer.</li>
+<li><strong>margin</strong> &#8211; The symmetric bottom vertices for the slab. For
+example, a value of zero would be vertices at the
+first and last trace, a value of traces/2 would
+put a vertex in the center, making a triangular
+shape. Anything in between is trapezoidal.</li>
+<li><strong>left</strong> &#8211; The depths of the wedge interface at the left edge of
+the plot. A two element tuple(d1,d2) whose difference
+defines the thickness of the wedge at the left edge.</li>
+<li><strong>right</strong> &#8211; The depths of the wedge interface at the right edge
+of the plot. A two element tuple(d1,d2) whose
+difference defines the thickness of the wedge at the
+right edge.</li>
+<li><strong>traces</strong> &#8211; The number of traces to use in the model.</li>
+<li><strong>layers</strong> &#8211; An array/list/tuple of RGB values that will be
+mapped to each layer. Indexed as
+(top, slab, bottom) as RGB values
+((R,G,B),(R,G,B), (R,G,B) ).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A numpy array of RGB values for the earth model.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="modelr.modelbuilder.body_svg">
+<tt class="descclassname">modelr.modelbuilder.</tt><tt class="descname">body_svg</tt><big>(</big><em>pad</em>, <em>margin</em>, <em>left</em>, <em>right</em>, <em>traces</em>, <em>layers</em><big>)</big><a class="reference internal" href="_modules/modelr/modelbuilder.html#body_svg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.modelbuilder.body_svg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a body. Used for tilted slabs and wedges.
+Give it pad, left and right thickness, traces, and an iterable of
+layers.
+Returns an SVG file name.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pad</strong> &#8211; The amount of samples before the first interface.
+Essentially the thickness of the first layer.</li>
+<li><strong>margin</strong> &#8211; The symmetric bottom vertices for the slab. For
+example, a value of zero would be vertices at the
+first and last trace, a value of traces/2 would
+put a vertex in the center, making a triangular
+shape. Anything in between is trapezoidal.</li>
+<li><strong>left</strong> &#8211; The depths of the wedge interface at the left edge of
+the plot. A two element tuple(d1,d2) whose difference
+defines the thickness of the wedge at the left edge.</li>
+<li><strong>right</strong> &#8211; The depths of the wedge interface at the right edge
+of the plot. A two element tuple(d1,d2) whose
+difference defines the thickness of the wedge at the
+right edge.</li>
+<li><strong>traces</strong> &#8211; The number of traces to use in the model.</li>
+<li><strong>layers</strong> &#8211; An array/list/tuple of RGB values that will be
+mapped to each layer. Indexed as
+(top, slab, bottom) as RGB values
+((R,G,B),(R,G,B), (R,G,B) ).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a tempfile object holding the output svg filename.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="modelr.modelbuilder.channel">
+<tt class="descclassname">modelr.modelbuilder.</tt><tt class="descname">channel</tt><big>(</big><em>pad</em>, <em>thickness</em>, <em>traces</em>, <em>layers</em><big>)</big><a class="reference internal" href="_modules/modelr/modelbuilder.html#channel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.modelbuilder.channel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a rounded channel.
+Give it pad, thickness, traces, and an iterable of layers.
+Returns an SVG file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pad</strong> &#8211; The number (n) of points on top of the channel.</li>
+<li><strong>traces</strong> &#8211; The number of traces in the channel model.</li>
+<li><strong>layers</strong> &#8211; An 3X3 array or tuple of RGB values corresponding
+to each rock layer. ((R,G,B),(R,G,B),(R,G,B)).
+Indexed as (top, channel, bottom ).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Param:</th><td class="field-body"><p class="first">thickness: The radius of the channel (npoints).</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a numpy array of the RGB values for the data model.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="modelr.modelbuilder.channel_svg">
+<tt class="descclassname">modelr.modelbuilder.</tt><tt class="descname">channel_svg</tt><big>(</big><em>pad</em>, <em>thickness</em>, <em>traces</em>, <em>layers</em><big>)</big><a class="reference internal" href="_modules/modelr/modelbuilder.html#channel_svg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.modelbuilder.channel_svg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a rounded channel.
+Give it pad, thickness, traces, and an iterable of layers.
+Returns an SVG file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pad</strong> &#8211; The number (n) of points on top of the channel.</li>
+<li><strong>traces</strong> &#8211; The number of traces in the channel model.</li>
+<li><strong>layers</strong> &#8211; An 3X3 array or tuple of RGB values corresponding
+to each rock layer. ((R,G,B),(R,G,B),(R,G,B)).
+Indexed as (top, channel, bottom ).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Param:</th><td class="field-body"><p class="first">thickness: The radius of the channel (npoints).</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a tempfile object pointed to the model svg file.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="modelr.modelbuilder.png2array">
+<tt class="descclassname">modelr.modelbuilder.</tt><tt class="descname">png2array</tt><big>(</big><em>infile</em><big>)</big><a class="reference internal" href="_modules/modelr/modelbuilder.html#png2array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.modelbuilder.png2array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Turns a PNG into a numpy array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>infile</strong> &#8211; Path to PNG file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a NumPy array.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="modelr.modelbuilder.svg2array">
+<tt class="descclassname">modelr.modelbuilder.</tt><tt class="descname">svg2array</tt><big>(</big><em>infile</em>, <em>layers</em><big>)</big><a class="reference internal" href="_modules/modelr/modelbuilder.html#svg2array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.modelbuilder.svg2array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for svg2png and png2array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>infile</strong> &#8211; File object output from tempfile.NamedTemporaryFile
+containing the path to the SVG file.</li>
+<li><strong>layers</strong> &#8211; An array or tuple of RGB values allowed in the
+output PNG. Should correspond to the number of
+rocks used in the SVG earth model.
+((R,G,B),(R,G,B,))</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a numpy array of the RGB levels from the svg.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="modelr.modelbuilder.svg2png">
+<tt class="descclassname">modelr.modelbuilder.</tt><tt class="descname">svg2png</tt><big>(</big><em>infile</em>, <em>layers</em><big>)</big><a class="reference internal" href="_modules/modelr/modelbuilder.html#svg2png"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.modelbuilder.svg2png" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert an SVG file to PNG file. Uses calls to Imagemagick for the
+conversion.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>infile</strong> &#8211; File object output from tempfile.NamedTemporaryFile
+containing the path to the SVG file.</li>
+<li><strong>layers</strong> &#8211; An array or tuple of RGB values allowed in the
+output PNG. Should correspond to the number of
+rocks used in the SVG earth model.
+((R,G,B),(R,G,B,))</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a tempfile.NamedTemporaryFile containing the png of the
+of the model.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="modelr.modelbuilder.web2array">
+<tt class="descclassname">modelr.modelbuilder.</tt><tt class="descname">web2array</tt><big>(</big><em>url</em>, <em>colours</em><big>)</big><a class="reference internal" href="_modules/modelr/modelbuilder.html#web2array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.modelbuilder.web2array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a URL string, make an SVG or PNG on the web into a
+NumPy array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>url</strong> &#8211; The url path to the SVG or PNG image.</li>
+<li><strong>colours</strong> &#8211; An array or tuple of RGB values allowed in the
+image ((R,G,B),(R,G,B), ....). Should map to the
+rocks in the model.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns an array of RGB values.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Models and Calculations</a><ul>
+<li><a class="reference internal" href="#modelr-reflectivity">modelr.reflectivity</a></li>
+<li><a class="reference internal" href="#modelr-modelbuilder">modelr.modelbuilder</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="web_framework.html"
+                        title="previous chapter">Web Framework</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="wavelet.html"
+                        title="next chapter">Scientific Code</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/reflectivity.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="wavelet.html" title="Scientific Code"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="web_framework.html" title="Web Framework"
+             >previous</a> |</li>
+        <li><a href="index.html">Modelr 0.2.2-alpha documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Sean Ross-Ross, Evan Bianco, Ben Bougher, Matt Hall.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

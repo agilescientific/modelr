@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Plotting Code &mdash; Modelr 0.2.2-alpha documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.2.2-alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Modelr 0.2.2-alpha documentation" href="index.html" />
+    <link rel="prev" title="Scientific Code" href="wavelet.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="wavelet.html" title="Scientific Code"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Modelr 0.2.2-alpha documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-modelr.web.util">
+<span id="plotting-code"></span><h1>Plotting Code<a class="headerlink" href="#module-modelr.web.util" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="modelr-web-util">
+<h2>modelr.web.util<a class="headerlink" href="#modelr-web-util" title="Permalink to this headline">¶</a></h2>
+<p>Created on May 3, 2012</p>
+<p>&#64;author: sean</p>
+<dl class="function">
+<dt id="modelr.web.util.get_figure_data">
+<tt class="descclassname">modelr.web.util.</tt><tt class="descname">get_figure_data</tt><big>(</big><em>transparent=False</em><big>)</big><a class="reference internal" href="_modules/modelr/web/util.html#get_figure_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.web.util.get_figure_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the current plot as a binary blob.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="modelr.web.util.modelr_plot">
+<tt class="descclassname">modelr.web.util.</tt><tt class="descname">modelr_plot</tt><big>(</big><em>model</em>, <em>colourmap</em>, <em>args</em><big>)</big><a class="reference internal" href="_modules/modelr/web/util.html#modelr_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.web.util.modelr_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates reflectivities from the earth model then convolves
+against a bank of wavelets. Figures of various slices are created
+based on the args structure.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>model</strong> &#8211; The earth model image to use for forward modeling.</li>
+<li><strong>colourmap</strong> &#8211; A Dict that maps colour values in the earth
+model to physical rock properties.</li>
+<li><strong>args</strong> &#8211; Structure of parsed arguments.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a png graphic of the forward model results.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="modelr.web.util.wiggle">
+<tt class="descclassname">modelr.web.util.</tt><tt class="descname">wiggle</tt><big>(</big><em>data</em>, <em>dt=1</em>, <em>line_colour='black'</em>, <em>fill_colour='blue'</em>, <em>opacity=0.5</em>, <em>skipt=0</em>, <em>gain=1</em>, <em>lwidth=0.5</em>, <em>xax=1</em><big>)</big><a class="reference internal" href="_modules/modelr/web/util.html#wiggle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#modelr.web.util.wiggle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a wiggle trace and plots it on the current figure.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> &#8211; as a 2D array indexed as [samples, traces]</li>
+<li><strong>dt</strong> &#8211; sample interval of the data [seconds].</li>
+<li><strong>skipt</strong> &#8211; number of traces to skip</li>
+<li><strong>gain</strong> &#8211; scaling factor for the traces</li>
+<li><strong>lwidth</strong> &#8211; width of line</li>
+<li><strong>xax</strong> &#8211; scaler of axis to match image plot</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Plotting Code</a><ul>
+<li><a class="reference internal" href="#modelr-web-util">modelr.web.util</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="wavelet.html"
+                        title="previous chapter">Scientific Code</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/plotting.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="wavelet.html" title="Scientific Code"
+             >previous</a> |</li>
+        <li><a href="index.html">Modelr 0.2.2-alpha documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Sean Ross-Ross, Evan Bianco, Ben Bougher, Matt Hall.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>
