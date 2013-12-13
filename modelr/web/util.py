@@ -59,7 +59,6 @@ def wiggle(data, dt=1, line_colour='black', fill_colour='blue',
     
     plt.axis('tight')
 
-
 def modelr_plot( model, colourmap, args ):
     """
     Calculates reflectivities from the earth model then convolves
