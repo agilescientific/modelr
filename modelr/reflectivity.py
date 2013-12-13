@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 '''
-================================================================
-modelr.reflectivity -- TODO short docstring here
-================================================================
+=====================
+modelr.reflectivity 
+=====================
 
 Basic methods for creating models.
-
 '''
+
 import numpy as np
 import scipy
 from agilegeo import avo as reflection
@@ -22,7 +22,7 @@ def get_boundaries( data ):
 
     :param data: A numpy array of RGB values, indexed as
                  (sample, trace, (R,G,B) )
-    :returns a list of indices where a boundary occurs.
+    :returns: a list of indices where a boundary occurs.
     """
     
     diff = np.absolute( np.diff(data, axis=0) )
@@ -48,7 +48,7 @@ def rock_reflectivity( Rp0, Rp1, theta=0.0,
     :keyword method: The reflectivity method to use. See agilegeo.avo
                      for available functions. Defaults to zoeppreitz.
 
-    :returns the p-wave reflection coefficients for each value of
+    :returns: the p-wave reflection coefficients for each value of
              theta.
     """
     ref = method( Rp0.vp, Rp0.vs, Rp0.rho,
@@ -80,7 +80,7 @@ def get_reflectivity(data,
     :keyword reflectivity_method: The reflectivity algorithm to use.
                                   See agilegeo.avo for methods.
 
-    :returns The vp reflectivity coefficients corresponding to the
+    :returns: The vp reflectivity coefficients corresponding to the
              earth model. Data will be indexed as
              [sample, trace, theta]
     '''
@@ -138,7 +138,7 @@ def do_convolve( wavelets, data,
                      specified, convolutions will be calculated for
                      every trace.
 
-    :returns an array of synthetic seismic traces, indexed as
+    :returns: an array of synthetic seismic traces, indexed as
              [samples, traces, wavelet]. 
     """
 

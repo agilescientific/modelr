@@ -1,4 +1,8 @@
 '''
+==================
+modelr.web.util
+==================
+
 Created on May 3, 2012
 
 @author: sean
@@ -33,13 +37,14 @@ def get_figure_data(transparent=False):
 def wiggle(data, dt=1, line_colour='black', fill_colour='blue',
            opacity= 0.5, skipt=0, gain=1, lwidth=.5, xax=1):
     """
-    Make a wiggle trace.
-    param: data: as array      
-    param: dt: sample interval <<<< WHAT IS THIS??
-    param: skipt: number of traces to skip
-    param: gain: scaling factor
-    param: lwidth: width of line
-    param: xax: scaler of axis to match image plot
+    Make a wiggle trace and plots it on the current figure.
+    
+    :param data: as a 2D array indexed as [samples, traces]      
+    :param dt: sample interval of the data [seconds].
+    :param skipt: number of traces to skip
+    :param gain: scaling factor for the traces
+    :param lwidth: width of line
+    :param xax: scaler of axis to match image plot
     """  
   
     t = np.arange(data.shape[0])*dt
@@ -73,7 +78,7 @@ def modelr_plot( model, colourmap, args ):
                       model to physical rock properties.
     :param args: Structure of parsed arguments.
 
-    :returns a png graphic of the forward model results.
+    :returns: a png graphic of the forward model results.
     """
 
     from modelr.constants import dt, duration

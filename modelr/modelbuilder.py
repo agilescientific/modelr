@@ -1,13 +1,9 @@
 '''
-Model builder
-Experimental routine to build models from functions of
-depth and offset. Pass in one or more functions, in the
-order they need to be created. 
-
-Depends on svgwrite and PIL, both of which can be
-installed with pip.
-    
+=====================
+modelr.modelbuilder
+=====================
 '''
+
 # Import what we need
 import numpy as np
 import svgwrite
@@ -49,7 +45,7 @@ def png2array(infile):
     Turns a PNG into a numpy array.
 
     :param infile: Path to PNG file
-    :returns a NumPy array.
+    :returns: a NumPy array.
     """
     
     png_reader = png.Reader( filename = infile.name )
@@ -72,7 +68,7 @@ def svg2png(infile, layers):
                    rocks used in the SVG earth model.
                    ((R,G,B),(R,G,B,))
                    
-    :returns a tempfile.NamedTemporaryFile containing the png of the
+    :returns: a tempfile.NamedTemporaryFile containing the png of the
              of the model.
     """
 
@@ -113,7 +109,7 @@ def svg2array(infile, layers):
                    rocks used in the SVG earth model.
                    ((R,G,B),(R,G,B,))
 
-    :returns a numpy array of the RGB levels from the svg.
+    :returns: a numpy array of the RGB levels from the svg.
     """
     
     return png2array(svg2png(infile, layers))
@@ -178,7 +174,7 @@ def channel_svg(pad, thickness, traces, layers):
                    to each rock layer. ((R,G,B),(R,G,B),(R,G,B)).
                    Indexed as (top, channel, bottom ).
 
-    :returns a tempfile object pointed to the model svg file.
+    :returns: a tempfile object pointed to the model svg file.
     """    
     
     outfile = tempfile.NamedTemporaryFile(suffix='.svg')
@@ -234,17 +230,17 @@ def body_svg(pad, margin, left, right, traces, layers):
     :param left: The depths of the wedge interface at the left edge of
                  the plot. A two element tuple(d1,d2) whose difference
                  defines the thickness of the wedge at the left edge.
-    :param right:The depths of the wedge interface at the right edge
-                 of the plot. A two element tuple(d1,d2) whose
-                 difference defines the thickness of the wedge at the
-                 right edge.
+    :param right: The depths of the wedge interface at the right edge
+                  of the plot. A two element tuple(d1,d2) whose
+                  difference defines the thickness of the wedge at the
+                  right edge.
     :param traces: The number of traces to use in the model.
     :param layers: An array/list/tuple of RGB values that will be
                    mapped to each layer. Indexed as
                    (top, slab, bottom) as RGB values
                    ((R,G,B),(R,G,B), (R,G,B) ).
 
-    :returns a tempfile object holding the output svg filename.
+    :returns: a tempfile object holding the output svg filename.
     """    
     
     outfile = tempfile.NamedTemporaryFile(suffix='.svg')
@@ -312,17 +308,17 @@ def body(pad, margin, left, right, traces, layers):
     :param left: The depths of the wedge interface at the left edge of
                  the plot. A two element tuple(d1,d2) whose difference
                  defines the thickness of the wedge at the left edge.
-    :param right:The depths of the wedge interface at the right edge
-                 of the plot. A two element tuple(d1,d2) whose
-                 difference defines the thickness of the wedge at the
-                 right edge.
+    :param right: The depths of the wedge interface at the right edge
+                  of the plot. A two element tuple(d1,d2) whose
+                  difference defines the thickness of the wedge at the
+                  right edge.
     :param traces: The number of traces to use in the model.
     :param layers: An array/list/tuple of RGB values that will be
                    mapped to each layer. Indexed as
                    (top, slab, bottom) as RGB values
                    ((R,G,B),(R,G,B), (R,G,B) ).
                    
-    :returns A numpy array of RGB values for the earth model.
+    :returns: A numpy array of RGB values for the earth model.
     """
 
     return svg2array(body_svg(pad, margin, left, right, traces,
@@ -341,7 +337,7 @@ def channel(pad, thickness, traces, layers):
                    to each rock layer. ((R,G,B),(R,G,B),(R,G,B)).
                    Indexed as (top, channel, bottom ).
 
-    :returns a numpy array of the RGB values for the data model.
+    :returns: a numpy array of the RGB values for the data model.
     """    
 
     return svg2array(channel_svg(pad,thickness,traces,layers), layers)

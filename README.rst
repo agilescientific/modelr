@@ -13,9 +13,32 @@ Or to get help just run:
 
 Prerequisites
 ++++++++++++++++
-EPD is no longer supported; we will come up with a replacement distribution, such as IPython or Enthought Canopy. In a nutshell, you need NumPy, SciPy, and Matplotlib.
+.. line-block::
+   You will need scientific python (numpy, scipy, matplotlib), which come with
+   Enthought Canopy:  `<http://www.enthought.com>`_
 
-* Enthought Python Distribution `<http://www.enthought.com/products/epd_free.php>`_
+   They can be alternatively be installed via pip, aptitude, ports,
+   or sourced from git.
+
+   Additionally, ImageMagick will need to be installed in order to
+   handle conversion of svg to png. 
+   Binaries can be downloaded from the ImageMagick website: 
+   `<http://www.imagemagick.org/script/binary-releases.php#unix>`_
+
+   ImageMagick can also be installed via ports or aptitude.
+
+   Other python packages that will be automatically installed during setup:
+
+* agilegeo
+* pypng
+* requests
+* jinja2
+* svgwrite
+
+
+
+
+
 
 Links
 +++++++++++
