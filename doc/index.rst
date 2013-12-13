@@ -14,6 +14,7 @@ Contents:
    :maxdepth: 2
 
    getting_started.rst
+   manual.rst
    web_framework.rst
    reflectivity.rst
    wavelet.rst
