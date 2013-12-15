@@ -5,8 +5,7 @@ Google charts like API for geophysics! Submit tasks via a script-plus-parameters
 
 Example: 
 
-* `<http://server.modelr.org:8080/plot.jpeg?script=one_spike.py&title=Ricker&f=25&reflectivity_model=zoeppritz&Rpp0=2350,2350,1200&Rpp1=2670,2560,1300&theta1=45>`_
-
+* `<http://server.modelr.org:8081/plot.jpeg?script=stochastic_avo.py&plot_type=AVO&title=Plot&reflectivity_method=zoeppritz&Rpp0=2222%2C2222%2C2222%2C100%2C100%2C100&Rpp1=1500%2C1500%2C1500%2C10%2C50%2C100&iterations=1000>`_
 Or to get help just run:
 
 * `<http://server.modelr.org:8080/plot.jpeg>`_
