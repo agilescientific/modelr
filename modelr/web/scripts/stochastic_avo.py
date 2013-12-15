@@ -66,7 +66,7 @@ def make_normal_dist( rock, sample_size, correlation=.8 ):
     :keyword correlation: The amount of correlation between the
                         uncertainties in each property.
 
-    :returns distributions for vp, vs, rho
+    :returns: distributions for vp, vs, rho
     """
 
     cor = correlation

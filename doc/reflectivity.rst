@@ -1,7 +1,10 @@
 =============================================
-Reflectivity
+Models and Calculations
 =============================================
 
 
-.. automodule:: modelr.reflecty
+.. automodule:: modelr.reflectivity
+    :members:
+
+.. automodule:: modelr.modelbuilder
     :members:

@@ -1,4 +1,8 @@
 '''
+==================
+modelr.web.util
+==================
+
 Created on May 3, 2012
 
 @author: sean
@@ -33,24 +37,27 @@ def get_figure_data(transparent=False):
 def wiggle(data, dt=1, line_colour='black', fill_colour='blue',
            opacity= 0.5, skipt=0, gain=1, lwidth=.5, xax=1):
     """
-    Make a wiggle trace.
-    param: data: as array      
-    param: dt: sample interval <<<< WHAT IS THIS??
-    param: skipt: number of traces to skip
-    param: gain: scaling factor
-    param: lwidth: width of line
-    param: xax: scaler of axis to match image plot
-    """  
+    Make a wiggle trace and plots it on the current figure.
     
+    :param data: as a 2D array indexed as [samples, traces]      
+    :param dt: sample interval of the data [seconds].
+    :param skipt: number of traces to skip
+    :param gain: scaling factor for the traces
+    :param lwidth: width of line
+    :param xax: scaler of axis to match image plot
+    """  
+  
     t = np.arange(data.shape[0])*dt
     for i in range(0,data.shape[1],skipt+1):
 
         trace = data[:,i]
         
         trace[0]=0
-        trace[-1]=0  
-        new_trace = gain*(trace/np.amax(data))  
-        scaler = (max(xax)-min(xax))/len(xax)
+        trace[-1]=0 
+        new_trace = gain*(trace/np.amax(data))
+
+        scaler = (np.amax(xax)-np.amin(xax))/float( len(xax))
+    
         plt.plot( (i + new_trace) * scaler + min(xax), t, color=line_colour, 
                 linewidth=lwidth,alpha=opacity)
     
@@ -70,7 +77,7 @@ def modelr_plot( model, colourmap, args ):
                       model to physical rock properties.
     :param args: Structure of parsed arguments.
 
-    :returns a png graphic of the forward model results.
+    :returns: a png graphic of the forward model results.
     """
 
     from modelr.constants import dt, duration
@@ -90,7 +97,8 @@ def modelr_plot( model, colourmap, args ):
         except:
             theta_step = 1
         
-        theta = np.linspace(theta0, theta1, int((theta1-theta0) / theta_step))
+        theta = np.linspace(theta0, theta1,
+                            int((theta1-theta0) / theta_step))
         
 
     else:
@@ -114,8 +122,8 @@ def modelr_plot( model, colourmap, args ):
         f = args.f
 
 
-    model = model[:, traces]
-    model = np.reshape( model, (model.shape[0], np.size(traces)) )
+    model = model[:, traces, :]
+    model = np.reshape( model, (model.shape[0], np.size(traces),3) )
 
     
     ############################

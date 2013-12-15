@@ -16,6 +16,8 @@ from modelr.web.util import modelr_plot
 
 import modelr.modelbuilder as mb
 
+from svgwrite import rgb
+
 short_description = 'Create a simple wedge or slab model.'
 
 def add_arguments(parser):
@@ -102,19 +104,28 @@ def run_script(args):
         
     left = (args.left[0], args.left[1])
     right = (args.right[0], args.right[1])
+
+
+    l1 = (150,110,110)
+    l2 = (110,150,110)
+    l3 = (110,110,150)
+    layers= [l1,l2]
+
+    # This is a hack to conserve colors
+    colourmap = { rgb(l1[0],l1[1],l1[2]): args.Rock0,
+                  rgb(l2[0],l2[1],l2[2]): args.Rock1 }
     
+    if not isinstance(args.Rock2, str):
+        colourmap[rgb( l3[0],l3[1],l3[2])] = args.Rock2
+        layers.append( l3 )
     
     model = mb.body( traces = args.ntraces,
                      pad = args.pad,
                      margin=args.margin,
                      left = left,
                      right = right,
-                     layers = (args.Rock0,args.Rock1,args.Rock2)
+                     layers = layers
                    )
-
-    colourmap = { 0: args.Rock0, 1: args.Rock1 }
-    if not isinstance(args.Rock2, str):
-        colourmap[2] = args.Rock2
 
     return modelr_plot( model, colourmap, args )
 
