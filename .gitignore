@@ -1,5 +1,16 @@
 *.py[co]
 
+# test stuff
+test_*.py
+
+# image files
+#*.png Needed for some models
+*.jpg
+#*.svg Testing with some models
+
+# Log files
+*.log
+
 # Packages
 *.egg
 *.egg-info

@@ -2,15 +2,13 @@
 Scientific Code
 ============================
  
-.. automodule:: modelr.wavelet
+.. automodule:: agilegeo.wavelet
     :members:
 
-.. automodule:: modelr.reflectivity
+.. automodule:: agilegeo.avo
     :members:
 
 .. automodule:: modelr.rock_properties
     :members:
 
-.. automodule:: modelr.zoep_calc
-    :members:
 

@@ -12,9 +12,32 @@ Or to get help just run:
 
 Prerequisites
 ++++++++++++++++
+.. line-block::
+   You will need scientific python (numpy, scipy, matplotlib), which come with
+   Enthought Canopy:  `<http://www.enthought.com>`_
 
-* Google App Engine  API `<https://developers.google.com/appengine/>`_
-* Enthought Python Distribution `<http://www.enthought.com/products/epd_free.php>`_
+   They can alternatively be installed via pip, aptitude, ports,
+   or sourced from git.
+
+   Additionally, ImageMagick will need to be installed in order to
+   handle conversion of svg to png. 
+   Binaries can be downloaded from the ImageMagick website: 
+   `<http://www.imagemagick.org/script/binary-releases.php#unix>`_
+
+   ImageMagick can also be installed via ports or aptitude.
+
+   Other python packages that will be automatically installed during setup:
+
+* agilegeo
+* pypng
+* requests
+* jinja2
+* svgwrite
+
+
+
+
+
 
 Links
 +++++++++++
@@ -32,4 +55,7 @@ Authors
 ++++++++++++++++
 
 * `Matt Hall <https://github.com/kwinkunks>`_ @ `Agile Geoscience <http://www.agilegeoscience.com>`_
-* `Sean Ross-Ross <https://github.com/srossross>`_ @ `Enthought Inc. <http://www.enthought.com>`_ 
+* `Sean Ross-Ross <https://github.com/srossross>`_ @ now at `Continuum`
+* `Evan Bianco <https://github.com/EvanBianco>`_ @ `Agile Geoscience <http://www.agilegeoscience.com>`_
+* `Ben Bougher <https://github.com/ben-bougher>`_
+

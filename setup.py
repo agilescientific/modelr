@@ -21,8 +21,7 @@ def main():
         url='https://github.com/agile-geoscience/modelr',
         
         packages=find_packages(),
-        package_data={'modelr.web': ['static/*', 'templates/*']},
-            
+        package_data={'modelr.web': ['static/*', 'templates/*']},   
         classifiers=[c.strip() for c in """\
             Development Status :: 5 - Production/Stable
             Intended Audience :: Developers
@@ -41,13 +40,15 @@ def main():
         description='Web Service like google charts API',
         long_description=long_description,
         license='BSD',
-        
-    entry_points={
+        install_requires=['agilegeo','jinja2', 'pypng', 'requests',
+                          'svgwrite'],
+        entry_points={
                     'console_scripts': [
-                                        'modelr-server = modelr.web.server:main',
+                            'modelr-server = modelr.web.server:main',
                                         ],
                     }
-
+        
+        
           )
 
 

@@ -9,33 +9,63 @@ import sys
 from urlparse import urlparse, parse_qs
 from argparse import Namespace
 import json
+from modelr.constants import WAVELETS
+from modelr.constants import REFLECTION_MODELS
 
 def rock_properties_type(str_input):
     from modelr.rock_properties import RockProperties
     args = str_input.split(',')
-    assert len(args) == 3
-    return RockProperties(float(args[0]), float(args[1]), float(args[2]))
+    assert ((len(args) == 3) or (len(args)==6))
+
+    if (len(args) == 3 ):
+        return RockProperties(float(args[0]),
+                              float(args[1]), float(args[2]))
+    return RockProperties(float(args[0]),
+                          float(args[1]), float(args[2]),
+                          float(args[3]), float(args[4]),
+                          float(args[5]))
+
+
+          
+def wavelet_type(str_input):
+    '''
+    To be used as the 'type' value in an Argument. 
+    
+    Takes a string as input and returns an arbitrary value.
+    
+    Example::
+                     
+        parser.add_argument('wavelet', type=wavelet_type, help='... ',
+                            default='ricker', choices=WAVELETS.keys())
+     
+    '''
+    
+    return WAVELETS[str_input]
 
 def reflectivity_type(str_input):
     '''
     To be used as the 'type' value in an Argument. 
     
-    
     Takes a string as input and returns an arbitrary value.
     
     Example::
         
-        parser.add_argument('reflectivity_model', type=reflectivity_type, help='... ', default='zoeppritz', choices=MODELS.keys())
+        parser.add_argument('reflectivity_model',
+        type=reflectivity_type, help='... ', default='zoeppritz',
+        choices=MODELS.keys())
      
-    '''
-    from modelr.rock_properties import MODELS
-    return MODELS[str_input]
+    ''' 
+    return REFLECTION_MODELS[str_input]
+
+
     
+ 
 class Argument(object):
     '''
-    An place holder for an url argument.
+    A place holder for a url argument.
     '''
-    def __init__(self, name, required=False, default=None, type=str, action='store', help='', choices=None):
+    def __init__(self, name, required=False, default=None, type=str,
+                 action='store', help='', choices=None):
         self.name = name
         self.required = required
         self.default = default
@@ -47,18 +77,24 @@ class Argument(object):
     def parse_arg(self, args):
         if not args or not args[0] or args[0] == 'null':
             if self.required:
-                raise ArgumentError("missing argument %r" % (self.name,))
+                raise ArgumentError("missing argument %r" %
+                                    (self.name,))
             else:
                 return self.default
         
         arg = args[0]
         if self.action != 'list':
             if self.choices is not None and arg not in self.choices:
-                raise ArgumentError("argument %s is invalid: must be one of %r (got %r)" % (self.name, self.choices, arg))
+                raise ArgumentError("argument %s is invalid:" +
+                                    " must be one of %r (got %r)" %
+                                    (self.name, self.choices, arg))
             try:
                 arg = self.type(arg)
             except:
-                raise ArgumentError("argument %s: invalid %s value: %r" % (self.name, self.type.__name__, arg))
+                raise ArgumentError("argument %s: invalid %s" +
+                                    " value: %r" %
+                                    (self.name, self.type.__name__,
+                                     arg))
             
             return arg
         else:
@@ -67,7 +103,10 @@ class Argument(object):
                 try:
                     value = self.type(arg)
                 except:
-                    raise ArgumentError("argument %s: invalid %s value: %r" % (self.name, self.type.__name__, arg))
+                    raise ArgumentError("argument %s: invalid %s"+
+                                        " value: %r" %
+                                        (self.name,
+                                         self.type.__name__, arg))
                 
                 new_args.append(value)
             
@@ -94,7 +133,8 @@ class Argument(object):
     
 class ArgumentError(Exception):
     '''
-    Exception to be called when arguments are not as expected by the parser.
+    Exception to be called when arguments are not as expected by the
+    parser.
     '''
 
 class SendHelp(Exception):
@@ -120,11 +160,13 @@ class URLArgumentParser(object):
 #        self.arguments = {'help': Argument('help')}
         self.arguments = {}
         
-    def add_argument(self, name, required=False, default=None, type=str, action='store', help='', choices=None):
+    def add_argument(self, name, required=False, default=None,
+                     type=str, action='store', help='', choices=None):
         '''
         add an argument
         '''
-        arg = Argument(name, required, default, type, action, help, choices)
+        arg = Argument(name, required, default, type, action,
+                       help, choices)
         self.arguments[name] = arg
         
     def parse_params(self, params):
@@ -164,14 +206,17 @@ class URLArgumentParser(object):
     @property
     def json_data(self):
         obj = {'description': self.description,
-               'arguments': {k:v.json_dict for (k, v) in self.arguments.items()}}
+               'arguments': {k:v.json_dict for (k, v)
+                             in self.arguments.items()}}
         return json.dumps(obj)
     
     @property
     def help_html(self):
         
-        arguments = '\n'.join(arg.html_help for arg in self.arguments.values())
-        return '<p>%s</p><ul>\n%s</ul>' % (self.description, arguments)
+        arguments = '\n'.join(arg.html_help for arg in
+                              self.arguments.values())
+        return '<p>%s</p><ul>\n%s</ul>' % (self.description,
+                                           arguments)
         
     def raise_help(self):
         raise SendHelp(self.help_html)

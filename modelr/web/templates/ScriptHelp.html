@@ -27,7 +27,7 @@
       {% if arg.choices %}
         <select name="{{name}}">
           {% for c in arg.choices %}
-            <option {% if arg.default is not none %}selected{% endif %} value={{ c }}>{{ c }}</option>
+            <option {% if c == arg.default %}selected="selected" {% endif %}value={{ c }}>{{ c }}</option>
           {% endfor %}
         </select>
       {% else %}

@@ -13,11 +13,12 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   getting_started
-   web_framework
-   reflectivity
-   wavelet
-   api.rst
+   getting_started.rst
+   manual.rst
+   web_framework.rst
+   reflectivity.rst
+   wavelet.rst
+   plotting.rst
 
 Indices and tables
 ==================

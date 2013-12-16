@@ -16,7 +16,8 @@ from argparse import ArgumentParser
 from os import listdir
 from os.path import isfile, join, dirname
 from urlparse import urlparse, parse_qs
-from modelr.web.urlargparse import SendHelp, ArgumentError, URLArgumentParser
+from modelr.web.urlargparse import SendHelp, ArgumentError, \
+     URLArgumentParser
 import traceback
 import json
 
@@ -257,7 +258,8 @@ def main():
     args = parser.parse_args()
     try:
         server = HTTPServer((args.host, args.port), MyHandler)
-        server.jenv = Environment(loader=PackageLoader('modelr', 'web/templates'))
+        server.jenv = Environment(loader=PackageLoader('modelr',
+                                                    'web/templates'))
         
         print 'started httpserver...'
         server.serve_forever()
