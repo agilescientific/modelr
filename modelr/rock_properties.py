@@ -1,9 +1,9 @@
 '''
-================================================================
-modelr.rock_properties -- TODO short docstring here
-================================================================
+=========================
+modelr.rock_properties
+=========================
 
-TODO: long doc here 
+Container for physical rock properties
 '''
     
 class RockProperties(object):
