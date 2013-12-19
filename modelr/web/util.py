@@ -202,7 +202,7 @@ def modelr_plot( model, colourmap, args ):
     # This is *better* for non-spatial slices, but can't have
     # overlays
     
-    stretch  = args.vertical_exaggertion 
+    stretch  = args.vertical_exaggeration 
     
     pad = np.ceil((plot_data.shape[0] - model.shape[0]) / 2)
 
