@@ -125,5 +125,12 @@ def default_parsers(parser, list_of_parsers):
                             default='ricker',
                             choices=WAVELETS.keys()
                             )
+                            
+    if 'vertical_exaggeration' in list_of_parsers:
+        parser.add_argument('vertical_exaggeration',
+                            type=float,
+                            help='Vertical exaggeration of plot',
+                            default=2.0
+                            )
                                         
     return parser

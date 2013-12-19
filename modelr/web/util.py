@@ -201,14 +201,15 @@ def modelr_plot( model, colourmap, args ):
     
     # This is *better* for non-spatial slices, but can't have
     # overlays
-    aspect = model_aspect
+    
+    stretch  = args.vertical_exaggertion 
     
     pad = np.ceil((plot_data.shape[0] - model.shape[0]) / 2)
 
     # Work out the size of the figure
     each_width = 5
     width = each_width*len(plots)
-    height = width/aspect
+    height = each_width*stretch
 
     # First, set up the matplotlib figure
     fig = plt.figure(figsize=(width, height))

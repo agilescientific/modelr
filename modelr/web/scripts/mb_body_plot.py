@@ -31,6 +31,7 @@ def add_arguments(parser):
                            'colourmap',
                            'wavelet', 
                            'wiggle_skips',
+                           'vertical_exaggeration',
                            'base1','base2','overlay1','overlay2',
                            'opacity'
                            ]
