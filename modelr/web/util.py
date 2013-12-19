@@ -182,12 +182,16 @@ def modelr_plot( model, colourmap, args ):
         xlabel = 'trace'
     elif( args.slice == 'angle' ):
         plot_data = warray_amp[ :, 0, :, 0 ]
-        reflectivity = warray_amp[ :, 0, : ]
+        reflectivity = reflectivity[ :, 0, : ]
         xax = theta
         xlabel = 'angle'
     elif( args.slice == 'frequency' ):
         plot_data = warray_amp[ :, 0, 0, : ]
-        reflectivity = warray_amp[ :, 0, 0 ]
+        reflectivity = np.reshape( np.repeat( reflectivity[:,0,0],
+                                              warray_amp.shape[1] ),
+                                   ( reflectivity.shape[0],
+                                     warray_amp.shape[1] ) )
+        
         xax = f
         xlabel = 'frequency'
     else:
@@ -274,7 +278,7 @@ def modelr_plot( model, colourmap, args ):
                 #TO DO:put transparent when null / zero
                 #
                 masked_refl = np.ma.masked_where(reflectivity == 0.0, reflectivity)
-                
+            
                 ax.imshow(masked_refl,
                            cmap = plt.get_cmap('Greys'),
                            aspect='auto',
