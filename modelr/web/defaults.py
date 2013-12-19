@@ -126,11 +126,11 @@ def default_parsers(parser, list_of_parsers):
                             choices=WAVELETS.keys()
                             )
                             
-    if 'vertical_exaggeration' in list_of_parsers:
-        parser.add_argument('vertical_exaggeration',
+    if 'aspect_ratio' in list_of_parsers:
+        parser.add_argument('aspect_ratio',
                             type=float,
-                            help='Vertical exaggeration of plot',
-                            default=2.0
+                            help='stretches the dimensions of each plot (bigger with > 1, smaller < 1)',
+                            default=1.0
                             )
                                         
     return parser
