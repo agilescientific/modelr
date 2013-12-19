@@ -104,6 +104,8 @@ def run_script(args):
     rho1 = np.zeros(args.iterations)
     reflect = []
     names = np.array([['Vp0','Vs0','rho0'],['Vp1','Vs1','rho1']])
+    nbins = 15
+    limits = np.array([[ (2500,4000),(1500,2500),(2400,2800) ], [ (2500,4000),(1500,2500),(2400,2800) ] ])
     
     for i in range( args.iterations ):
 
@@ -138,7 +140,11 @@ def run_script(args):
     for j in np.arange(2):
         for i in np.arange(3):
             plt.subplot(G[j,3+i+shift])
-            plt.hist(prop_samples[i+(3*j)], 15,facecolor='gray', alpha=0.25)
+            plt.hist( prop_samples[i+(3*j)], 15, 
+                     facecolor='gray', 
+                     alpha=0.25 )
+            temp = plt.gca()
+            plt.axis([limits[j][i][0], limits[j][i][1], temp.axis()[2], temp.axis()[3]*1.25])
             plt.yticks([])
             plt.xticks( rotation=90,horizontalalignment='left' )
             ax = plt.gca()  # gca stands for 'get current axis'
@@ -146,7 +152,7 @@ def run_script(args):
             ax.spines['left'].set_color('none')
             ax.spines['top'].set_color('none')
             ax.spines['bottom'].set_alpha(0.5)
-            ax.text(0.25, 0.8, names[j,i],
+            ax.text(0.5, 0.8, names[j,i],
                     verticalalignment='bottom', horizontalalignment='center',
                     transform=ax.transAxes, 
                     color='black', fontsize=8, alpha=0.75)

@@ -125,5 +125,12 @@ def default_parsers(parser, list_of_parsers):
                             default='ricker',
                             choices=WAVELETS.keys()
                             )
+                            
+    if 'aspect_ratio' in list_of_parsers:
+        parser.add_argument('aspect_ratio',
+                            type=float,
+                            help='stretches the dimensions of each plot (bigger with > 1, smaller < 1)',
+                            default=1.0
+                            )
                                         
     return parser
