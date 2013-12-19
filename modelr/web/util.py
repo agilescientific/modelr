@@ -162,17 +162,18 @@ def modelr_plot( model, colourmap, args ):
     else:
         overlay1 = args.overlay1
     
-    if args.base2 == 'none':
-        base2 = None
-    else:
-        base2 = args.base2
-    
     if args.overlay2 == 'none':
         overlay2 = None
     else:
         overlay2 = args.overlay2
-    
-    plots = [(base1, overlay1), (base2, overlay2)]
+        
+    if args.base2 == 'none':
+        base2 = None
+        plots = [(base1, overlay1)]
+        
+    else:
+        base2 = args.base2
+        plots = [(base1, overlay1), (base2, overlay2)]
 
     if( args.slice == 'spatial' ):
         plot_data = warray_amp[ :, :, 0,0]
