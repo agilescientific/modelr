@@ -73,13 +73,16 @@ def svg2png(infile, layers):
     """
 
     # Map the allowed colourmap for the output PNG
-    cmapfile = tempfile.NamedTemporaryFile( suffix='.png' )
+    cmapfile = tempfile.NamedTemporaryFile( suffix='.png',
+                                            delete=True )
     cmap = png.from_array( layers,mode='RGB' )
     cmap.save( cmapfile.name )
 
     # Make the intermediate and output tempfiles
-    tmpfile = tempfile.NamedTemporaryFile( suffix='.png' )
-    outfile = tempfile.NamedTemporaryFile( suffix='.png' )
+    tmpfile = tempfile.NamedTemporaryFile( suffix='.png',
+                                           delete=True )
+    outfile = tempfile.NamedTemporaryFile( suffix='.png',
+                                           delete=True )
 
     # Convert to PNG
     command = ['convert',
@@ -96,6 +99,11 @@ def svg2png(infile, layers):
     subprocess.call(command)
 
     outfile.seek(0)
+
+    # Cleanup
+    tmpfile.close()
+    cmapfile.close()
+    
     return outfile
     
 def svg2array(infile, layers):
@@ -111,8 +119,13 @@ def svg2array(infile, layers):
 
     :returns: a numpy array of the RGB levels from the svg.
     """
+
+    pngfile = svg2png(infile, layers)
+    arr = png2array(pngfile)
+    pngfile.close()
+
+    return arr
     
-    return png2array(svg2png(infile, layers))
     
 def web2array(url,colours):
     '''
@@ -131,7 +144,8 @@ def web2array(url,colours):
     suffix = '.' + url.split('.')[-1]
     
     # Make a tempfile with the correct extension
-    outfile = tempfile.NamedTemporaryFile(suffix=suffix)
+    outfile = tempfile.NamedTemporaryFile(suffix=suffix,
+                                          delete=True)
 
     # Get the file from the web and save into the new temp file name
     urllib.urlretrieve(url,outfile.name)
@@ -141,21 +155,28 @@ def web2array(url,colours):
     if suffix == '.png':
         
         # Write the PNG cmap to remove interpolated colours.
-        cmapfile = tempfile.NamedTemporaryFile( suffix='.png' )
+        cmapfile = tempfile.NamedTemporaryFile( suffix='.png',
+                                                delete=True)
         cmap = png.from_array( colours,mode='RGB' )
-        tmpfile = tempfile.NamedTemporaryFile( suffix='.png' )
+        tmpfile = tempfile.NamedTemporaryFile( suffix='.png',
+                                               delete=True)
         cmap.save( cmapfile.name )
 
         command = ['convert', outfile.name,
                    '+dither','-remap', cmapfile.name,
                    tmpfile.name]
         subprocess.call(command)
-        
-        return png2array(tmpfile)
+        arr = png2array(tmpfile)
+        # Cleanup temps
+        tmpfile.close()
+        cmapfile.close()
+      
     elif suffix == '.svg':
-        return svg2array(outfile,colours)
+        arr = svg2array(outfile,colours)
     else:
         pass # Throw an error
+    outfile.close()
+    return arr
         
         
 ###########################################
@@ -177,7 +198,7 @@ def channel_svg(pad, thickness, traces, layers):
     :returns: a tempfile object pointed to the model svg file.
     """    
     
-    outfile = tempfile.NamedTemporaryFile(suffix='.svg')
+    outfile = tempfile.NamedTemporaryFile(suffix='.svg', delete=True )
     
     top_colour = rgb( layers[0][0],layers[0][1], layers[0][2] )
     body_colour = rgb( layers[1][0],layers[1][1], layers[1][2] )
@@ -243,7 +264,8 @@ def body_svg(pad, margin, left, right, traces, layers):
     :returns: a tempfile object holding the output svg filename.
     """    
     
-    outfile = tempfile.NamedTemporaryFile(suffix='.svg')
+    outfile = tempfile.NamedTemporaryFile(suffix='.svg',
+                                          delete=True)
     
     width = traces
     height = 2 * pad + max(left[1],right[1])
@@ -321,8 +343,10 @@ def body(pad, margin, left, right, traces, layers):
     :returns: A numpy array of RGB values for the earth model.
     """
 
-    return svg2array(body_svg(pad, margin, left, right, traces,
-                              layers), layers)
+    infile = body_svg( pad, margin, left, right, traces, layers )
+    arr = svg2array(infile, layers)
+    infile.close()
+    return arr
     
 def channel(pad, thickness, traces, layers):
     """
@@ -338,9 +362,13 @@ def channel(pad, thickness, traces, layers):
                    Indexed as (top, channel, bottom ).
 
     :returns: a numpy array of the RGB values for the data model.
-    """    
+    """
 
-    return svg2array(channel_svg(pad,thickness,traces,layers), layers)
+    infile = channel_svg( pad, thickness, traces, layers )
+    arr = svg2array( infile, layers )
+    infile.close()
+
+    return arr
 
 # No scripts call these, but we'll leave them here for now;
 # they are both just special cases of body. Note, they have not been

@@ -32,7 +32,8 @@ def add_arguments(parser):
                            'wavelet',
                            'wiggle_skips',
                            'base1','base2','overlay1','overlay2',
-                           'opacity'                           
+                           'opacity', 'aspect_ratio'
+                           
                            ]
     
     default_parsers(parser,default_parser_list)
@@ -143,7 +144,7 @@ def run_script(args):
     else:
         colours = args.rocks
 
-
+    
     colours = ((255,255,255),(255,0,0), (0,0,255) )
     model = mb.web2array(args.url,
                          colours = colours

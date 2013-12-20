@@ -98,30 +98,21 @@ def run_script(args):
 
     theta = np.arange(0,90)
     
-    vp0 = np.zeros(args.iterations)
-    vs0 = np.zeros(args.iterations)
-    rho0 = np.zeros(args.iterations)
-    vp1 = np.zeros(args.iterations)
-    vs1 = np.zeros(args.iterations)
-    rho1 = np.zeros(args.iterations)
+    vp0, vs0, rho0 = make_normal_dist( Rprop0, args.iterations )
+    vp1, vs1, rho1 = make_normal_dist( Rprop1, args.iterations )
     reflect = []
     names = np.array([['Vp0','Vs0','rho0'],['Vp1','Vs1','rho1']])
     nbins = 15
-    limits = np.array([[ (2500,4000), (1500,2500), (2300,2800) ], [ (2500, 4000), (1500, 2500), (2400,2800) ]])
+    limits = np.array([[ (2500,4000),(1500,2500),(2400,2800) ],
+                       [ (2500,4000),(1500,2500),(2400,2800) ] ])
     
     for i in range( args.iterations ):
-
-        vp0[i] = np.random.normal( Rprop0.vp, Rprop0.vp_sig )
-        vs0[i] = np.random.normal( Rprop0.vs, Rprop0.vs_sig )
-        rho0[i] = np.random.normal( Rprop0.rho, Rprop0.rho_sig )
-
-        vp1[i] = np.random.normal( Rprop1.vp, Rprop1.vp_sig )
-        vs1[i] = np.random.normal( Rprop1.vs, Rprop1.vs_sig )
-        rho1[i] = np.random.normal( Rprop1.rho, Rprop1.rho_sig )
         
-        reflect.append( args.reflectivity_method( vp0[i], vs0[i], rho0[i],
-                                            vp1[i], vs1[i], rho1[i],
-                                            theta) )
+        reflect.append( args.reflectivity_method( vp0[i], vs0[i],
+                                                  rho0[i],
+                                                  vp1[i], vs1[i],
+                                                  rho1[i],
+                                                  theta) )
     reflect = np.array(reflect)
     temp = np.concatenate( (vp0, vs0, rho0, vp1, vs1, rho1), axis=0)
     prop_samples = np.reshape(temp, (6, args.iterations))
