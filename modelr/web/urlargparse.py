@@ -18,12 +18,15 @@ def rock_properties_type(str_input):
     assert ((len(args) == 3) or (len(args)==6))
 
     if (len(args) == 3 ):
-        return RockProperties(float(args[0]),
-                              float(args[1]), float(args[2]))
-    return RockProperties(float(args[0]),
-                          float(args[1]), float(args[2]),
-                          float(args[3]), float(args[4]),
-                          float(args[5]))
+        return RockProperties(vp = float(args[0]),
+                              vs = float(args[1]), 
+                              rho = float(args[2]))
+    return RockProperties(vp = float(args[0]),
+                          vs = float(args[1]), 
+                          rho = float(args[2]),
+                          vp_sig = float(args[3]), 
+                          vs_sig = float(args[4]),
+                          rho_sig = float(args[5]))
 
 
           
