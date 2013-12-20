@@ -19,7 +19,7 @@ def get_figure_data(transparent=False):
     '''
     Return the current plot as a binary blob. 
     '''
-    fig_path = tempfile.NameTemporaryFile(suffix='.png', delete=True)
+    fig_path = tempfile.NamedTemporaryFile(suffix='.png', delete=True)
     plt.savefig(fig_path, transparent=transparent) 
     with open(fig_path, 'rb') as fd:
         data = fd.read()
