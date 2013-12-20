@@ -9,7 +9,6 @@ Created on May 3, 2012
 '''
 
 import tempfile
-from os import unlink
 import matplotlib
 import matplotlib.pyplot as plt
 from agilegeo.wavelet import ricker
@@ -20,12 +19,12 @@ def get_figure_data(transparent=False):
     '''
     Return the current plot as a binary blob. 
     '''
-    fig_path = tempfile.mktemp('.png')
+    fig_path = tempfile.NameTemporaryFile(suffix='.png', delete=True)
     plt.savefig(fig_path, transparent=transparent) 
     with open(fig_path, 'rb') as fd:
         data = fd.read()
         
-    unlink(fig_path)
+    fig_path.close()
         
     # Alternative approach to do it in memory rather than on disk
     #image_file = tempfile.SpooledTemporaryFile(suffix='.png')

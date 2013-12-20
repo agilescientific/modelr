@@ -73,13 +73,16 @@ def svg2png(infile, layers):
     """
 
     # Map the allowed colourmap for the output PNG
-    cmapfile = tempfile.NamedTemporaryFile( suffix='.png' )
+    cmapfile = tempfile.NamedTemporaryFile( suffix='.png',
+                                            delete=True )
     cmap = png.from_array( layers,mode='RGB' )
     cmap.save( cmapfile.name )
 
     # Make the intermediate and output tempfiles
-    tmpfile = tempfile.NamedTemporaryFile( suffix='.png' )
-    outfile = tempfile.NamedTemporaryFile( suffix='.png' )
+    tmpfile = tempfile.NamedTemporaryFile( suffix='.png',
+                                           delete=True )
+    outfile = tempfile.NamedTemporaryFile( suffix='.png',
+                                           delete=True )
 
     # Convert to PNG
     command = ['convert',
@@ -141,7 +144,8 @@ def web2array(url,colours):
     suffix = '.' + url.split('.')[-1]
     
     # Make a tempfile with the correct extension
-    outfile = tempfile.NamedTemporaryFile(suffix=suffix)
+    outfile = tempfile.NamedTemporaryFile(suffix=suffix,
+                                          delete=True)
 
     # Get the file from the web and save into the new temp file name
     urllib.urlretrieve(url,outfile.name)
@@ -151,9 +155,11 @@ def web2array(url,colours):
     if suffix == '.png':
         
         # Write the PNG cmap to remove interpolated colours.
-        cmapfile = tempfile.NamedTemporaryFile( suffix='.png' )
+        cmapfile = tempfile.NamedTemporaryFile( suffix='.png',
+                                                delete=True)
         cmap = png.from_array( colours,mode='RGB' )
-        tmpfile = tempfile.NamedTemporaryFile( suffix='.png' )
+        tmpfile = tempfile.NamedTemporaryFile( suffix='.png',
+                                               delete=True)
         cmap.save( cmapfile.name )
 
         command = ['convert', outfile.name,
@@ -192,7 +198,7 @@ def channel_svg(pad, thickness, traces, layers):
     :returns: a tempfile object pointed to the model svg file.
     """    
     
-    outfile = tempfile.NamedTemporaryFile(suffix='.svg')
+    outfile = tempfile.NamedTemporaryFile(suffix='.svg', delete=True )
     
     top_colour = rgb( layers[0][0],layers[0][1], layers[0][2] )
     body_colour = rgb( layers[1][0],layers[1][1], layers[1][2] )
@@ -258,7 +264,8 @@ def body_svg(pad, margin, left, right, traces, layers):
     :returns: a tempfile object holding the output svg filename.
     """    
     
-    outfile = tempfile.NamedTemporaryFile(suffix='.svg')
+    outfile = tempfile.NamedTemporaryFile(suffix='.svg',
+                                          delete=True)
     
     width = traces
     height = 2 * pad + max(left[1],right[1])
