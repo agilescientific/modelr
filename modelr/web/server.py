@@ -159,7 +159,8 @@ class MyHandler(BaseHTTPRequestHandler):
             
             raise
         
-    def run_script(self, script, script_main, add_arguments, short_description, parameters):
+    def run_script(self, script, script_main, add_arguments,
+                   short_description, parameters):
         '''
         Run a script 
         
@@ -199,7 +200,8 @@ class MyHandler(BaseHTTPRequestHandler):
         self.end_headers()
             
         self.wfile.write(jpeg_data)
-    
+
+        del jpeg_data
     def get_available_scripts(self):
         '''
         Returns a list of all the scripts in the scripts directory.
