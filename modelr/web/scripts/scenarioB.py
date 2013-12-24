@@ -5,7 +5,6 @@ Created on Apr 30, 2012
 '''
 import numpy as np
 import matplotlib
-
 import matplotlib.pyplot as plt
 
 from argparse import ArgumentParser
@@ -15,23 +14,15 @@ from modelr.web.urlargparse import rock_properties_type
 from modelr.web.util import modelr_plot
 
 import modelr.modelbuilder as mb
-
+from agilegeo.avo import zoeppritz
+from agilegeo.wavelet import ricker
 from svgwrite import rgb
 
-short_description = 'Create a simple wedge or slab model.'
+# This is required for Script help
+short_description = 'Create a simple wedge model.'
 
 def add_arguments(parser):
-    
-    default_parser_list = ['ntraces',
-                           'pad',
-                           'reflectivity_method',
-                           'title',
-                           'theta',
-                           'f',
-                           'colourmap',
-                           'wavelet', 
-                           'wiggle_skips',
-                           'aspect_ratio',
+    default_parser_list = [
                            'base1','base2','overlay1','overlay2',
                            'opacity'
                            ]
@@ -61,76 +52,65 @@ def add_arguments(parser):
                         required=False,
                         default='2500,1200,2600'
                         )
-    
-    parser.add_argument('left',
-                        type=int,
-                        action='list',
-                        default='0,0',                        
-                        help='The thickness on the left-hand side'
-                        )
-                        
-    parser.add_argument('right',
-                        type=int,
-                        action='list',
-                        default='0,50',                        
-                        help='The thickness on the right-hand side'
-                        )
-                        
-    parser.add_argument('margin',
-                        type=int,
-                        help='Traces with zero thickness',
-                        default=1
-                        )
-
-    parser.add_argument('slice',
-                        type=str,
-                        help='Slice to return',
-                        default='spatial',
-                        choices=['spatial', 'angle', 'frequency']
-                        )
-                        
     parser.add_argument('trace',
-                        type=int,
-                        help='Trace to use for non-spatial slice',
-                        default=0
+                        type=int, 
+                        help='Trace location',
+                        required=False,
+                        default=40
                         )
+                        
+
+
                         
     return parser
 
-
 def run_script(args):
     from modelr.constants import dt, duration
-    
     matplotlib.interactive(False)
-        
-    left = (args.left[0], args.left[1])
-    right = (args.right[0], args.right[1])
+    
+    """if args.transparent == 'False' or args.transparent == 'No':
+        transparent = False
+    else:
+        transparent = True"""
 
-
+    args.ntraces = 300
+    args.pad = 150
+    args.reflectivity_method = zoeppritz
+    args.title = 'Scenario A - Cross Section'
+    args.theta = (0,50,.5)
+    args.f = 15.0
+    args.colourmap = 'Greys'
+    args.wavelet = ricker
+    args.wiggle_skips = 10
+    args.aspect_ratio = 1
+    args.thickness = 50
+    args.margin=1
+    args.slice='angle'
+   
+    
+    transparent = False
+    # This is a hack to conserve colors
     l1 = (150,110,110)
     l2 = (110,150,110)
     l3 = (110,110,150)
     layers= [l1,l2]
-
-    # This is a hack to conserve colors
-    colourmap = { rgb(l1[0],l1[1],l1[2]): args.Rock0,
-                  rgb(l2[0],l2[1],l2[2]): args.Rock1 }
+    colourmap = { rgb(150,110,110): args.Rock0,
+                  rgb(110,150,110): args.Rock1 }
     
     if not isinstance(args.Rock2, str):
-        colourmap[rgb( l3[0],l3[1],l3[2])] = args.Rock2
+        colourmap[rgb( 110,110,150)] = args.Rock2
         layers.append( l3 )
-    
-    model = mb.body( traces = args.ntraces,
-                     pad = args.pad,
-                     margin=args.margin,
-                     left = left,
-                     right = right,
-                     layers = layers
+    # Get the physical model (an array of rocks)    
+    model = mb.channel(pad = args.pad,
+                       thickness = args.thickness,
+                       traces = args.ntraces,
+                       layers = layers
                    )
 
-    return modelr_plot( model, colourmap, args )
-
     
+    return modelr_plot( model, colourmap, args )
+  
+
 def main():
     parser = ArgumentParser(usage=short_description,
                             description=__doc__
