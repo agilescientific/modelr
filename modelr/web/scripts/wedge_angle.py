@@ -102,8 +102,8 @@ def run_script(args):
     model = mb.body( traces = args.ntraces,
                      pad = args.pad,
                      margin=args.margin,
-                     left = left,
-                     right = right,
+                     left = args.left,
+                     right = args.right,
                      layers = layers
                    )
 
