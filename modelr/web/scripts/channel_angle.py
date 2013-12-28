@@ -73,7 +73,7 @@ def run_script(args):
     args.ntraces = 300
     args.pad = 150
     args.reflectivity_method = zoeppritz
-    args.title = 'Scenario A - Cross Section'
+    args.title = 'Channel Model - Angle Cross Section'
     args.theta = (0,50,.5)
     args.f = 15.0
     args.colourmap = 'Greys'
