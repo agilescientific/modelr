@@ -7,7 +7,7 @@ Created on May 3, 2012
 
 @author: sean
 '''
-
+import gc
 import tempfile
 import matplotlib
 import matplotlib.pyplot as plt
@@ -21,16 +21,17 @@ def get_figure_data(transparent=False):
     '''
     fig_path = tempfile.NamedTemporaryFile(suffix='.png', delete=True)
     plt.savefig(fig_path, transparent=transparent) 
-    with open(fig_path, 'rb') as fd:
+    with open(fig_path.name, 'rb') as fd:
         data = fd.read()
-        
+        del fd        
     fig_path.close()
-        
+    del fig_path    
     # Alternative approach to do it in memory rather than on disk
     #image_file = tempfile.SpooledTemporaryFile(suffix='.png')
     #plt.savefig(image_file, format='png') 
     #data = image_file.read()
-    
+    #image_file.close()
+    gc.collect()
     return data
 
 def wiggle(data, dt=1, line_colour='black', fill_colour='blue',
