@@ -19,7 +19,7 @@ from agilegeo.wavelet import ricker
 from svgwrite import rgb
 
 # This is required for Script help
-short_description = 'Create a simple wedge model.'
+short_description = 'Angle gather over a channel model.'
 
 def add_arguments(parser):
     default_parser_list = [
@@ -31,24 +31,21 @@ def add_arguments(parser):
     
     parser.add_argument('Rock0',
                         type=rock_properties_type, 
-                        help='Rock properties of upper rock '+
-                        '[Vp,Vs, rho]',
+                        help='Upper rock type',
                         required=True,
                         default='2000,1000,2200'
                         )
                         
     parser.add_argument('Rock1',
                         type=rock_properties_type, 
-                        help='Rock properties of middle rock ' +
-                        '[Vp, Vs, rho]',
+                        help='Rock type of the wedge',
                         required=True,
                         default='2200,1100,2300'
                         )
     
     parser.add_argument('Rock2',
                         type=rock_properties_type, 
-                        help='Rock properties of lower rock ' +
-                        '[Vp, Vs, rho]',
+                        help='Lower rock type',
                         required=False,
                         default='2500,1200,2600'
                         )

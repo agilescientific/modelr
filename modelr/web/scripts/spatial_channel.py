@@ -19,7 +19,7 @@ from agilegeo.wavelet import ricker
 from svgwrite import rgb
 
 # This is required for Script help
-short_description = 'Create a simple wedge model.'
+short_description = 'Spatial view of a channel'
 
 def add_arguments(parser):
     default_parser_list = [
@@ -31,33 +31,25 @@ def add_arguments(parser):
     
     parser.add_argument('Rock0',
                         type=rock_properties_type, 
-                        help='Rock properties of upper rock '+
-                        '[Vp,Vs, rho]',
+                        help='Upper rock type',
                         required=True,
                         default='2000,1000,2200'
                         )
                         
     parser.add_argument('Rock1',
                         type=rock_properties_type, 
-                        help='Rock properties of middle rock ' +
-                        '[Vp, Vs, rho]',
+                        help='Rock type of the channel',
                         required=True,
                         default='2200,1100,2300'
                         )
     
     parser.add_argument('Rock2',
                         type=rock_properties_type, 
-                        help='Rock properties of lower rock ' +
-                        '[Vp, Vs, rho]',
+                        help='Lower rock type',
                         required=False,
                         default='2500,1200,2600'
                         )
-    parser.add_argument('trace',
-                        type=int, 
-                        help='Trace location',
-                        required=False,
-                        default=40
-                        )
+    
                         
 
 
@@ -77,16 +69,16 @@ def run_script(args):
     args.pad = 150
     args.reflectivity_method = zoeppritz
     args.title = 'Scenario A - Cross Section'
-    args.theta = 0.0
+    args.theta = 0
+    args.f = 25.0
     args.colourmap = 'Greys'
     args.wavelet = ricker
     args.wiggle_skips = 10
     args.aspect_ratio = 1
     args.thickness = 50
     args.margin=1
-    args.f = (15,75,.5)
-    args.slice='frequency'
-   
+    args.slice='spatial'
+    args.trace = 0
     
     transparent = False
     # This is a hack to conserve colors
