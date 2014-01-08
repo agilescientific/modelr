@@ -20,6 +20,7 @@ from modelr.web.urlargparse import SendHelp, ArgumentError, \
      URLArgumentParser
 import traceback
 import json
+import multiprocessing as mp
 
 class MyHandler(BaseHTTPRequestHandler):
     '''
@@ -141,7 +142,14 @@ class MyHandler(BaseHTTPRequestHandler):
             short_description = namespace.get('short_description', 'No description')
             
             print "parameters", parameters
-            self.run_script(script[0], script_main, add_arguments, short_description, parameters)
+            p = mp.Process(
+                target=self.run_script, args=(script[0],script_main,
+                                              add_arguments,
+                                              short_description,
+                                              parameters))
+            p.start()
+            p.join()
+            #self.run_script(script[0], script_main, add_arguments, short_description, parameters)
             
         except Exception as err:
             self.send_response(400)

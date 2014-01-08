@@ -20,11 +20,11 @@ def get_figure_data(transparent=False):
     Return the current plot as a binary blob. 
     '''
     fig_path = tempfile.NamedTemporaryFile(suffix='.png', delete=True)
-    plt.savefig(fig_path.name, transparent=transparent) 
+    plt.savefig(fig_path.name, transparent=transparent)
+    plt.close()
     with open(fig_path.name, 'rb') as fd:
         data = fd.read()
-        
-    fig_path.close()
+             
         
     # Alternative approach to do it in memory rather than on disk
     #image_file = tempfile.SpooledTemporaryFile(suffix='.png')
