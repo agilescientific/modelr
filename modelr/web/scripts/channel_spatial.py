@@ -70,7 +70,6 @@ def run_script(args):
     args.reflectivity_method = zoeppritz
     args.title = 'Channel Model - Spatial Cross Section'
     args.theta = 0
-    args.f = 25.0
     args.colourmap = 'Greys'
     args.wavelet = ricker
     args.wiggle_skips = 10
