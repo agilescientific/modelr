@@ -48,7 +48,7 @@ def png2array(infile):
     :returns: a NumPy array.
     """
     
-    png_reader = png.Reader( filename = infile.name )
+    png_reader = png.Reader(filename=infile.name)
     img = png_reader.asDirect()
 
     im = np.hstack(itertools.imap(np.uint8, img[2]))
