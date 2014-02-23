@@ -53,7 +53,7 @@ def add_arguments(parser):
                         type=int, 
                         help='Trace location',
                         required=False,
-                        default=40
+                        default=150
                         )
                         
 
