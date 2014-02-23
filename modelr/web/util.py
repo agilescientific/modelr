@@ -122,7 +122,7 @@ def modelr_plot( model, colourmap, args ):
 
 
     model = model[:, traces, :]
-    model = np.reshape( model, (model.shape[0], np.size(traces),3) )
+    model = np.reshape(model, (model.shape[0], np.size(traces),3))
 
     
     ############################
@@ -312,7 +312,6 @@ def modelr_plot( model, colourmap, args ):
  
     fig.tight_layout()
 
-    
     return get_figure_data()
 if __name__ == '__main__':
     dt =0.001

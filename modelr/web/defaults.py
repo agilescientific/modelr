@@ -35,8 +35,7 @@ def default_parsers(parser, list_of_parsers):
     if 'reflectivity_method' in list_of_parsers:
         parser.add_argument('reflectivity_method',
                             type=reflectivity_type,
-                            help='Algorithm for calculating' +
-                            ' reflectivity',
+                            help='Reflectivity Algorithm',
                             default='zoeppritz',
                             choices=MODELS.keys()
                             ) 

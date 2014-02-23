@@ -17,10 +17,11 @@ def rock_properties_type(str_input):
     args = str_input.split(',')
     assert ((len(args) == 3) or (len(args)==6))
 
-    if (len(args) == 3 ):
+    if (len(args) == 3):
         return RockProperties(vp = float(args[0]),
                               vs = float(args[1]), 
                               rho = float(args[2]))
+    
     return RockProperties(vp = float(args[0]),
                           vs = float(args[1]), 
                           rho = float(args[2]),
@@ -155,7 +156,7 @@ class URLArgumentParser(object):
     Modeled after http://docs.python.org/dev/library/argparse.html
     '''
     
-    def __init__(self, description):
+    def __init__(self, description='No Description'):
         '''
         Constructor
         '''
@@ -185,7 +186,7 @@ class URLArgumentParser(object):
         for key in self.arguments:
             
             arg = params.pop(key, None)
-            
+            print(arg, key)
             value = self.arguments[key].parse_arg(arg)
             result[key] = value
             
