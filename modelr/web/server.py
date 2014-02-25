@@ -3,7 +3,7 @@
 modelr.web.server
 ===================
 
-Main program to strat a web server.
+Main program to start a web server.
 
 Created on Apr 30, 2012
 
@@ -21,6 +21,7 @@ from modelr.web.urlargparse import SendHelp, ArgumentError, \
 import traceback
 import json
 import multiprocessing as mp
+import ssl
 
 class MyHandler(BaseHTTPRequestHandler):
     '''
@@ -210,6 +211,7 @@ class MyHandler(BaseHTTPRequestHandler):
         self.wfile.write(jpeg_data)
 
         del jpeg_data
+        
     def get_available_scripts(self):
         '''
         Returns a list of all the scripts in the scripts directory.
@@ -255,6 +257,12 @@ class MyHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         self.send_error(404, 'Post request not supportd yet: %s' % self.path)
 
+# Locations of the PEM files for SSL
+# If this doesn't work, an alternative would be to store the
+# full chain including the private key, as described here:
+# http://www.digicert.com/ssl-support/pem-ssl-creation.htm
+CERTFILE = '/etc/ssl/modelr/public.pem'
+KEYFILE = '/etc/ssl/private/private.pem'
 
 def main():
     '''
@@ -270,7 +278,19 @@ def main():
         server = HTTPServer((args.host, args.port), MyHandler)
         server.jenv = Environment(loader=PackageLoader('modelr',
                                                     'web/templates'))
-        
+        # This provides SSL, serving over HTTPS.
+        # This approach will not allow service over HTTP.
+        # I think we should allow both, since there is no
+        # real reason for modelr-server to be secure.
+        # I don't know if we need to check the certificate
+        # on the client side too, or if doing it this way
+        # will satisfy the browser and that's enough.
+        server.socket = ssl.wrap_socket(server.socket,
+                                         certfile=CERTFILE,
+                                         keyfile=KEYFILE,
+                                         server-side=True
+                                         )
+                                        
         print 'started httpserver...'
         server.serve_forever()
     except KeyboardInterrupt:
