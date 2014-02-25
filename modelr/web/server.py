@@ -300,7 +300,7 @@ def main():
         server.socket = ssl.wrap_socket(server.socket,
                                          certfile=CERTFILE,
                                          keyfile=KEYFILE,
-                                         server-side=True
+                                         server_side=True
                                          )
                                         
         print 'started httpserver...'
