@@ -12,7 +12,7 @@ Or to get help just run:
 
 Full interface
 +++++++++++++
-* There's a full interface for modelr at [modelr.io](https://www.modelr.io/)
+* There's a full interface for modelr at `modelr.io <https://www.modelr.io/>`_
 
 
 Prerequisites
