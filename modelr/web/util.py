@@ -85,7 +85,7 @@ def modelr_plot( model, colourmap, args ):
     if args.slice == 'spatial':
         traces = range( args.ntraces )
     else:
-        traces = args.trace
+        traces = args.trace - 1
         
     if args.slice == 'angle':
         theta0 = args.theta[0]

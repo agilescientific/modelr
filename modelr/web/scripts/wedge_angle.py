@@ -24,7 +24,7 @@ short_description = 'Angle gather in a wedge model.'
 def add_arguments(parser):
     default_parser_list = [
                            'base1','base2','overlay1','overlay2',
-                           'opacity'
+                           'opacity', 'f'
                            ]
     
     default_parsers(parser,default_parser_list)
@@ -53,7 +53,7 @@ def add_arguments(parser):
                         type=int, 
                         help='Trace location',
                         required=False,
-                        default=40
+                        default=150
                         )
                         
 
@@ -81,8 +81,7 @@ def run_script(args):
     args.aspect_ratio = 1
     args.left = (0,0)
     args.right = (0,50)
-    args.margin=1
-    args.f = 15
+    args.margin=1 
     args.slice='angle'
    
     

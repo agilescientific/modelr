@@ -20,7 +20,6 @@ from svgwrite import rgb
 
 # This is required for Script help
 short_description = 'Wavelet bank in a wedge model.'
-
 def add_arguments(parser):
     default_parser_list = [
                            'base1','base2','overlay1','overlay2',
@@ -53,7 +52,7 @@ def add_arguments(parser):
                         type=int, 
                         help='Trace location',
                         required=False,
-                        default=40
+                        default=150
                         )
                         
 
