@@ -24,7 +24,7 @@ short_description = 'Spatial view of a channel'
 def add_arguments(parser):
     default_parser_list = [
                            'base1','base2','overlay1','overlay2',
-                           'opacity','f'
+                           'opacity','f', 'theta'
                            ]
     
     default_parsers(parser,default_parser_list)
@@ -69,7 +69,6 @@ def run_script(args):
     args.pad = 150
     args.reflectivity_method = zoeppritz
     args.title = 'Channel Model - Spatial Cross Section'
-    args.theta = 0
     args.colourmap = 'Greys'
     args.wavelet = ricker
     args.wiggle_skips = 10
