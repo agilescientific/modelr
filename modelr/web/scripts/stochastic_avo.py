@@ -59,8 +59,8 @@ def make_normal_dist( rock, sample_size, correlation=.8 ):
     :returns: distributions for vp, vs, rho
     """
 
-    pid = mp.current_process()._identity[0]
-    np.random.seed(pid)
+    #pid = mp.current_process()._identity[0]
+    #np.random.seed(pid)
     
     cor = correlation
 
