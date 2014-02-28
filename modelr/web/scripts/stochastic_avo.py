@@ -9,7 +9,7 @@ from modelr.constants import REFLECTION_MODELS as MODELS
 from modelr.web.util import get_figure_data
 import numpy as np
 from scipy import arcsin
-
+import multiprocessing as mp
 
 short_description = (
     "Make a stochastic avo plot using monte carlo " +
@@ -59,6 +59,9 @@ def make_normal_dist( rock, sample_size, correlation=.8 ):
     :returns: distributions for vp, vs, rho
     """
 
+    pid = mp.current_process()._identity[0]
+    np.random.seed(pid)
+    
     cor = correlation
 
     # Make three normalized gaussian distributions
