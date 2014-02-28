@@ -14,78 +14,50 @@ from modelr.web.urlargparse import rock_properties_type
 from modelr.web.util import modelr_plot
 
 import modelr.modelbuilder as mb
-
+from agilegeo.avo import zoeppritz
+from agilegeo.wavelet import ricker
 from svgwrite import rgb
 
 # This is required for Script help
-short_description = 'Create a simple wedge model.'
+short_description = 'Angle gather in a wedge model.'
 
 def add_arguments(parser):
-    default_parser_list = ['ntraces',
-                           'pad',
-                           'reflectivity_method',
-                           'title',
-                           'theta',
-                           'f',
-                           'colourmap',
-                           'wavelet', 
-                           'wiggle_skips',
-                           'aspect_ratio',
+    default_parser_list = [
                            'base1','base2','overlay1','overlay2',
-                           'opacity'
+                           'opacity', 'f'
                            ]
     
     default_parsers(parser,default_parser_list)
     
     parser.add_argument('Rock0',
                         type=rock_properties_type, 
-                        help='Rock properties of upper rock '+
-                        '[Vp,Vs, rho]',
+                        help='Upper rock type',
                         required=True,
                         default='2000,1000,2200'
                         )
                         
     parser.add_argument('Rock1',
                         type=rock_properties_type, 
-                        help='Rock properties of middle rock ' +
-                        '[Vp, Vs, rho]',
+                        help='Channel rock type',
                         required=True,
                         default='2200,1100,2300'
                         )
     
     parser.add_argument('Rock2',
                         type=rock_properties_type, 
-                        help='Rock properties of lower rock ' +
-                        '[Vp, Vs, rho]',
+                        help='Lower rock type',
                         required=False,
                         default='2500,1200,2600'
                         )
-    
-    parser.add_argument('thickness',
-                        default=50,
-                        type=int,
-                        help='The maximum thickness of the wedge'
-                        )
-                            
-                        
-    parser.add_argument('margin',
-                        type=int,
-                        help='Traces with zero thickness',
-                        default=1
-                        )
-
-    parser.add_argument('slice',
-                        type=str,
-                        help='Slice to return',
-                        default='spatial',
-                        choices=['spatial', 'angle', 'frequency']
-                        )
-                        
     parser.add_argument('trace',
-                        type=int,
-                        help='Trace to use for non-spatial slice',
-                        default=0
+                        type=int, 
+                        help='Trace location',
+                        required=False,
+                        default=150
                         )
+                        
+
+
                         
     return parser
 
@@ -97,6 +69,22 @@ def run_script(args):
         transparent = False
     else:
         transparent = True"""
+
+    args.ntraces = 300
+    args.pad = 150
+    args.reflectivity_method = zoeppritz
+    args.title = 'Wedge Model - Angle Cross Section'
+    args.theta = (0.0,50,.5)
+    args.colourmap = 'Greys'
+    args.wavelet = ricker
+    args.wiggle_skips = 10
+    args.aspect_ratio = 1
+    args.left = (0,0)
+    args.right = (0,50)
+    args.margin=1 
+    args.slice='angle'
+   
+    
     transparent = False
     # This is a hack to conserve colors
     l1 = (150,110,110)
@@ -110,10 +98,12 @@ def run_script(args):
         colourmap[rgb( 110,110,150)] = args.Rock2
         layers.append( l3 )
     # Get the physical model (an array of rocks)    
-    model = mb.channel(pad = args.pad,
-                       thickness = args.thickness,
-                       traces = args.ntraces,
-                       layers = layers
+    model = mb.body( traces = args.ntraces,
+                     pad = args.pad,
+                     margin=args.margin,
+                     left = args.left,
+                     right = args.right,
+                     layers = layers
                    )
 
     
