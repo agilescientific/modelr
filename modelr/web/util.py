@@ -276,7 +276,7 @@ def modelr_plot( model, colourmap, args ):
                 vddata=plot_data
                 if vddata.ndim == 3:
                     vddata = np.sum(plot_data,axis=-1)
-                extreme = np.amax(vddata)
+                extreme = np.percentile(vddata,99)
                 ax.imshow( vddata,
                            cmap = args.colourmap,
                            vmin = -extreme,
