@@ -13,6 +13,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from agilegeo.wavelet import ricker
 import numpy as np
+from scipy.signal import hilbert
 from modelr.reflectivity import get_reflectivity, do_convolve
 
 def get_figure_data(transparent=False):
@@ -82,7 +83,11 @@ def modelr_plot( model, colourmap, args ):
     from modelr.constants import dt, duration
     model_aspect = float(model.shape[1]) / model.shape[0]
 
-    if args.slice == 'spatial':
+    if not hasattr(args, 'xscale'):
+        args.xscale=0
+    
+    
+    if args.slice == 'spatial':       
         traces = range( args.ntraces )
     else:
         traces = args.trace - 1
@@ -95,6 +100,7 @@ def modelr_plot( model, colourmap, args ):
             theta_step = args.theta[2]
         except:
             theta_step = 1
+        
         
         theta = np.linspace(theta0, theta1,
                             int((theta1-theta0) / theta_step))
@@ -115,8 +121,10 @@ def modelr_plot( model, colourmap, args ):
         except:
             f_step = 1
         
-        f = np.linspace(f0, f1, (int((f1-f0)/f_step)) )
-        
+        if (args.xscale) == 0:
+            f = np.linspace(f0, f1, (int((f1-f0)/f_step)) )
+        else:
+            f = np.logspace(max(np.log2(f0),np.log2(7)),np.log2(f1),300,endpoint=True, base=2.0) 
     else:
         f = args.f
 
@@ -175,7 +183,8 @@ def modelr_plot( model, colourmap, args ):
         plots = [(base1, overlay1), (base2, overlay2)]
 
     if( args.slice == 'spatial' ):
-        plot_data = warray_amp[ :, :, 0,0]
+        
+        plot_data = warray_amp[ :, :, 0,:]
         reflectivity = reflectivity[:,:,0]
         xax = traces
         xlabel = 'trace'
@@ -192,7 +201,7 @@ def modelr_plot( model, colourmap, args ):
                                      warray_amp.shape[1] ) )
         
         xax = f
-        xlabel = 'frequency'
+        xlabel = 'frequency [Hz]'
     else:
         # Default to spatial
         plot_data = warray_amp[ :, :, 0, 0 ]
@@ -232,7 +241,10 @@ def modelr_plot( model, colourmap, args ):
                 
         # Set up the plot 'canvas'
         ax = fig.add_subplot(1,l,p+1)
-            
+        
+        if args.xscale:
+            ax.set_xscale('log', basex = int(args.xscale) )    
+        
         # Each plot can have two layers (maybe more later?)
         # Display the two layers by looping over the non-blank
         # elements
@@ -261,9 +273,14 @@ def modelr_plot( model, colourmap, args ):
                            )
             
             elif layer == 'variable-density':
-                
-                ax.imshow(plot_data,
+                vddata=plot_data
+                if vddata.ndim == 3:
+                    vddata = np.sum(plot_data,axis=-1)
+                extreme = np.amax(vddata)
+                ax.imshow( vddata,
                            cmap = args.colourmap,
+                           vmin = -extreme,
+                           vmax = extreme,
                            alpha = alpha,
                            aspect='auto',
                            extent=[min(xax),max(xax),
@@ -290,7 +307,10 @@ def modelr_plot( model, colourmap, args ):
 
             elif layer == 'wiggle':
             # wiggle needs an alpha setting too
-                wiggle(plot_data,
+                wigdata=plot_data
+                if wigdata.ndim == 3:
+                    wigdata= np.sum(plot_data,axis=-1)
+                wiggle(wigdata,
                        dt = dt,
                        skipt = args.wiggle_skips,
                        gain = args.wiggle_skips + 1,
@@ -303,13 +323,35 @@ def modelr_plot( model, colourmap, args ):
                     # then we're in an base layer so...
                     ax.set_ylim(max(ax.set_ylim()),min(ax.set_ylim()))
 
+            elif layer == 'RGB':
+                exponent = 2
+                envelope = abs(hilbert(plot_data))
+                envelope = envelope**exponent
+                
+                envelope[:,:,0]= envelope[:,:,0]/np.amax(envelope[:,:,0])
+                envelope[:,:,1]= envelope[:,:,1]/np.amax(envelope[:,:,1])
+                envelope[:,:,2]= envelope[:,:,2]/np.amax(envelope[:,:,2])
+                
+                extreme = np.amax(abs(envelope))
+                ax.imshow(envelope,
+                           cmap = args.colourmap,
+                           vmin = -extreme,
+                           vmax = extreme,
+                           alpha = alpha,
+                           aspect='auto',
+                           extent=[min(xax),max(xax),
+                                   envelope.shape[0]*dt,0], 
+                           origin = 'upper'
+                           )
             else:
                 # We should never get here
                 continue     
         ax.set_xlabel(xlabel)
         ax.set_ylabel('time [s]')
         ax.set_title(args.title % locals())
- 
+        
+        # check to see if the user wants a logarithmic scale (for freq. domain)
+
     fig.tight_layout()
 
     

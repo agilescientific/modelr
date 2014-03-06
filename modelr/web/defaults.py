@@ -62,6 +62,8 @@ def default_parsers(parser, list_of_parsers):
                             type=str,
                             help='Matplotlib colourmap, ' +
                             'ageo.co/modelrcolour',
+                            choices = ['Greys','seismic','RdBu','BrBg','bwr',
+                            'PuOr','RdGy'],
                             default='Greys'
                             )
         
@@ -77,7 +79,7 @@ def default_parsers(parser, list_of_parsers):
                             type=str,
                             help='Plot 1, base layer',
                             choices=['wiggle', 'variable-density',
-                                     'earth-model', 'reflectivity'],
+                                     'earth-model', 'reflectivity', 'RGB'],
                             default='variable-density'
                             )
         
@@ -87,7 +89,7 @@ def default_parsers(parser, list_of_parsers):
                             help='Plot 1, overlay',
                             choices=['none', 'wiggle',
                                      'variable-density',
-                                     'earth-model', 'reflectivity'],
+                                     'earth-model', 'reflectivity', 'RGB'],
                             default='none'
                             )
         
@@ -97,7 +99,7 @@ def default_parsers(parser, list_of_parsers):
                             help='Plot 2, base layer',
                             choices=['none', 'wiggle',
                                      'variable-density',
-                                     'earth-model', 'reflectivity'],
+                                     'earth-model', 'reflectivity', 'RGB'],
                             default='none'
                             )
         
@@ -107,7 +109,7 @@ def default_parsers(parser, list_of_parsers):
                             help='Plot 2, overlay',
                             choices=['none', 'wiggle',
                                      'variable-density',
-                                     'earth-model', 'reflectivity'],
+                                     'earth-model', 'reflectivity', 'RGB'],
                             default='none'
                             )
         

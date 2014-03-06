@@ -23,7 +23,7 @@ short_description = 'Wavelet bank in a wedge model.'
 def add_arguments(parser):
     default_parser_list = [
                            'base1','base2','overlay1','overlay2',
-                           'opacity','theta'
+                           'opacity','theta', 'f','colourmap'
                            ]
     
     default_parsers(parser,default_parser_list)
@@ -54,8 +54,13 @@ def add_arguments(parser):
                         required=False,
                         default=150
                         )
-                        
-
+                                                                      
+    parser.add_argument('xscale',
+                        type=int, 
+                        help='0 for linear, 2 for log base 2, 10 for log Base 10', 
+                        required=True,
+                        default='0'
+                        )
 
                         
     return parser
@@ -73,14 +78,12 @@ def run_script(args):
     args.pad = 150
     args.reflectivity_method = zoeppritz
     args.title = 'Wedge Model - Wavelet Cross Section' 
-    args.colourmap = 'Greys'
     args.wavelet = ricker
     args.wiggle_skips = 10
     args.aspect_ratio = 1
     args.left = (0,0)
     args.right = (0,50)
     args.margin=1
-    args.f = (15,75,.5)
     args.slice='frequency'
    
     
