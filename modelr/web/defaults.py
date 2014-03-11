@@ -62,7 +62,7 @@ def default_parsers(parser, list_of_parsers):
                             type=str,
                             help='Matplotlib colourmap, ' +
                             'ageo.co/modelrcolour',
-                            choices = ['Greys','seismic','RdBu','BrBg','bwr',
+                            choices = ['Greys','seismic','RdBu','BrBG','bwr',
                             'PuOr','RdGy'],
                             default='Greys'
                             )
