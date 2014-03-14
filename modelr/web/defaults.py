@@ -142,5 +142,21 @@ def default_parsers(parser, list_of_parsers):
                             help='stretches the dimensions of each plot (bigger with > 1, smaller < 1)',
                             default=1.0
                             )
+    
+    if 'extraction_twt' in list_of_parsers:
+        parser.add_argument('extraction_twt',
+                            type=float,
+                            help='twt (s) for amplitude extraction or slice',
+                            default=0.150
+                            )
+    
+    if 'extract_along' in list_of_parsers:
+        parser.add_argument('extract_along',
+                            type=str,
+                            help='added dimension(s) along which to extract data',
+                            choices=[ 'none','spatial','angle','frequency'
+                                     ],
+                            default='none'
+                            )
                                         
     return parser

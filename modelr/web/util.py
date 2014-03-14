@@ -35,7 +35,7 @@ def get_figure_data(transparent=False):
     return data
 
 def wiggle(data, dt=1, line_colour='black', fill_colour='blue',
-           opacity= 0.5, skipt=0, gain=1, lwidth=.5, xax=1):
+           opacity= 0.5, skipt=0, gain=1, lwidth=.5, xax=1, quadrant=plt):
     """
     Make a wiggle trace and plots it on the current figure.
     
@@ -57,14 +57,15 @@ def wiggle(data, dt=1, line_colour='black', fill_colour='blue',
         new_trace = gain*(trace/np.amax(data))
 
         scaler = (np.amax(xax)-np.amin(xax))/float( len(xax))
-    
-        plt.plot( (i + new_trace) * scaler + min(xax), t, color=line_colour, 
-                linewidth=lwidth,alpha=opacity)
-    
-        plt.fill_betweenx(t, ((i + new_trace) * scaler)+min(xax), (i * scaler)+min(xax) ,  new_trace > 0,
-                          color=fill_colour, alpha=opacity, lw=0)
-    
-    plt.axis('tight')
+        
+        
+        quadrant.plot( (i + new_trace) * scaler + min(xax), t, color=line_colour, 
+                  linewidth=lwidth,alpha=opacity)
+                
+        quadrant.fill_betweenx(t, ((i + new_trace) * scaler)+min(xax), (i * scaler)+min(xax) ,  new_trace > 0,
+                         color=fill_colour, alpha=opacity, lw=0)
+                
+        quadrant.axis('tight')
 
 def modelr_plot( model, colourmap, args ):
     """
@@ -218,15 +219,21 @@ def modelr_plot( model, colourmap, args ):
     
     pad = np.ceil((plot_data.shape[0] - model.shape[0]) / 2)
 
-    # Work out the size of the figure
-    each_width = 5
-    width = each_width*len(plots)
-    height = each_width*stretch
-
     # First, set up the matplotlib figure
-    fig = plt.figure(figsize=(width, height))
+    #fig = plt.figure(figsize=(width, 2*height))
 
+    fig, axarr = plt.subplots(2, len(plots))     #, sharex='col', sharey='row')
     
+    if len(plots) == 1:
+        axarr = np.transpose(np.array([axarr]))
+    
+    print(axarr.shape)
+    
+    # Work out the size of the figure
+    each_width = 6
+    fig.set_figwidth(each_width*len(plots))
+    fig.set_figheight(each_width*stretch*2)
+
     # Start a loop for the figures...
     for plot in plots:
         
@@ -236,14 +243,10 @@ def modelr_plot( model, colourmap, args ):
             break
             
         # Establish what sort of subplot grid we need
-        l = len(plots)
         p = plots.index(plot)
-                
-        # Set up the plot 'canvas'
-        ax = fig.add_subplot(1,l,p+1)
-        
+    
         if args.xscale:
-            ax.set_xscale('log', basex = int(args.xscale) )    
+            axarr[0, p].set_xscale('log', basex = int(args.xscale) )    
         
         # Each plot can have two layers (maybe more later?)
         # Display the two layers by looping over the non-blank
@@ -261,7 +264,7 @@ def modelr_plot( model, colourmap, args ):
             # Now find out what sort of plot we're making on this
             # loop...        
             if layer == 'earth-model':
-                ax.imshow(model,
+                axarr[0, p].imshow(model,
                           cmap = plt.get_cmap('gist_earth'),
                           vmin = np.amin(model)-np.amax(model)/2,
                           vmax = np.amax(model)+np.amax(model)/2,
@@ -277,7 +280,8 @@ def modelr_plot( model, colourmap, args ):
                 if vddata.ndim == 3:
                     vddata = np.sum(plot_data,axis=-1)
                 extreme = np.percentile(vddata,99)
-                ax.imshow( vddata,
+                print "SHAPE", p
+                axarr[0, p].imshow( vddata,
                            cmap = args.colourmap,
                            vmin = -extreme,
                            vmax = extreme,
@@ -287,6 +291,7 @@ def modelr_plot( model, colourmap, args ):
                                    plot_data.shape[0]*dt,0], 
                            origin = 'upper'
                            )
+                
     
             elif layer == 'reflectivity':
                 # Show unconvolved reflectivities
@@ -295,7 +300,7 @@ def modelr_plot( model, colourmap, args ):
                 #
                 masked_refl = np.ma.masked_where(reflectivity == 0.0, reflectivity)
             
-                ax.imshow(masked_refl,
+                axarr[0,p].imshow(masked_refl,
                            cmap = plt.get_cmap('Greys'),
                            aspect='auto',
                            extent=[min(xax),max(xax),
@@ -317,11 +322,12 @@ def modelr_plot( model, colourmap, args ):
                        line_colour = 'black',
                        fill_colour = 'black',
                        opacity = args.opacity,
-                       xax = xax
+                       xax = xax,
+                       quadrant = axarr[0, p]
                        )    
                 if plot.index(layer) == 0:
                     # then we're in an base layer so...
-                    ax.set_ylim(max(ax.set_ylim()),min(ax.set_ylim()))
+                    axarr[0, p].set_ylim(max(axarr[0, p].set_ylim()),min(axarr[0, p].set_ylim()))
 
             elif layer == 'RGB':
                 exponent = 2
@@ -333,7 +339,7 @@ def modelr_plot( model, colourmap, args ):
                 envelope[:,:,2]= envelope[:,:,2]/np.amax(envelope[:,:,2])
                 
                 extreme = np.amax(abs(envelope))
-                ax.imshow(envelope,
+                axarr[0, p].imshow(envelope,
                            cmap = args.colourmap,
                            vmin = -extreme,
                            vmax = extreme,
@@ -345,12 +351,59 @@ def modelr_plot( model, colourmap, args ):
                            )
             else:
                 # We should never get here
-                continue     
-        ax.set_xlabel(xlabel)
-        ax.set_ylabel('time [s]')
-        ax.set_title(args.title % locals())
+                continue   
+             
+        axarr[0, p].set_xlabel(xlabel)
+        axarr[0, p].set_ylabel('time [s]')
+        axarr[0, p].set_title(args.title % locals())
         
-        # check to see if the user wants a logarithmic scale (for freq. domain)
+        #plot inst. amplitude at 150 ms (every 6 samples, we should parameterize)
+        t = args.tslice
+        y = plot_data[int(t*1000.0),:].flatten()
+        
+        
+        
+        # compute lines for instantaneous chart
+        amax_tune = np.amax(y)
+        amin_tune = np.amin(y)
+        aun_tuned = plot_data[int(t*1000.0),-1]
+
+        # instantaneous charts       
+        axarr[1,p].plot(xax[:],y,'ko-',lw=3,alpha=0.2, color = 'g')
+        if args.xscale:    #check for log plot on graphs too
+            axarr[1, p].set_xscale('log', basex = int(args.xscale) )
+        axarr[1,p].set_xlabel(xlabel)
+        
+        # horizontal line, plot min, plot max
+        axarr[1, p].axhline(y=amin_tune, alpha=0.15, lw=3, color = 'g')
+        axarr[1, p].axhline(y=amax_tune, alpha=0.15, lw=3, color = 'g' )
+        
+        #plot ave
+        axarr[1, p].axhline(y=aun_tuned, alpha=0.15, lw=3, color = 'g')
+        
+        # vertical line
+        axarr[1, p].axvline(x=xax[np.argmax(y)], alpha=0.15, lw=3, color='b' )
+        axarr[1, p].axvline(x=xax[np.argmin(y)], alpha=0.15, lw=3, color='b' )
+        axarr[0, p].axvline(x=xax[np.argmax(y)], alpha=0.15, lw=3, color='b' )
+        axarr[0, p].axvline(x=xax[np.argmin(y)], alpha=0.15, lw=3, color='b' )
+        # draw vertical line at onset of steady state
+        y_r = np.array(y[::-1])
+        print y
+        try:
+            steady_state = np.where(abs(np.gradient(y_r)) >= (0.001*np.ptp(y)))[0][0]
+            axarr[1, p].axvline(x=xax[-steady_state], alpha=0.15, lw=3, color='r' )
+            axarr[0, p].axvline(x=xax[-steady_state], alpha=0.15, lw=3, color='r' )
+        except:
+            pass
+        #labels
+        axarr[1, p].set_title('instantaneous attribute at %s ms' % int(t*1000.0))
+        axarr[1, p].set_ylabel('amplitude')
+        axarr[1,p].grid()
+        plt.xlim((xax[0], xax[-1]))
+        
+        #plot horizontal green line on model image, and steady state
+        axarr[0,p].axhline(y=t, alpha=0.5, lw=2, color = 'g')
+        
 
     fig.tight_layout()
 

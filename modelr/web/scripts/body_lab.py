@@ -94,7 +94,14 @@ def add_arguments(parser):
                         help='Trace to use for non-spatial slice',
                         default=0
                         )
-                        
+    
+    parser.add_argument('tslice',
+                        type=float, 
+                        help='time [s] along which to plot instantaneous amplitude ',
+                        required=True,
+                        default=0.051
+                        )
+    
     return parser
 
 

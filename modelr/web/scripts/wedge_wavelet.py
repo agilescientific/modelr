@@ -23,7 +23,7 @@ short_description = 'Wavelet bank in a wedge model.'
 def add_arguments(parser):
     default_parser_list = [
                            'base1','base2','overlay1','overlay2',
-                           'opacity','theta', 'f','colourmap'
+                           'opacity','theta', 'colourmap'
                            ]
     
     default_parsers(parser,default_parser_list)
@@ -62,6 +62,12 @@ def add_arguments(parser):
                         default='0'
                         )
 
+    parser.add_argument('tslice',
+                        type=float, 
+                        help='time [s] along which to plot instantaneous amplitude ',
+                        required=True,
+                        default=0.150
+                        )
                         
     return parser
 
@@ -77,7 +83,7 @@ def run_script(args):
     args.ntraces = 300
     args.pad = 150
     args.reflectivity_method = zoeppritz
-    args.title = 'Wedge Model - Wavelet Cross Section' 
+    args.title = 'Wedge model - wavelet cross section' 
     args.wavelet = ricker
     args.wiggle_skips = 10
     args.aspect_ratio = 1
@@ -85,7 +91,7 @@ def run_script(args):
     args.right = (0,50)
     args.margin=1
     args.slice='frequency'
-   
+    args.f = (8,256,1)
     
     transparent = False
     # This is a hack to conserve colors
