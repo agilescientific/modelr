@@ -62,6 +62,8 @@ def default_parsers(parser, list_of_parsers):
                             type=str,
                             help='Matplotlib colourmap, ' +
                             'ageo.co/modelrcolour',
+                            choices = ['Greys','seismic','RdBu','BrBG','bwr',
+                            'PuOr','RdGy'],
                             default='Greys'
                             )
         
@@ -77,7 +79,9 @@ def default_parsers(parser, list_of_parsers):
                             type=str,
                             help='Plot 1, base layer',
                             choices=['wiggle', 'variable-density',
-                                     'earth-model', 'reflectivity'],
+                                     'earth-model', 'reflectivity'
+                                     #'RGB'    #uncomment for RGB display
+                                     ],
                             default='variable-density'
                             )
         
@@ -87,7 +91,9 @@ def default_parsers(parser, list_of_parsers):
                             help='Plot 1, overlay',
                             choices=['none', 'wiggle',
                                      'variable-density',
-                                     'earth-model', 'reflectivity'],
+                                     'earth-model', 'reflectivity', 
+                                     #'RGB'  #uncomment for RGB display
+                                     ],
                             default='none'
                             )
         
@@ -97,7 +103,9 @@ def default_parsers(parser, list_of_parsers):
                             help='Plot 2, base layer',
                             choices=['none', 'wiggle',
                                      'variable-density',
-                                     'earth-model', 'reflectivity'],
+                                     'earth-model', 'reflectivity', 
+                                     #'RGB'  #uncomment for RGB display
+                                     ],
                             default='none'
                             )
         
@@ -107,7 +115,9 @@ def default_parsers(parser, list_of_parsers):
                             help='Plot 2, overlay',
                             choices=['none', 'wiggle',
                                      'variable-density',
-                                     'earth-model', 'reflectivity'],
+                                     'earth-model', 'reflectivity', 
+                                     # 'RGB'     #uncomment for RGB display
+                                     ],
                             default='none'
                             )
         
@@ -131,6 +141,22 @@ def default_parsers(parser, list_of_parsers):
                             type=float,
                             help='stretches the dimensions of each plot (bigger with > 1, smaller < 1)',
                             default=1.0
+                            )
+    
+    if 'extraction_twt' in list_of_parsers:
+        parser.add_argument('extraction_twt',
+                            type=float,
+                            help='twt (s) for amplitude extraction or slice',
+                            default=0.150
+                            )
+    
+    if 'extract_along' in list_of_parsers:
+        parser.add_argument('extract_along',
+                            type=str,
+                            help='added dimension(s) along which to extract data',
+                            choices=[ 'none','spatial','angle','frequency'
+                                     ],
+                            default='none'
                             )
                                         
     return parser

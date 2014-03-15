@@ -13,6 +13,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from agilegeo.wavelet import ricker
 import numpy as np
+from scipy.signal import hilbert
 from modelr.reflectivity import get_reflectivity, do_convolve
 
 def get_figure_data(transparent=False):
@@ -20,12 +21,12 @@ def get_figure_data(transparent=False):
     Return the current plot as a binary blob. 
     '''
     fig_path = tempfile.NamedTemporaryFile(suffix='.png', delete=True)
-    plt.savefig(fig_path, transparent=transparent) 
+    plt.savefig(fig_path.name, transparent=transparent)
+    plt.close()
     with open(fig_path.name, 'rb') as fd:
         data = fd.read()
-        del fd        
-    fig_path.close()
-    del fig_path    
+             
+        
     # Alternative approach to do it in memory rather than on disk
     #image_file = tempfile.SpooledTemporaryFile(suffix='.png')
     #plt.savefig(image_file, format='png') 
@@ -35,7 +36,8 @@ def get_figure_data(transparent=False):
     return data
 
 def wiggle(data, dt=1, line_colour='black', fill_colour='blue',
-           opacity= 0.5, skipt=0, gain=1, lwidth=.5, xax=1):
+           opacity= 0.5, skipt=0, gain=1, lwidth=.5, xax=1,
+           quadrant=plt):
     """
     Make a wiggle trace and plots it on the current figure.
     
@@ -57,14 +59,15 @@ def wiggle(data, dt=1, line_colour='black', fill_colour='blue',
         new_trace = gain*(trace/np.amax(data))
 
         scaler = (np.amax(xax)-np.amin(xax))/float( len(xax))
-    
-        plt.plot( (i + new_trace) * scaler + min(xax), t, color=line_colour, 
-                linewidth=lwidth,alpha=opacity)
-    
-        plt.fill_betweenx(t, ((i + new_trace) * scaler)+min(xax), (i * scaler)+min(xax) ,  new_trace > 0,
-                          color=fill_colour, alpha=opacity, lw=0)
-    
-    plt.axis('tight')
+        
+        
+        quadrant.plot( (i + new_trace) * scaler + min(xax), t, color=line_colour, 
+                  linewidth=lwidth,alpha=opacity)
+                
+        quadrant.fill_betweenx(t, ((i + new_trace) * scaler)+min(xax), (i * scaler)+min(xax) ,  new_trace > 0,
+                         color=fill_colour, alpha=opacity, lw=0)
+                
+        quadrant.axis('tight')
 
 def modelr_plot( model, colourmap, args ):
     """
@@ -83,10 +86,16 @@ def modelr_plot( model, colourmap, args ):
     from modelr.constants import dt, duration
     model_aspect = float(model.shape[1]) / model.shape[0]
 
-    if args.slice == 'spatial':
+    if not hasattr(args, 'xscale'):
+        args.xscale=0
+    
+    
+    if args.slice == 'spatial':       
         traces = range( args.ntraces )
     else:
-        traces = args.trace
+        traces = args.trace - 1
+        if traces >= args.ntraces:
+            traces = args.ntraces -1
         
     if args.slice == 'angle':
         theta0 = args.theta[0]
@@ -96,6 +105,7 @@ def modelr_plot( model, colourmap, args ):
             theta_step = args.theta[2]
         except:
             theta_step = 1
+        
         
         theta = np.linspace(theta0, theta1,
                             int((theta1-theta0) / theta_step))
@@ -116,8 +126,10 @@ def modelr_plot( model, colourmap, args ):
         except:
             f_step = 1
         
-        f = np.linspace(f0, f1, (int((f1-f0)/f_step)) )
-        
+        if (args.xscale) == 0:
+            f = np.linspace(f0, f1, (int((f1-f0)/f_step)) )
+        else:
+            f = np.logspace(max(np.log2(f0),np.log2(7)),np.log2(f1),300,endpoint=True, base=2.0) 
     else:
         f = args.f
 
@@ -176,7 +188,8 @@ def modelr_plot( model, colourmap, args ):
         plots = [(base1, overlay1), (base2, overlay2)]
 
     if( args.slice == 'spatial' ):
-        plot_data = warray_amp[ :, :, 0,0]
+        
+        plot_data = warray_amp[ :, :, 0,:]
         reflectivity = reflectivity[:,:,0]
         xax = traces
         xlabel = 'trace'
@@ -193,12 +206,13 @@ def modelr_plot( model, colourmap, args ):
                                      warray_amp.shape[1] ) )
         
         xax = f
-        xlabel = 'frequency'
+        xlabel = 'frequency [Hz]'
     else:
         # Default to spatial
         plot_data = warray_amp[ :, :, 0, 0 ]
 
     # Calculate some basic stuff
+    plot_data = np.nan_to_num(plot_data)
     
     # This doesn't work well for non-spatial slices
     #aspect = float(warray_amp.shape[1]) / warray_amp.shape[0]                                        
@@ -210,15 +224,19 @@ def modelr_plot( model, colourmap, args ):
     
     pad = np.ceil((plot_data.shape[0] - model.shape[0]) / 2)
 
-    # Work out the size of the figure
-    each_width = 5
-    width = each_width*len(plots)
-    height = each_width*stretch
-
     # First, set up the matplotlib figure
-    fig = plt.figure(figsize=(width, height))
+    #fig = plt.figure(figsize=(width, 2*height))
 
+    fig, axarr = plt.subplots(2, len(plots))     #, sharex='col', sharey='row')
     
+    if len(plots) == 1:
+        axarr = np.transpose(np.array([axarr]))
+    
+    # Work out the size of the figure
+    each_width = 6
+    fig.set_figwidth(each_width*len(plots))
+    fig.set_figheight(each_width*stretch*2)
+
     # Start a loop for the figures...
     for plot in plots:
         
@@ -228,12 +246,11 @@ def modelr_plot( model, colourmap, args ):
             break
             
         # Establish what sort of subplot grid we need
-        l = len(plots)
         p = plots.index(plot)
-                
-        # Set up the plot 'canvas'
-        ax = fig.add_subplot(1,l,p+1)
-            
+    
+        if args.xscale:
+            axarr[0, p].set_xscale('log', basex = int(args.xscale) )    
+        
         # Each plot can have two layers (maybe more later?)
         # Display the two layers by looping over the non-blank
         # elements
@@ -250,7 +267,7 @@ def modelr_plot( model, colourmap, args ):
             # Now find out what sort of plot we're making on this
             # loop...        
             if layer == 'earth-model':
-                ax.imshow(model,
+                axarr[0, p].imshow(model,
                           cmap = plt.get_cmap('gist_earth'),
                           vmin = np.amin(model)-np.amax(model)/2,
                           vmax = np.amax(model)+np.amax(model)/2,
@@ -262,24 +279,32 @@ def modelr_plot( model, colourmap, args ):
                            )
             
             elif layer == 'variable-density':
-                
-                ax.imshow(plot_data,
+                vddata=plot_data
+                if vddata.ndim == 3:
+                    vddata = np.sum(plot_data,axis=-1)
+                extreme = np.percentile(vddata,99)
+            
+                axarr[0, p].imshow( vddata,
                            cmap = args.colourmap,
+                           vmin = -extreme,
+                           vmax = extreme,
                            alpha = alpha,
                            aspect='auto',
                            extent=[min(xax),max(xax),
                                    plot_data.shape[0]*dt,0], 
                            origin = 'upper'
                            )
+                
     
             elif layer == 'reflectivity':
                 # Show unconvolved reflectivities
                 #
                 #TO DO:put transparent when null / zero
                 #
-                masked_refl = np.ma.masked_where(reflectivity == 0.0, reflectivity)
+                masked_refl = np.ma.masked_where(reflectivity == 0.0,
+                                                 reflectivity)
             
-                ax.imshow(masked_refl,
+                axarr[0,p].imshow(masked_refl,
                            cmap = plt.get_cmap('Greys'),
                            aspect='auto',
                            extent=[min(xax),max(xax),
@@ -291,26 +316,100 @@ def modelr_plot( model, colourmap, args ):
 
             elif layer == 'wiggle':
             # wiggle needs an alpha setting too
-                wiggle(plot_data,
+                wigdata=plot_data
+                if wigdata.ndim == 3:
+                    wigdata= np.sum(plot_data,axis=-1)
+                wiggle(wigdata,
                        dt = dt,
                        skipt = args.wiggle_skips,
                        gain = args.wiggle_skips + 1,
                        line_colour = 'black',
                        fill_colour = 'black',
                        opacity = args.opacity,
-                       xax = xax
+                       xax = xax,
+                       quadrant = axarr[0, p]
                        )    
                 if plot.index(layer) == 0:
                     # then we're in an base layer so...
-                    ax.set_ylim(max(ax.set_ylim()),min(ax.set_ylim()))
+                    axarr[0, p].set_ylim(max(axarr[0, p].set_ylim()),min(axarr[0, p].set_ylim()))
 
+            elif layer == 'RGB':
+                exponent = 2
+                envelope = abs(hilbert(plot_data))
+                envelope = envelope**exponent
+                
+                envelope[:,:,0]= envelope[:,:,0]/np.amax(envelope[:,:,0])
+                envelope[:,:,1]= envelope[:,:,1]/np.amax(envelope[:,:,1])
+                envelope[:,:,2]= envelope[:,:,2]/np.amax(envelope[:,:,2])
+                
+                extreme = np.amax(abs(envelope))
+                axarr[0, p].imshow(envelope,
+                           cmap = args.colourmap,
+                           vmin = -extreme,
+                           vmax = extreme,
+                           alpha = alpha,
+                           aspect='auto',
+                           extent=[min(xax),max(xax),
+                                   envelope.shape[0]*dt,0], 
+                           origin = 'upper'
+                           )
             else:
                 # We should never get here
-                continue     
-        ax.set_xlabel(xlabel)
-        ax.set_ylabel('time [s]')
-        ax.set_title(args.title % locals())
- 
+                continue   
+             
+        axarr[0, p].set_xlabel(xlabel)
+        axarr[0, p].set_ylabel('time [s]')
+        axarr[0, p].set_title(args.title % locals())
+        
+        #plot inst. amplitude at 150 ms (every 6 samples, we should parameterize)
+        t = args.tslice
+        t_index = np.amin([int(t*1000.0), plot_data.shape[0]-1])
+        y = plot_data[t_index,:].flatten()
+        
+        
+        
+        # compute lines for instantaneous chart
+        amax_tune = np.amax(y)
+        amin_tune = np.amin(y)
+        aun_tuned = plot_data[t_index,-1]
+
+        # instantaneous charts       
+        axarr[1,p].plot(xax[:],y,'ko-',lw=3,alpha=0.2, color = 'g')
+        if args.xscale:    #check for log plot on graphs too
+            axarr[1, p].set_xscale('log', basex = int(args.xscale) )
+        axarr[1,p].set_xlabel(xlabel)
+        
+        # horizontal line, plot min, plot max
+        axarr[1, p].axhline(y=amin_tune, alpha=0.15, lw=3, color = 'g')
+        axarr[1, p].axhline(y=amax_tune, alpha=0.15, lw=3, color = 'g' )
+        
+        #plot ave
+        axarr[1, p].axhline(y=aun_tuned, alpha=0.15, lw=3, color = 'g')
+        
+        # vertical line
+        axarr[1, p].axvline(x=xax[np.argmax(y)], alpha=0.15, lw=3, color='b' )
+        axarr[1, p].axvline(x=xax[np.argmin(y)], alpha=0.15, lw=3, color='b' )
+        axarr[0, p].axvline(x=xax[np.argmax(y)], alpha=0.15, lw=3, color='b' )
+        axarr[0, p].axvline(x=xax[np.argmin(y)], alpha=0.15, lw=3, color='b' )
+        # draw vertical line at onset of steady state
+        y_r = np.array(y[::-1])
+    
+        try:
+            steady_state = np.where(abs(np.gradient(y_r)) >= (0.001*np.ptp(y)))[0][0]
+            axarr[1, p].axvline(x=xax[-steady_state], alpha=0.15, lw=3, color='r' )
+            axarr[0, p].axvline(x=xax[-steady_state], alpha=0.15, lw=3, color='r' )
+        except:
+            pass
+        #labels
+        axarr[1, p].set_title('instantaneous attribute at %s ms' % int(t*1000.0))
+        axarr[1, p].set_ylabel('amplitude')
+        axarr[1,p].grid()
+        plt.xlim((xax[0], xax[-1]))
+        
+        #plot horizontal green line on model image, and steady state
+        axarr[0,p].axhline(y=t, alpha=0.5, lw=2, color = 'g')
+        
+
     fig.tight_layout()
 
     
