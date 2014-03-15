@@ -35,7 +35,8 @@ def get_figure_data(transparent=False):
     return data
 
 def wiggle(data, dt=1, line_colour='black', fill_colour='blue',
-           opacity= 0.5, skipt=0, gain=1, lwidth=.5, xax=1, quadrant=plt):
+           opacity= 0.5, skipt=0, gain=1, lwidth=.5, xax=1,
+           quadrant=plt):
     """
     Make a wiggle trace and plots it on the current figure.
     
@@ -92,6 +93,8 @@ def modelr_plot( model, colourmap, args ):
         traces = range( args.ntraces )
     else:
         traces = args.trace - 1
+        if traces >= args.ntraces:
+            traces = args.ntraces -1
         
     if args.slice == 'angle':
         theta0 = args.theta[0]
@@ -208,6 +211,7 @@ def modelr_plot( model, colourmap, args ):
         plot_data = warray_amp[ :, :, 0, 0 ]
 
     # Calculate some basic stuff
+    plot_data = np.nan_to_num(plot_data)
     
     # This doesn't work well for non-spatial slices
     #aspect = float(warray_amp.shape[1]) / warray_amp.shape[0]                                        
@@ -226,8 +230,6 @@ def modelr_plot( model, colourmap, args ):
     
     if len(plots) == 1:
         axarr = np.transpose(np.array([axarr]))
-    
-    print(axarr.shape)
     
     # Work out the size of the figure
     each_width = 6
@@ -280,7 +282,7 @@ def modelr_plot( model, colourmap, args ):
                 if vddata.ndim == 3:
                     vddata = np.sum(plot_data,axis=-1)
                 extreme = np.percentile(vddata,99)
-                print "SHAPE", p
+            
                 axarr[0, p].imshow( vddata,
                            cmap = args.colourmap,
                            vmin = -extreme,
@@ -298,7 +300,8 @@ def modelr_plot( model, colourmap, args ):
                 #
                 #TO DO:put transparent when null / zero
                 #
-                masked_refl = np.ma.masked_where(reflectivity == 0.0, reflectivity)
+                masked_refl = np.ma.masked_where(reflectivity == 0.0,
+                                                 reflectivity)
             
                 axarr[0,p].imshow(masked_refl,
                            cmap = plt.get_cmap('Greys'),
@@ -359,14 +362,15 @@ def modelr_plot( model, colourmap, args ):
         
         #plot inst. amplitude at 150 ms (every 6 samples, we should parameterize)
         t = args.tslice
-        y = plot_data[int(t*1000.0),:].flatten()
+        t_index = np.amin([int(t*1000.0), plot_data.shape[0]-1])
+        y = plot_data[t_index,:].flatten()
         
         
         
         # compute lines for instantaneous chart
         amax_tune = np.amax(y)
         amin_tune = np.amin(y)
-        aun_tuned = plot_data[int(t*1000.0),-1]
+        aun_tuned = plot_data[t_index,-1]
 
         # instantaneous charts       
         axarr[1,p].plot(xax[:],y,'ko-',lw=3,alpha=0.2, color = 'g')
@@ -388,7 +392,7 @@ def modelr_plot( model, colourmap, args ):
         axarr[0, p].axvline(x=xax[np.argmin(y)], alpha=0.15, lw=3, color='b' )
         # draw vertical line at onset of steady state
         y_r = np.array(y[::-1])
-        print y
+    
         try:
             steady_state = np.where(abs(np.gradient(y_r)) >= (0.001*np.ptp(y)))[0][0]
             axarr[1, p].axvline(x=xax[-steady_state], alpha=0.15, lw=3, color='r' )

@@ -84,7 +84,7 @@ def run_script(args):
         transparent = True"""
 
     args.ntraces = 300
-    args.pad = 149
+    args.pad = 150
     args.reflectivity_method = zoeppritz
     args.title = 'Channel Model - Wavelet Cross Section'
     args.wavelet = ricker
