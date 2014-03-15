@@ -285,6 +285,7 @@ def main():
     parser.add_argument('--host', type=str, default='')
     parser.add_argument('-p', '--port', type=int, default=80)
 
+    parser.add_argument('--local', type=bool, default=False)
     args = parser.parse_args()
     try:
         server = HTTPServer((args.host, args.port), MyHandler)
@@ -297,11 +298,14 @@ def main():
         # I don't know if we need to check the certificate
         # on the client side too, or if doing it this way
         # will satisfy the browser and that's enough.
-        server.socket = ssl.wrap_socket(server.socket,
-                                         certfile=CERTFILE,
-                                         keyfile=KEYFILE,
-                                         server_side=True
-                                         )
+        
+        if not args.local:
+            server.socket = ssl.wrap_socket(server.socket,
+                                            certfile=CERTFILE,
+                                            keyfile=KEYFILE,
+                                            server_side=True
+                                            )
+        
                                         
         print 'started httpserver...'
         server.serve_forever()
