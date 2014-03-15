@@ -23,6 +23,7 @@ import json
 import multiprocessing as mp
 import ssl
 
+
 class MyHandler(BaseHTTPRequestHandler):
     '''
     Handles a single request.
@@ -98,13 +99,15 @@ class MyHandler(BaseHTTPRequestHandler):
 
                 self.send_response(200)
                 self.send_header('Access-Control-Allow-Origin', '*')
-                self.send_header('Access-Control-Allow-Headers', 'X-Request, X-Requested-With')
+                self.send_header('Access-Control-Allow-Headers',
+                                 'X-Request, X-Requested-With')
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
                 
                 script_main = namespace['run_script']
                 add_arguments = namespace['add_arguments']
-                short_description = namespace.get('short_description', 'No description')
+                short_description = namespace.get('short_description',
+                                                  'No description')
 
                 parser = URLArgumentParser(short_description)
                 add_arguments(parser)
@@ -116,7 +119,8 @@ class MyHandler(BaseHTTPRequestHandler):
             if uri.path == '/available_scripts.json':
                 self.send_response(200)
                 self.send_header('Access-Control-Allow-Origin', '*')
-                self.send_header('Access-Control-Allow-Headers', 'X-Request, X-Requested-With')
+                self.send_header('Access-Control-Allow-Headers',
+                                 'X-Request, X-Requested-With')
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
                 
@@ -140,7 +144,8 @@ class MyHandler(BaseHTTPRequestHandler):
                 
             script_main = namespace['run_script']
             add_arguments = namespace['add_arguments']
-            short_description = namespace.get('short_description', 'No description')
+            short_description = namespace.get('short_description',
+                                              'No description')
             
             print "parameters", parameters
             p = mp.Process(
@@ -150,7 +155,7 @@ class MyHandler(BaseHTTPRequestHandler):
                                               parameters))
             p.start()
             p.join()
-            #self.run_script(script[0], script_main, add_arguments, short_description, parameters)
+           
             
         except Exception as err:
             self.send_response(400)
@@ -187,10 +192,12 @@ class MyHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             
-            template = self.server.jenv.get_template('ScriptHelp.html')
+            template = \
+              self.server.jenv.get_template('ScriptHelp.html')
             
             print parameters
-            html = template.render(script=script, parser=parser, parameters=parameters)
+            html = template.render(script=script, parser=parser,
+                                   parameters=parameters)
             self.wfile.write(html)
             return
         except ArgumentError as err:
@@ -198,7 +205,8 @@ class MyHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
                 
-            self.wfile.write('<p><b>Error:</b> %s</p>' % (err.args[0],))
+            self.wfile.write('<p><b>Error:</b> %s</p>'
+                             % (err.args[0],))
             self.wfile.write(parser.help_html)
             return
         
@@ -229,7 +237,8 @@ class MyHandler(BaseHTTPRequestHandler):
                 namespace = {}
                 with open(join(scripts_dir, script), 'r') as fd:
                     exec fd.read() in namespace
-                short_doc = namespace.get('short_description', 'No doc')
+                short_doc = namespace.get('short_description',
+                                          'No doc')
                 print script, namespace
                 available_scripts.append((script, short_doc))
             except Exception, e:
@@ -250,12 +259,15 @@ class MyHandler(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'text/html')
         self.end_headers()
         
-        html = template.render(msg=msg, available_scripts=self.get_available_scripts())
+        html = \
+          template.render(msg=msg,
+                    available_scripts=self.get_available_scripts())
         self.wfile.write(html)
         
         
     def do_POST(self):
-        self.send_error(404, 'Post request not supportd yet: %s' % self.path)
+        self.send_error(404, 'Post request not supportd yet: %s'
+                        % self.path)
 
 # Locations of the PEM files for SSL
 # If this doesn't work, an alternative would be to store the
@@ -273,6 +285,7 @@ def main():
     parser.add_argument('--host', type=str, default='')
     parser.add_argument('-p', '--port', type=int, default=80)
 
+    parser.add_argument('--local', type=bool, default=False)
     args = parser.parse_args()
     try:
         server = HTTPServer((args.host, args.port), MyHandler)
@@ -285,11 +298,14 @@ def main():
         # I don't know if we need to check the certificate
         # on the client side too, or if doing it this way
         # will satisfy the browser and that's enough.
-        server.socket = ssl.wrap_socket(server.socket,
-                                         certfile=CERTFILE,
-                                         keyfile=KEYFILE,
-                                         server-side=True
-                                         )
+        
+        if not args.local:
+            server.socket = ssl.wrap_socket(server.socket,
+                                            certfile=CERTFILE,
+                                            keyfile=KEYFILE,
+                                            server_side=True
+                                            )
+        
                                         
         print 'started httpserver...'
         server.serve_forever()

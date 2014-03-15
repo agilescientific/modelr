@@ -9,7 +9,7 @@ from modelr.constants import REFLECTION_MODELS as MODELS
 from modelr.web.util import get_figure_data
 import numpy as np
 from scipy import arcsin
-
+import multiprocessing as mp
 
 short_description = (
     "Make a stochastic avo plot using monte carlo " +
@@ -18,34 +18,22 @@ short_description = (
 
 def add_arguments(parser):
 
-    default_parser_list = [
-                           'title'
-                           ]
-    
-    default_parsers(parser,default_parser_list)
+
                             
 
-    parser.add_argument('Rpp0', type=rock_properties_type, 
-                        help=('rock properties of lower rock: Vp, ' +
-                              'Vs, Rho, Vp std. dev., Vs std. dev.,'+
-                              'Rho std. dev.'),
+    parser.add_argument('Rock0', type=rock_properties_type, 
+                        help=('Upper rock type'),
                         default = '2900, 1600, 2600, 29, 16, 26',
                         required=True)
     
-    parser.add_argument('Rpp1', type=rock_properties_type, 
-                        help=('rock properties of lower rock: Vp, ' +
-                              'Vs, Rho, Vp std. dev., Vs std. dev.,'+
-                              'Rho std. dev.'),
+    parser.add_argument('Rock1', type=rock_properties_type, 
+                        help=('Lower rock type'),
                         default = '3200, 1900, 2500, 32, 19, 25',
                         required=True)
                         
     parser.add_argument( 'iterations', type=int, default=50, 
                          help='number of monte carlo simulations' )
     
-    parser.add_argument('plot_type', type=str,
-                        help='AVO, AB, or dashboard ',
-                        default='dashboard'
-                        )
                         
     parser.add_argument('reflectivity_method',
                         type=reflectivity_type,
@@ -71,6 +59,9 @@ def make_normal_dist( rock, sample_size, correlation=.8 ):
     :returns: distributions for vp, vs, rho
     """
 
+    #pid = mp.current_process()._identity[0]
+    #np.random.seed(pid)
+    
     cor = correlation
 
     # Make three normalized gaussian distributions
@@ -92,9 +83,10 @@ def make_normal_dist( rock, sample_size, correlation=.8 ):
 def run_script(args): 
     
     matplotlib.interactive(False)
- 
-    Rprop0 = args.Rpp0 
-    Rprop1 = args.Rpp1
+
+    args.plot_type = 'dashboard'
+    Rprop0 = args.Rock0
+    Rprop1 = args.Rock1
 
     theta = np.arange(0,90)
     
@@ -103,8 +95,23 @@ def run_script(args):
     reflect = []
     names = np.array([['Vp0','Vs0','rho0'],['Vp1','Vs1','rho1']])
     nbins = 15
-    limits = np.array([[ (2500,4000),(1500,2500),(2400,2800) ],
-                       [ (2500,4000),(1500,2500),(2400,2800) ] ])
+
+    vp_lim = ( np.amin((Rprop1.vp - ( 3.* Rprop1.vp_sig ),
+                        Rprop0.vp - ( 3.* Rprop1.vp_sig ) ) ),
+                        np.amax((Rprop1.vp + ( 3.* Rprop1.vp_sig ),
+                        Rprop0.vp + ( 3.* Rprop1.vp_sig ) ) ) )
+
+    vs_lim = ( np.amin((Rprop1.vs - ( 3.* Rprop1.vs_sig ),
+                        Rprop0.vs - ( 3.* Rprop1.vs_sig ) ) ),
+                        np.amax((Rprop1.vs + ( 3.* Rprop1.vs_sig ),
+                        Rprop0.vs + ( 3.* Rprop1.vs_sig ) ) ) )
+    rho_lim = ( np.amin((Rprop1.rho - ( 3.* Rprop1.rho_sig ),
+                        Rprop0.rho - ( 3.* Rprop1.rho_sig ) ) ),
+                        np.amax((Rprop1.rho + ( 3.* Rprop1.rho_sig ),
+                        Rprop0.rho + ( 3.* Rprop1.rho_sig ) ) ) )
+    
+    limits = np.array([[ vp_lim,vs_lim,rho_lim ],
+                       [ vp_lim,vs_lim,rho_lim ] ])
     
     for i in range( args.iterations ):
         
@@ -120,11 +127,11 @@ def run_script(args):
     nbins = 15
     # DO PLOTTING
         
-    plt.figure(figsize = (15,4))
-    plt.subplots_adjust(bottom=0.1, left=0.1, top = 0.9, right=0.9)
+    plt.figure(figsize = (4,10))
+    plt.subplots_adjust(bottom=0.1, left=0.1, top = 1, right=0.9)
     plt.hold(True)
     if args.plot_type == 'dashboard':
-        G = matplotlib.gridspec.GridSpec(2,9)
+        G = matplotlib.gridspec.GridSpec(9,2, hspace=0.5)
         shift=3
     else:
         G = matplotlib.gridspec.GridSpec(2,6)
@@ -133,18 +140,20 @@ def run_script(args):
     # ax_3, ax_4, ax_5, ax_6, ax_7, ax_8
     hist_max = 0
     for k in np.arange(len(prop_samples)):
-        hist_max = max(hist_max,max(np.histogram(prop_samples[k],density=True)[0]))
+        hist_max = max(hist_max,max(np.histogram(prop_samples[k],
+                                                 density=True)[0]))
     
     for j in np.arange(2):
         for i in np.arange(3):
-            plt.subplot(G[j,3+i+shift])
+            plt.subplot(G[3+i+shift,j])
             plt.hist( prop_samples[i+(3*j)], nbins, 
                      facecolor='gray', 
                      alpha=0.25,
                      normed = True
                      )
             temp = plt.gca()
-            plt.axis([limits[j][i][0], limits[j][i][1], temp.axis()[2], hist_max ])
+            plt.axis([limits[j][i][0], limits[j][i][1],
+                      temp.axis()[2], hist_max ])
             plt.yticks([])
             plt.xticks( rotation=90,horizontalalignment='left' )
             ax = plt.gca()  # gca stands for 'get current axis'
@@ -159,14 +168,15 @@ def run_script(args):
             for label in ax.get_xticklabels() + ax.get_yticklabels():
                 label.set_fontsize(6)
                 label.set_alpha(0.5)
-                label.set_bbox(dict(facecolor='white', edgecolor='None', alpha=0.35))
+                label.set_bbox(dict(facecolor='white',
+                                    edgecolor='None', alpha=0.35))
                 
             for tick in ax.xaxis.get_major_ticks():
                 tick.tick1On = True
                 tick.tick2On = False      
     
     # ax_1 the AVO plot
-    plt.subplot(G[:,0:3])
+    plt.subplot(G[0:3,:])
     plt.hold(True)
     for i in range( args.iterations -1):        
         plt.plot( theta, reflect[i] ,color = 'red', alpha = np.min((10./args.iterations, 0.5)))
@@ -204,12 +214,15 @@ def run_script(args):
    
                        
     # ax_2 the AB plot
-    plt.subplot(G[:,0+shift:3+shift])
+    plt.subplot(G[0+shift:3+shift,:])
     plt.hold(True)
     for i in range( args.iterations -1):
-        plt.scatter( reflect[i,0], (reflect[i,50]-reflect[i,0] ) , color = 'red' , s=20, alpha = np.min((10./args.iterations,0.5)) )
+        plt.scatter( reflect[i,0], (reflect[i,50]-reflect[i,0] ),
+                     color = 'red' , s=20,
+                     alpha = np.min((10./args.iterations,0.5)) )
         #data += np.nan_to_num( reflect ) 
-    plt.scatter( ave_reflect[0], ave_reflect[50]- ave_reflect[0]  , color = 'green' , s=20, alpha=.5 )  
+    plt.scatter( ave_reflect[0], ave_reflect[50]- ave_reflect[0],
+                 color = 'green' , s=20, alpha=.5 )  
     plt.xticks([]), plt.yticks([])
     ax = plt.gca()  # gca stands for 'get current axis'
     ax.spines['right'].set_color('none')
@@ -221,25 +234,33 @@ def run_script(args):
     ax.spines['left'].set_position(('data',0))
     ax.spines['left'].set_alpha(0.5)
     ax.text(0.05, 0.95, 'Intercept-Gradient\ncrossplot',
-                    verticalalignment='top', horizontalalignment='left',
-                    transform=ax.transAxes,
-                    color='black', fontsize=10, alpha=0.75)
+            verticalalignment='top',
+            horizontalalignment='left',
+            transform=ax.transAxes,
+            color='black', fontsize=10, alpha=0.75)
     for label in ax.get_xticklabels() + ax.get_yticklabels():
         label.set_fontsize(7)
         label.set_alpha(0.5)
-        label.set_bbox(dict(facecolor='white', edgecolor='None', alpha=0.35))
+        label.set_bbox(dict(facecolor='white',
+                            edgecolor='None',
+                            alpha=0.35))
     plt.grid()
-    plt.ylim((-.3,.3))
-    plt.xlim((-.3,.3))
+    plt.ylim((np.amin((-.3,np.nanmin(reflect[:,50]-reflect[:,0]))),
+              np.amax((.3,np.nanmax(reflect[:,50]-reflect[:,0])))) )
+    
+    plt.xlim((np.amin((-.3,np.nanmin(reflect[:,0]))),
+              np.amax((.3,np.nanmax(reflect[:,0])))))
     ax.text(1.0, 0.55, 'intercept',
-                    verticalalignment='top', horizontalalignment='right',
+                    verticalalignment='top',
+                    horizontalalignment='right',
                     transform=ax.transAxes,
                     color='black', fontsize=8, alpha=0.5)
     ax.text(0.55, 1.0, 'gradient', rotation=90,
-                    verticalalignment='top', horizontalalignment='right',
-                    transform=ax.transAxes,
-                    color='black', fontsize=8, alpha=0.5)
-    #plt.text(-0.15, 0.5, 'Intercept-Gradient plot',ha='left',va='center',size=10,alpha=.5)
+            verticalalignment='top', horizontalalignment='right',
+            transform=ax.transAxes,
+            color='black', fontsize=8, alpha=0.5)
+    #plt.text(-0.15, 0.5, 'Intercept-Gradient plot',ha='left',
+    #va='center',size=10,alpha=.5)
                               
     return get_figure_data()
     
