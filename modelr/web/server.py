@@ -305,6 +305,7 @@ def main():
                                             keyfile=KEYFILE,
                                             server_side=True
                                             )
+            server.socket.settimeout(8.0)
         
                                         
         print 'started httpserver...'
