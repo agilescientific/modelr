@@ -22,7 +22,9 @@ import traceback
 import json
 import multiprocessing as mp
 import ssl
+import socket
 
+socket.setdefaulttimeout(6)
 
 class MyHandler(BaseHTTPRequestHandler):
     '''
