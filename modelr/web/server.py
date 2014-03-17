@@ -23,6 +23,7 @@ import json
 import multiprocessing as mp
 import ssl
 
+import  base64
 
 class MyHandler(BaseHTTPRequestHandler):
     '''
@@ -131,7 +132,15 @@ class MyHandler(BaseHTTPRequestHandler):
                 self.wfile.write(data)
                 
                 return
-            
+
+            if uri.path == '/forward_model.json':
+
+                # Read the JSON
+                args = json.loads(self.request.recv(1024).strip())
+                p = mp.Process(target=self.forward_model,
+                               args=args)
+                
+                
             if uri.path != '/plot.jpeg':
                 self.send_error(404, 'File Not Found: %s' % self.path)
                 return
@@ -172,6 +181,36 @@ class MyHandler(BaseHTTPRequestHandler):
             self.wfile.write('</div>')
             
             raise
+
+    def forward_model(self, args):
+       
+        # Decode the model
+        image = base64.b64decode(args["image"])
+        
+        # Run the model
+        seismic_data = forward_model(args["earth_structure"],
+                                     args["property_mapping"],
+                                     args["seismic_model"])
+
+        # Calculate metadata (max/min, variability,etc, ...)
+        metadata = {}
+        
+        output = {"metadata": metadata, "plots": []}
+        
+        for pane in args["plots"]:
+
+            jpeg = modelr_plot(pane, data)
+            output["plots"].append(base64.b64encode(jpeg))
+
+        json_out = json.dumps(output)
+
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+            
+        self.wfile.write(json_out)
+        
+        
         
     def run_script(self, script, script_main, add_arguments,
                    short_description, parameters):
