@@ -3,7 +3,7 @@
 modelr.web.server
 ===================
 
-Main program to strat a web server.
+Main program to start a web server.
 
 Created on Apr 30, 2012
 
@@ -21,7 +21,11 @@ from modelr.web.urlargparse import SendHelp, ArgumentError, \
 import traceback
 import json
 import multiprocessing as mp
+
 import base64
+
+import ssl
+
 
 class MyHandler(BaseHTTPRequestHandler):
     '''
@@ -113,6 +117,9 @@ class MyHandler(BaseHTTPRequestHandler):
                                  'X-Request, X-Requested-With')
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
+                
+                script_main = namespace['run_script']
+                
 
                 # Pull the script help and load it into a parser
                 short_description = namespace.get('short_description',
@@ -150,75 +157,7 @@ class MyHandler(BaseHTTPRequestHandler):
                 self.send_header('Access-Control-Allow-Origin', '*')
                 self.send_header('Access-Control-Allow-Headers',
                                  'X-Request, X-Requested-With')
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
 
-                # Write the response
-                self.wfile.write(parser.json_data)
-
-            # Get the seismic model parsers
-            elif uri.path == '/seismic_info.json':
-
-                # Parse uri params
-                parameters = parse_qs(uri.query)
-                script = parameters.pop("script")
-                cross_section = parameters.pop("slice")
-                
-                 # Pull namespace from script and cross section parser
-                namespace = self.eval_script(script)
-                add_arguments = namespace['add_seismic_arguments']
-
-                # Fill the parser
-                parser = URLArgumentParser("Seismic Parameters")
-                print '++++++++++++++ ', cross_section
-                add_arguments(parser, cross_section[0])
-
-                # Set the response headers for json data
-                self.send_response(200)
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.send_header('Access-Control-Allow-Headers',
-                                 'X-Request, X-Requested-With')
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
-
-                # Write the response
-                self.wfile.write(parser.json_data)
-
-            elif uri.path == '/plot_info.json':
-
-                # Parse uri params
-                parameters = parse_qs(uri.query)
-                script = parameters.pop("script")
-                
-                # Pull namespace from script and cross section parser
-                namespace = self.eval_script(script)
-                add_arguments = namespace['add_plot_arguments']
-
-                # Fill the parser
-                parser = URLArgumentParser()
-                add__arguments(parser)
-
-                # Set the response headers for json data
-                self.send_response(200)
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.send_header('Access-Control-Allow-Headers',
-                                 'X-Request, X-Requested-With')
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
-
-                # Write the response
-                self.wfile.write(parser.json_data)
-                
-            # Get the list of available scripts with their description
-            elif uri.path == '/available_scripts.json':
-
-                parameters = parse_qs(uri.query)
-
-                # Set the response headers for json
-                self.send_response(200)
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.send_header('Access-Control-Allow-Headers',
-                                 'X-Request, X-Requested-With')
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
                 
@@ -230,63 +169,19 @@ class MyHandler(BaseHTTPRequestHandler):
                 
                 return
 
-            # Generic script read and run
-            elif uri.path == '/plot.jpeg':
+            if uri.path == '/forward_model.json':
 
-                parameters = parse_qs(uri.query)
-                script = parameters.pop('script', None)
-
-                # Read in the namespace
-                namespace = self.eval_script(script)
-                if namespace is None:
-                    return
-                script_main = namespace['run_script']
-                add_arguments = namespace['add_arguments']
-                short_description = namespace.get('short_description',
-                                                  'No description')
-
-                # Run in a sub-process so MPL memory can be released
-                p = mp.Process(target=self.run_script,
-                               args=(script[0],script_main,
-                                     add_arguments,
-                                     short_description,
-                                     parameters))
+                # Read the JSON
+                args = json.loads(self.request.recv(1024).strip())
+                p = mp.Process(target=self.forward_model,
+                               args=args)
                 p.start()
                 p.join()
-
                 return
-            
-            # Json requests
-            elif uri.path == '/plot.json':
-
-                # Get the JSON
-                #jsonurl = urllib.urlopen(self.uri)
-                #parameters = json.loads(jsonurl.read())
-                parameters = parse_qs(uri.query)
-                print(parameters)
-                script = parameters.pop("script")
                 
-                # Get the namespace
-                namespace = self.eval_script(script)
-                if namespace is None:
-                    print("test")
-                    return
-
-                add_arguments = namespace['add_arguments']
-                script_main = namespace['run_script']
-
-                # Run in sub-process to prevent memory hogging
-                p = mp.Process(target=self.run_json,
-                               args=(script_main, 
-                                     add_arguments,
-                                     parameters))
-                p.start()
-                p.join()
-                
-            else:
+            if uri.path != '/forward_model.json':
                 self.send_error(404, 'File Not Found: %s' % self.path)
                 return
-                
             
         except Exception as err:
             self.send_response(400)
@@ -304,47 +199,34 @@ class MyHandler(BaseHTTPRequestHandler):
             
             raise
 
-
-    def run_json(self, script_main, add_arguments,
-                 parameters):
-        """
-        Runs a script and writes out a JSON response
-
-        :param script: The main method of the script.
-        :param add_arguments: Parser method of the script.
-        :param parameters: Parameters parsed from the uri.
-        """
-
-        # Parse parameters
-        parser = URLArgumentParser()
-        add_arguments(parser)
-        try:
-            args = parser.parse_params(parameters)
-        except SendHelp as helper:
-            self.send_response(200)
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
-
-        # Run the script
-        image_data = script_main(args)
-
-        # Encode for http send
-        encoded_image = base64.b64encode(image_data)
-
-        # convert to json
-        data = json.dumps({'data': encoded_image})
+    def forward_model(self, args):
+       
+        # Decode the model
+        image = base64.b64decode(args["image"])
         
-        # Set the response headers for json
+        # Run the model
+        seismic_data = forward_model(args["earth_structure"],
+                                     args["property_mapping"],
+                                     args["seismic_model"])
+
+        # Calculate metadata (max/min, variability,etc, ...)
+        metadata = {}
+        
+        output = {"metadata": metadata, "plots": []}
+        
+        for pane in args["plots"]:
+
+            jpeg = modelr_plot(pane, data)
+            output["plots"].append(base64.b64encode(jpeg))
+
+        json_out = json.dumps(output)
+
         self.send_response(200)
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Headers',
-                         'X-Request, X-Requested-With')
         self.send_header('Content-type', 'application/json')
         self.end_headers()
-
-        # Write response
-        self.wfile.write(data)
-
+            
+        self.wfile.write(json_out)
+        
         
     def run_script(self, script, script_main, add_arguments,
                    short_description, parameters):
@@ -379,7 +261,8 @@ class MyHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
                 
-            self.wfile.write('<p><b>Error:</b> %s</p>' % (err.args[0],))
+            self.wfile.write('<p><b>Error:</b> %s</p>'
+                             % (err.args[0],))
             self.wfile.write(parser.help_html)
             return
         
@@ -412,6 +295,8 @@ class MyHandler(BaseHTTPRequestHandler):
                     exec fd.read() in namespace
                 short_doc = namespace.get('short_description',
                                           'No doc')
+
+
                 available_scripts.append((script, short_doc))
             except Exception, e:
                 print script, e
@@ -431,9 +316,11 @@ class MyHandler(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'text/html')
         self.end_headers()
         
-        html = template.render(msg=msg,
-                               available_scripts= \
-                                 self.get_available_scripts())
+
+        html = \
+          template.render(msg=msg,
+                    available_scripts=self.get_available_scripts())
+
         self.wfile.write(html)
         
         
@@ -441,6 +328,13 @@ class MyHandler(BaseHTTPRequestHandler):
         self.send_error(404, 'Post request not supportd yet: %s' \
                           % self.path)
 
+
+# Locations of the PEM files for SSL
+# If this doesn't work, an alternative would be to store the
+# full chain including the private key, as described here:
+# http://www.digicert.com/ssl-support/pem-ssl-creation.htm
+CERTFILE = '/etc/ssl/modelr/public.pem'
+KEYFILE = '/etc/ssl/private/private.pem'
 
 def main():
     '''
@@ -451,12 +345,29 @@ def main():
     parser.add_argument('--host', type=str, default='')
     parser.add_argument('-p', '--port', type=int, default=80)
 
+    parser.add_argument('--local', type=bool, default=False)
     args = parser.parse_args()
     try:
         server = HTTPServer((args.host, args.port), MyHandler)
-        server.jenv = \
-          Environment(loader=PackageLoader('modelr', 'web/templates'))
+
+        server.jenv = Environment(loader=PackageLoader('modelr',
+                                                    'web/templates'))
+        # This provides SSL, serving over HTTPS.
+        # This approach will not allow service over HTTP.
+        # I think we should allow both, since there is no
+        # real reason for modelr-server to be secure.
+        # I don't know if we need to check the certificate
+        # on the client side too, or if doing it this way
+        # will satisfy the browser and that's enough.
         
+        if not args.local:
+            server.socket = ssl.wrap_socket(server.socket,
+                                            certfile=CERTFILE,
+                                            keyfile=KEYFILE,
+                                            server_side=True
+                                            )
+        
+                                        
         print 'started httpserver...'
         server.serve_forever()
     except KeyboardInterrupt:
