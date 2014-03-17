@@ -92,14 +92,14 @@ def add_arguments(parser):
     parser.add_argument('trace',
                         type=int,
                         help='Trace to use for non-spatial slice',
-                        default=0
+                        default=150
                         )
     
     parser.add_argument('tslice',
                         type=float, 
                         help='time [s] along which to plot instantaneous amplitude ',
                         required=True,
-                        default=0.051
+                        default=0.050
                         )
     
     return parser

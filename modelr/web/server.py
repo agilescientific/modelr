@@ -25,7 +25,16 @@ import multiprocessing as mp
 import base64
 
 import ssl
+import socket
 
+from SocketServer import ThreadingMixIn
+
+# Timeout in seconds for server
+socket.setdefaulttimeout(6)
+
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    """ This class allows to handle requests in separated threads.
+        No further content needed, don't touch this. """
 
 class MyHandler(BaseHTTPRequestHandler):
     '''
@@ -348,7 +357,7 @@ def main():
     parser.add_argument('--local', type=bool, default=False)
     args = parser.parse_args()
     try:
-        server = HTTPServer((args.host, args.port), MyHandler)
+        server = ThreadedHTTPServer((args.host, args.port), MyHandler)
 
         server.jenv = Environment(loader=PackageLoader('modelr',
                                                     'web/templates'))
@@ -366,6 +375,7 @@ def main():
                                             keyfile=KEYFILE,
                                             server_side=True
                                             )
+            server.socket.settimeout(8.0)
         
                                         
         print 'started httpserver...'
