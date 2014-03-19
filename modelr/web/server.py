@@ -27,6 +27,10 @@ import base64
 import ssl
 import socket
 
+from modelr.forward_model import forward_model
+from modelr.EarthModel import EarthModel
+from modelr.SeismicModel import SeismicModel
+
 from SocketServer import ThreadingMixIn
 
 # Timeout in seconds for server
@@ -143,41 +147,6 @@ class MyHandler(BaseHTTPRequestHandler):
                 
                 return
 
-            # Get the cross section type parsers
-            elif uri.path == '/cross_section.json':
-
-                # Parse uri params
-                parameters = parse_qs(uri.query)
-                script = parameters.pop("script")
-
-                # Pull namespace from script and cross section parser
-                namespace = self.eval_script(script)
-                add_cs_arguments = namespace['add_cs_arguments']
-
-                # Fill the parser
-                parser = \
-                  URLArgumentParser(namespace.get('short_description',
-                                                  "No description"))
-                  
-                add_cs_arguments(parser)
-
-                # Set the response headers for json data
-                self.send_response(200)
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.send_header('Access-Control-Allow-Headers',
-                                 'X-Request, X-Requested-With')
-
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
-                
-                all_scripts = self.get_available_scripts()
-                
-                data = json.dumps(all_scripts)
-                
-                self.wfile.write(data)
-                
-                return
-
             if uri.path == '/forward_model.json':
 
                 # Read the JSON
@@ -209,14 +178,14 @@ class MyHandler(BaseHTTPRequestHandler):
             raise
 
     def forward_model(self, args):
-       
-        # Decode the model
-        image = base64.b64decode(args["image"])
-        
-        # Run the model
-        seismic_data = forward_model(args["earth_structure"],
-                                     args["property_mapping"],
-                                     args["seismic_model"])
+
+
+        earth_model = EarthModel(args["earth_structure"],
+                                 args["property_map"])
+        seismic_model = SeismicModel(args["seismic_model"])
+
+        seismic_data, reflectivity = forward_model(earth_model,
+                                                   seismic_model)
 
         # Calculate metadata (max/min, variability,etc, ...)
         metadata = {}
@@ -225,7 +194,10 @@ class MyHandler(BaseHTTPRequestHandler):
         
         for pane in args["plots"]:
 
-            jpeg = modelr_plot(pane, data)
+            plot_model = PlotModel(pane)
+            jpeg = PlotModel.plot(seismic_data, earth_model,
+                                  reflectivity)
+            
             output["plots"].append(base64.b64encode(jpeg))
 
         json_out = json.dumps(output)
