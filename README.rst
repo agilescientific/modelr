@@ -3,12 +3,9 @@ Welcome to modelr's documentation!
 
 Google charts like API for geophysics! Submit tasks via a script-plus-parameters, or via a URL.
 
-Examples: 
+Example: 
 
 * `<https://www.modelr.org/plot.jpeg?script=stochastic_avo.py&Rock0=3000.0%2C2500.0%2C1600.0%2C%0A%09%20%2050.0%2C%2050.0%2C%2050.0&Rock1=2770.0%2C2185.0%2C1780.0%2C%0A%09%20%2050.0%2C%2050.0%2C%2050.0&iterations=250&reflectivity_method=zoeppritz>`_
-Or to get help just run:
-
-* `<https://www.modelr.org/plot.jpeg>`_
 
 Full interface
 +++++++++++++
