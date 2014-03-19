@@ -1,7 +1,9 @@
-Welcome to modelr's documentation!
-==================================
+Welcome to modelr server
+========================
 
-Google charts like API for geophysics! Submit tasks via a script-plus-parameters, or via a URL.
+This is the documentation for the back-end modelr server software. You might be looking for `modelr.io <https://www.modelr.io/>`_
+
+Modelr server is a Google-Charts-like API for geophysics! Submit tasks via a URL.
 
 Example: 
 
