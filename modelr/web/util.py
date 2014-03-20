@@ -16,6 +16,43 @@ import numpy as np
 from scipy.signal import hilbert
 from modelr.reflectivity import get_reflectivity, do_convolve
 
+
+def forward_model(earth_model, seismic_model, args):
+    """
+    :param earth_model: EarthModel object
+    :param seismic_model: SeismicModel object
+    :param plots: List of ModelrPlot objects
+
+    :returns {metadata, [plots]}
+    """
+
+    # TODO make sure seismic model and earth model are sampled the
+    # same
+    
+    # TODO calculate the reflectivity and seismic
+    
+    reflectivity = get_reflectivity(data=earth_model.image,
+                                    colourmap=earth_model.property_map,
+                                    theta=seismic_model.offset_angles(),
+                                    reflectivity_method=seismic_model.reflectivity_method)
+    
+    seismic = do_convolve(seismic_model.wavelets(), reflectivity)
+
+    # TODO attributes
+
+    # TODO metadata
+    
+    # Get the axis information
+    f = seismic_model.wavelet_cf()
+    traces = seismic_model.sensor_spacing * seismic.shape[1]
+    theta = seismic_model.offset_angles()
+
+    return {"metadata":{}, "plot": modelr_plot(model, reflectivity,
+                                               seismic,
+                                       traces, theta, wavelet_cf,
+                                       args)}
+
+        
 def get_figure_data(transparent=False):
     '''
     Return the current plot as a binary blob. 
@@ -69,94 +106,28 @@ def wiggle(data, dt=1, line_colour='black', fill_colour='blue',
                 
         quadrant.axis('tight')
 
-def modelr_plot( model, colourmap, args ):
+def modelr_plot(model, reflectivity, seismic, traces,
+                f, theta, args):
     """
     Calculates reflectivities from the earth model then convolves
     against a bank of wavelets. Figures of various slices are created
     based on the args structure.
 
     :param model: The earth model image to use for forward modeling.
-    :param colourmap: A Dict that maps colour values in the earth
-                      model to physical rock properties.
     :param args: Structure of parsed arguments.
 
     :returns: a png graphic of the forward model results.
     """
 
     from modelr.constants import dt, duration
+    
     model_aspect = float(model.shape[1]) / model.shape[0]
-
-    if not hasattr(args, 'xscale'):
-        args.xscale=0
-    
-    
-    if args.slice == 'spatial':       
-        traces = range( args.ntraces )
-    else:
-        traces = args.trace - 1
-        if traces >= args.ntraces:
-            traces = args.ntraces -1
-        
-    if args.slice == 'angle':
-        theta0 = args.theta[0]
-        theta1 = args.theta[1]
-        
-        try:
-            theta_step = args.theta[2]
-        except:
-            theta_step = 1
-        
-        
-        theta = np.linspace(theta0, theta1,
-                            int((theta1-theta0) / theta_step))
-        
-
-    else:
-        try:
-            theta = args.theta[0]
-        except:
-            theta = args.theta
-    
-    if args.slice == 'frequency':
-        f0 = args.f[0]
-        f1 = args.f[1]
-        
-        try:
-            f_step = args.f[2]
-        except:
-            f_step = 1
-        
-        if (args.xscale) == 0:
-            f = np.linspace(f0, f1, (int((f1-f0)/f_step)) )
-        else:
-            f = np.logspace(max(np.log2(f0),np.log2(7)),np.log2(f1),300,endpoint=True, base=2.0) 
-    else:
-        f = args.f
-
-
-    model = model[:, traces, :]
-    model = np.reshape(model, (model.shape[0], np.size(traces),3))
-
-    
-    ############################
-    # Get reflectivities
-    reflectivity = get_reflectivity( data=model,
-                                     colourmap=colourmap,
-                                     theta=theta,
-                                     reflectivity_method = \
-                                       args.reflectivity_method
-                                    )
 
     # Do convolution
     if ( ( duration / dt ) > ( reflectivity.shape[0] ) ):
         duration = reflectivity.shape[0] * dt
-    wavelet = args.wavelet( duration, dt, f )
-    if( wavelet.ndim == 1 ): wavelet = \
-      wavelet.reshape( ( wavelet.size, 1 ) )
-     
-    warray_amp = do_convolve( wavelet, reflectivity )
 
-    nsamps, ntraces, ntheta, n_wavelets = warray_amp.shape
+    nsamps, ntraces, ntheta, n_wavelets = seismic.shape
 
     dx = 10    #trace offset (in metres)
     
@@ -189,33 +160,33 @@ def modelr_plot( model, colourmap, args ):
 
     if( args.slice == 'spatial' ):
         
-        plot_data = warray_amp[ :, :, 0,:]
+        plot_data = seismic[ :, :, 0,:]
         reflectivity = reflectivity[:,:,0]
         xax = traces
         xlabel = 'trace'
     elif( args.slice == 'angle' ):
-        plot_data = warray_amp[ :, 0, :, 0 ]
+        plot_data = seismic[ :, 0, :, 0 ]
         reflectivity = reflectivity[ :, 0, : ]
         xax = theta
         xlabel = 'angle'
     elif( args.slice == 'frequency' ):
-        plot_data = warray_amp[ :, 0, 0, : ]
+        plot_data = seismic[ :, 0, 0, : ]
         reflectivity = np.reshape( np.repeat( reflectivity[:,0,0],
-                                              warray_amp.shape[1] ),
+                                              seismic.shape[1] ),
                                    ( reflectivity.shape[0],
-                                     warray_amp.shape[1] ) )
+                                     seismic.shape[1] ) )
         
         xax = f
         xlabel = 'frequency [Hz]'
     else:
         # Default to spatial
-        plot_data = warray_amp[ :, :, 0, 0 ]
+        plot_data = seismic[ :, :, 0, 0 ]
 
     # Calculate some basic stuff
     plot_data = np.nan_to_num(plot_data)
     
     # This doesn't work well for non-spatial slices
-    #aspect = float(warray_amp.shape[1]) / warray_amp.shape[0]                                        
+    #aspect = float(seismic.shape[1]) / seismic.shape[0]                                        
     
     # This is *better* for non-spatial slices, but can't have
     # overlays

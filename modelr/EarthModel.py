@@ -58,7 +58,7 @@ class EarthModel(object):
         vp_data = np.zeros(self.image.shape[0:2])
             
         for i in range(self.image.shape[0]):
-            for j in range(self.image.shape[1])
+            for j in range(self.image.shape[1]):
                 value = self.image[i,j,:]
                 rgb_string = rgb(value[0], value[1], value[2])
                 vp_data[i,j] = self.property_map.get(rgb_string).vp

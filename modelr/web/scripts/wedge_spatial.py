@@ -26,7 +26,7 @@ def add_arguments(parser):
     
     default_parser_list = [
                            'base1','base2','overlay1','overlay2',
-                           'opacity','f', 'theta', 'colourmap'
+                           'opacity', 'colourmap'
                            ]
     
     default_parsers(parser,default_parser_list)

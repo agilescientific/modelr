@@ -37,19 +37,9 @@ class SeismicModel(object):
 
         
 
-    def generate_wavelets(self):
+    def wavelets(self):
 
-        # convenience
-        f0 = self.start_f
-        f1 = self.end_f
-        
-        if self.f_res == "octave"
-            f = np.logspace(max(np.log2(f0),np.log2(7)),
-                            np.log2(f1),300,
-                            endpoint=True,
-                            base=2.0)
-        if self.f_res == "linear":
-            f = np.linspace(f0, f1, (f1-f0)/.5)
+        f = self.wavelet_cf()
 
         wavelet = self.wavelet_model(wavelet_duration,
                                      self.dt, f)
@@ -64,9 +54,18 @@ class SeismicModel(object):
         return np.linspace(self.theta1, self.theta2, self.theta_res)
     
 
-
-    def convolution_model(self):
-
+    def wavelet_cf(self):
+        # convenience
+        f0 = self.start_f
+        f1 = self.end_f
         
-        
+        if self.f_res == "octave":
+            f = np.logspace(max(np.log2(f0),np.log2(7)),
+                            np.log2(f1),300,
+                            endpoint=True,
+                            base=2.0)
+        if self.f_res == "linear":
+            f = np.linspace(f0, f1, (f1-f0)/.5)
 
+        return f
+        

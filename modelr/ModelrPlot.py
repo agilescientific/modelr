@@ -13,13 +13,6 @@ class ModelrPlot(object):
             
         self.overlay = plot_json["overlay"]
 
-
-    def plot(self, seismic_data, seismic_model, earth_image,
-             reflectivity)
-
-        if self.cross_section == 'spatial':
-            data = seismic[:,:,0,:]
-        elif self.cross_section == 'angle':
-            data = 
+    
         
     
