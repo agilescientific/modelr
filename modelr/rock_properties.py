@@ -17,24 +17,41 @@ class RockProperties(object):
     '''
     
     def __init__(self, vp, vs=None, rho=None, vp_sig=0,
-                 vs_sig=0, rho_sig=0):
-                 
-        self.vp = vp
-        
-        # This needs to be exposed to the user
+                 vs_sig=0, rho_sig=0, units='si'):
+
+        # Deal with Imperial units
+
+        if units != 'si':
+            vp  = vp  * 0.30480
+            vs  = vs  * 0.30480
+            rho = rho * 1000.0
+
+            vp_sig  = vp_sig  * 0.30480
+            vs_sig  = vs_sig  * 0.30480
+            rho_sig = rho_sig * 1000.0
+
+
+        # Deal with missing values
+
         # Simple Vp/Vs ratio
         if vs is None:
-            self.vs = vp / 2.0
+            vs = vp / 2.0
         else:
-            self.vs = vs
+            vs = vs
             
-        # This needs to be exposed to the user
         # Gardner equation
         if rho is None:
-            self.rho = 1000 * 0.23 * (vp * 3.28084)**0.25
+            rho = 1000 * 0.23 * (vp * 3.28084)**0.25
         else:
-            self.rho = rho
+            rho = rho
             
+
+        # Set properties
+
+        self.vp = vp
+        self.vs = vs
+        self.rho = rho
+
         self.vp_sig = vp_sig
         self.vs_sig = vs_sig
         self.rho_sig = rho_sig
