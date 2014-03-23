@@ -20,6 +20,10 @@ class SeismicModel(object):
         :param seismic_params: A SeismicModel JSON dictionary.
         """
 
+        script = seismic_params.pop('script', None)
+        namespace = self.eval_script(script)
+
+        
         self.wavelet_model = \
           WAVELETS.get(seismic_params["wavelet_type"])
         self.reflectivity_model = \

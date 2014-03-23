@@ -1,6 +1,7 @@
 
 import numpy as np
 
+short_description = "Build a 3 layer slab model"
 def add_arguments(parser):
 
     parser.add_argument('interface_depth', default=100,

@@ -7,7 +7,13 @@ Container for handling earth models.
 '''
 
 from agilegeo.avo import time_to_depth, depth_to_time
-import base64
+import urllib
+import requests
+
+import numpy as np
+
+from PIL import Image
+from StringIO import StringIO
 from svgwrite import rgb
 
 class EarthModel(object):
@@ -15,22 +21,33 @@ class EarthModel(object):
     Class to store earth models.
     '''
     
-    def __init__(self, earth_structure, property_map):
+    def __init__(self,earth_structure):
         """
         Class for handling earth models.
 
-        :param earth_structure: An EarthStructure JSON dictionary.
-        :param property_map: Dict mapping rgb colours to rock property
-                         objects.
+        :param earth_structure: An EarthStructure JSON dictionary. 
         """
 
-        self.image = base64.b64decode(earth_structure.image)
-        self.depth = earth_structure.depth
-        self.length = earth_structure.length
+        # Load the image data
+        response = requests.get(earth_structure["image"])
+        img = Image.open(StringIO(response.content))
+        img.load()
 
-        self.units = earth_structure.units
+        print earth_structure
+        self.image = np.asarray(img, dtype="int32")
+        self.depth = earth_structure["depth"]
+        self.length = earth_structure["length"]
+
+        self.units = earth_structure["units"]
+
+        self.property_map = {}
+
+        # Keep only a direct map for legacy. Input data has name
+        # attribute we are going to ignore
+        mapping = earth_structure["mapping"]
+        for colour in mapping:
+            self.property_map[colour] = mapping[colour]["property"]
         
-        self.property_map = property_map
 
 
     def time2depth(self, dz):

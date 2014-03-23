@@ -23,8 +23,12 @@ import json
 import multiprocessing as mp
 import ssl
 import socket
-
+import urllib
 from SocketServer import ThreadingMixIn
+from modelr.EarthModel import EarthModel
+
+import requests
+import base64
 
 socket.setdefaulttimeout(6)
 
@@ -139,7 +143,43 @@ class MyHandler(BaseHTTPRequestHandler):
                 self.wfile.write(data)
                 
                 return
+
+            elif uri.path == '/plot.json':
+
+                # Get the JSON
+                #jsonurl = urllib.urlopen(self.uri)
+                #parameters = json.loads(jsonurl.read())
+                parameters = parse_qs(uri.query)
+                print(parameters)
+                script = parameters.pop("script")
+                
+                # Get the namespace
+                namespace = self.eval_script(script)
+                if namespace is None:
+                    print("test")
+                    return
+
+                add_arguments = namespace['add_arguments']
+                script_main = namespace['run_script']
+
+                # Run in sub-process to prevent memory hogging
+                p = mp.Process(target=self.run_json,
+                               args=(script_main,
+                                     add_arguments,
+                                     parameters))
+                p.start()
+                p.join()
+                return
+
             
+            if uri.path == '/forward_model.json':
+                
+                # Get the JSON
+                print '++++++++++', uri.query
+                parameters = json.loads(uri.query)
+                
+                print parameters
+                return    
             if uri.path != '/plot.jpeg':
                 self.send_error(404, 'File Not Found: %s' % self.path)
                 return
@@ -272,8 +312,67 @@ class MyHandler(BaseHTTPRequestHandler):
                     available_scripts=self.get_available_scripts())
         self.wfile.write(html)
         
+
+    def run_json(self, script_main, add_arguments,
+                 parameters):
+        """
+        Runs a script and writes out a JSON response
+        
+        :param script: The main method of the script.
+        :param add_arguments: Parser method of the script.
+        :param parameters: Parameters parsed from the uri.
+        """
+
+        # Parse parameters
+        parser = URLArgumentParser()
+        add_arguments(parser)
+        try:
+            args = parser.parse_params(parameters)
+        except SendHelp as helper:
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+
+        # Run the script
+        image_data = script_main(args)
+
+        # Encode for http send
+        encoded_image = base64.b64encode(image_data)
+
+        # convert to json
+        data = json.dumps({'data': encoded_image})
+        
+        # Set the response headers for json
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Headers',
+                         'X-Request, X-Requested-With')
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+
+        # Write response
+        self.wfile.write(data)
         
     def do_POST(self):
+        uri = urlparse(self.path)
+
+        if uri.path == '/forward_model.json':
+            
+            content_len = int(self.headers.getheader('content-length'))
+            raw_json = self.rfile.read(content_len)
+
+            parameters = json.loads(raw_json)
+
+            earth_model = EarthModel(parameters["earth_model"])
+
+            script_main = namespace['run_script']
+            add_arguments = namespace['add_arguments']
+            short_description = namespace.get('short_description',
+                                              'No description')
+
+            
+          
+            return
         self.send_error(404, 'Post request not supportd yet: %s'
                         % self.path)
 

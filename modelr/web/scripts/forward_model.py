@@ -18,85 +18,52 @@ import modelr.modelbuilder as mb
 from modelr.web.defaults import default_parsers
 from svgwrite import rgb
 
-short_description = ('Run a forward seismic convolution model '
+short_description = ('Look at plots '
                      'across spatial, offset, and frequency '
                      'cross-sections')
 
-def add_cs_arguments(parser):
+
+def add_arguments(parser):
+
+    default_parser_list = [
+                           'title',
+                           'theta',
+                           'f',
+                           'colourmap',
+                           'wiggle_skips',
+                           'aspect_ratio',
+                           'base1','base2','overlay1','overlay2',
+                           'opacity'
+                           ]
+    
+    default_parsers(parser,default_parser_list)
 
     parser.add_argument('slice',
+                        type=str,
+                        help='Slice to return',
                         default='spatial',
-                        choices=['spatial', 'angle',
-                                 'frequency'],
-                        help='Model Cross-Section')
-    return parser
-
-def add_seismic_arguments(parser, cross_section):
-
-    if cross_section == 'spatial':
-        
-        default_list = ['reflectivity_method']
-        default_parsers(parser, default_list)
-        parser.add_argument('f', type=float, default=20.0,
-                                     help="Wavelet Frequency")
-        parser.add_argument('theta', type=float, default=0.0,
-                            help="Offset Angle")
-        return parser
-    
-    elif cross_section == 'angle':
-        
-        default_list = ['reflectivity_method']
-        default_parsers(parser, default_list)
-        parser.add_argument('f', type=float, default=20.0,
-                            help="Wavelet Frequency")
-        parser.add_argument('trace', type=int, default=0,
-                            help="Trace Location")
-        parser.add_argument('theta', type=float, default='0,45,.5',
-                            action='list',
-                            help='Offset Angle (min, max, res)')
-        return parser
-    
-    elif cross_section == 'wavelet':
-        default_list = ['reflectivity_method']
-        default_parsers(parser, default_list)
-        parser.add_argument('trace', type=int, default=0,
-                            help="Trace Location")
-        parser.add_argument('theta', type=float, default='0,45,.5',
-                            action='list',
-                            help='Offset Angle(min, max, resolution)')
-        parser.add_argument('f', default='5, 120, 1', type=float,
-                            action='list',
-                            help='Wavelet Frequencies (min,max, res)')
-
-    else:
-        raise TypeError
-
-def add_plot_arguments(parser):
-
-    default_list = ['title', 'base1', 'base1', 'overlay1',
-                    'overlay2']
-    default_parsers(parser)
-
-    return parser
-
-def run_script(model, rock_map, args):
-
-    return modelr_plot(model, rock_map, args)
-
-    
-def main():
-    parser = ArgumentParser(usage=short_description,
-                            description=__doc__
-                            )
-                            
-    parser.add_argument('time',
-                        default=150,
-                        type=int, 
-                        help='The size in milliseconds of the plot'
+                        choices=['spatial', 'angle', 'frequency']
                         )
                         
-    args = parser.parse_args()
-    run_script(args)
+    parser.add_argument('trace',
+                        type=int,
+                        help='Trace to use for non-spatial slice',
+                        default=150
+                        )
+    
+    parser.add_argument('tslice',
+                        type=float, 
+                        help='time [s] along which to plot instantaneous amplitude ',
+                        required=True,
+                        default=0.050
+                        )
+
+
+    return parser
+
+def run_script(args):
+    pass
+
     
 if __name__ == '__main__':
     main()
