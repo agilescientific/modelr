@@ -16,6 +16,8 @@ from PIL import Image
 from StringIO import StringIO
 from svgwrite import rgb
 
+from modelr.web.urlargparse import rock_properties_type
+
 class EarthModel(object):
     '''
     Class to store earth models.
@@ -30,11 +32,12 @@ class EarthModel(object):
 
         # Load the image data
         response = requests.get(earth_structure["image"])
-        img = Image.open(StringIO(response.content))
+        img = Image.open(StringIO(response.content)).convert('RGB')
         img.load()
 
-        print earth_structure
+        
         self.image = np.asarray(img, dtype="int32")
+        
         self.depth = earth_structure["depth"]
         self.length = earth_structure["length"]
 
@@ -45,8 +48,11 @@ class EarthModel(object):
         # Keep only a direct map for legacy. Input data has name
         # attribute we are going to ignore
         mapping = earth_structure["mapping"]
+        print mapping
         for colour in mapping:
-            self.property_map[colour] = mapping[colour]["property"]
+            rock = mapping[colour]["property"]
+            
+            self.property_map[colour] = rock_properties_type(rock)
         
 
 

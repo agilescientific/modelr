@@ -25,7 +25,11 @@ import ssl
 import socket
 import urllib
 from SocketServer import ThreadingMixIn
+
 from modelr.EarthModel import EarthModel
+from modelr.SeismicModel import SeismicModel
+from modelr.ModelrPlot import ModelrPlot
+from modelr.ForwardModel import ForwardModel
 
 import requests
 import base64
@@ -61,13 +65,14 @@ class MyHandler(BaseHTTPRequestHandler):
         
         # If no script was passed, then tell the user
         if not script or len(script) != 1:
+            print "++++++++++++++++++++++++++++++++++++"
             self.send_script_error("argument 'script' was omitted or malformed (got %r)" % (script))
             return
         
         # Otherwise, run the script
         dirn = dirname(__file__)
         script_path = join(dirn, 'scripts', script[0])
-        
+    
         if not isfile(script_path):
             self.send_script_error("argument 'script' '%r' was is not a valid script " % (script[0],))
             return
@@ -75,7 +80,7 @@ class MyHandler(BaseHTTPRequestHandler):
         namespace = {}
         with open(script_path, 'r') as fd:
             exec fd.read() in namespace
-            
+
         return namespace
 
     def do_OPTIONS(self):
@@ -150,7 +155,7 @@ class MyHandler(BaseHTTPRequestHandler):
                 #jsonurl = urllib.urlopen(self.uri)
                 #parameters = json.loads(jsonurl.read())
                 parameters = parse_qs(uri.query)
-                print(parameters)
+                
                 script = parameters.pop("script")
                 
                 # Get the namespace
@@ -172,14 +177,6 @@ class MyHandler(BaseHTTPRequestHandler):
                 return
 
             
-            if uri.path == '/forward_model.json':
-                
-                # Get the JSON
-                print '++++++++++', uri.query
-                parameters = json.loads(uri.query)
-                
-                print parameters
-                return    
             if uri.path != '/plot.jpeg':
                 self.send_error(404, 'File Not Found: %s' % self.path)
                 return
@@ -313,28 +310,13 @@ class MyHandler(BaseHTTPRequestHandler):
         self.wfile.write(html)
         
 
-    def run_json(self, script_main, add_arguments,
-                 parameters):
+    def run_json(self, plot_generator):
         """
         Runs a script and writes out a JSON response
-        
-        :param script: The main method of the script.
-        :param add_arguments: Parser method of the script.
-        :param parameters: Parameters parsed from the uri.
         """
 
-        # Parse parameters
-        parser = URLArgumentParser()
-        add_arguments(parser)
-        try:
-            args = parser.parse_params(parameters)
-        except SendHelp as helper:
-            self.send_response(200)
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
-
         # Run the script
-        image_data = script_main(args)
+        image_data = plot_generator.go()
 
         # Encode for http send
         encoded_image = base64.b64encode(image_data)
@@ -362,16 +344,27 @@ class MyHandler(BaseHTTPRequestHandler):
             raw_json = self.rfile.read(content_len)
 
             parameters = json.loads(raw_json)
-
+            
+            print parameters.keys()
             earth_model = EarthModel(parameters["earth_model"])
 
-            script_main = namespace['run_script']
-            add_arguments = namespace['add_arguments']
-            short_description = namespace.get('short_description',
-                                              'No description')
+            seismic_script = parameters["seismic_model"].pop("script")
+            
+            seismic_namespace = self.eval_script([seismic_script])
 
             
-          
+            seismic_model = SeismicModel(parameters["seismic_model"]["args"],
+                                         seismic_namespace)
+
+            plot_script = parameters["plots"].pop("script")
+            plot_namespace = self.eval_script([plot_script])
+
+            plots = ModelrPlot(parameters["plots"]["args"],
+                               plot_namespace)
+
+            forward_model = ForwardModel(earth_model, seismic_model,
+                                         plots)
+            self.run_json(forward_model)
             return
         self.send_error(404, 'Post request not supportd yet: %s'
                         % self.path)

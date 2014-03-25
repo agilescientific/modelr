@@ -16,42 +16,6 @@ import numpy as np
 from scipy.signal import hilbert
 from modelr.reflectivity import get_reflectivity, do_convolve
 
-
-def forward_model(earth_model, seismic_model, args):
-    """
-    :param earth_model: EarthModel object
-    :param seismic_model: SeismicModel object
-    :param plots: List of ModelrPlot objects
-
-    :returns {metadata, [plots]}
-    """
-
-    # TODO make sure seismic model and earth model are sampled the
-    # same
-    
-    # TODO calculate the reflectivity and seismic
-    
-    reflectivity = get_reflectivity(data=earth_model.image,
-                                    colourmap=earth_model.property_map,
-                                    theta=seismic_model.offset_angles(),
-                                    reflectivity_method=seismic_model.reflectivity_method)
-    
-    seismic = do_convolve(seismic_model.wavelets(), reflectivity)
-
-    # TODO attributes
-
-    # TODO metadata
-    
-    # Get the axis information
-    f = seismic_model.wavelet_cf()
-    traces = seismic_model.sensor_spacing * seismic.shape[1]
-    theta = seismic_model.offset_angles()
-
-    return {"metadata":{}, "plot": modelr_plot(model, reflectivity,
-                                               seismic,
-                                       traces, theta, wavelet_cf,
-                                       args)}
-
         
 def get_figure_data(transparent=False):
     '''
@@ -119,8 +83,9 @@ def modelr_plot(model, reflectivity, seismic, traces,
     :returns: a png graphic of the forward model results.
     """
 
-    from modelr.constants import dt, duration
-    
+    from modelr.constants import dt, wavelet_duration as duration
+
+    print model.shape, seismic.shape, reflectivity.shape
     model_aspect = float(model.shape[1]) / model.shape[0]
 
     # Do convolution
@@ -219,8 +184,9 @@ def modelr_plot(model, reflectivity, seismic, traces,
         # Establish what sort of subplot grid we need
         p = plots.index(plot)
     
-        if args.xscale:
-            axarr[0, p].set_xscale('log', basex = int(args.xscale) )    
+        if args.slice == "frequency" and args.xscale:
+            if args.xscale=='octave':
+                axarr[0, p].set_xscale('log', basex=int(2))    
         
         # Each plot can have two layers (maybe more later?)
         # Display the two layers by looping over the non-blank
@@ -253,7 +219,7 @@ def modelr_plot(model, reflectivity, seismic, traces,
                 vddata=plot_data
                 if vddata.ndim == 3:
                     vddata = np.sum(plot_data,axis=-1)
-                extreme = np.percentile(vddata,99)
+                extreme = np.percentile(vddata,70)
             
                 axarr[0, p].imshow( vddata,
                            cmap = args.colourmap,
@@ -345,9 +311,10 @@ def modelr_plot(model, reflectivity, seismic, traces,
         aun_tuned = plot_data[t_index,-1]
 
         # instantaneous charts       
-        axarr[1,p].plot(xax[:],y,'ko-',lw=3,alpha=0.2, color = 'g')
-        if args.xscale:    #check for log plot on graphs too
-            axarr[1, p].set_xscale('log', basex = int(args.xscale) )
+        """axarr[1,p].plot(xax[:],y,'ko-',lw=3,alpha=0.2, color = 'g')
+        if args.xscale and args.slice=="frequency":    #check for log plot on graphs too
+            if args.xscale=='octave':
+                axarr[1, p].set_xscale('log', basex=2)
         axarr[1,p].set_xlabel(xlabel)
         
         # horizontal line, plot min, plot max
@@ -379,7 +346,7 @@ def modelr_plot(model, reflectivity, seismic, traces,
         
         #plot horizontal green line on model image, and steady state
         axarr[0,p].axhline(y=t, alpha=0.5, lw=2, color = 'g')
-        
+        """
 
     fig.tight_layout()
 

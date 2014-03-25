@@ -162,7 +162,7 @@ class URLArgumentParser(object):
         '''
         self.description = description
 #        self.arguments = {'help': Argument('help')}
-        self.arguments = {}
+        self.arguments = []
         
     def add_argument(self, name, required=False, default=None,
                      type=str, action='store', help='', choices=None):
@@ -171,7 +171,7 @@ class URLArgumentParser(object):
         '''
         arg = Argument(name, required, default, type, action,
                        help, choices)
-        self.arguments[name] = arg
+        self.arguments.append(arg)
         
     def parse_params(self, params):
         '''
@@ -183,12 +183,11 @@ class URLArgumentParser(object):
             params.pop('help')
             self.raise_help()
         
-        for key in self.arguments:
+        for parser in self.arguments:
             
-            arg = params.pop(key, None)
-            print(arg, key)
-            value = self.arguments[key].parse_arg(arg)
-            result[key] = value
+            arg = params.pop(parser.name, None)
+            value = parser.parse_arg([arg])
+            result[parser.name] = value
             
         if params:
             key, value = params.popitem()
@@ -210,15 +209,15 @@ class URLArgumentParser(object):
     @property
     def json_data(self):
         obj = {'description': self.description,
-               'arguments': {k:v.json_dict for (k, v)
-                             in self.arguments.items()}}
+               'arguments': [arg.json_dict
+                             for arg in self.arguments]}
         return json.dumps(obj)
     
     @property
     def help_html(self):
         
         arguments = '\n'.join(arg.html_help for arg in
-                              self.arguments.values())
+                              self.arguments)
         return '<p>%s</p><ul>\n%s</ul>' % (self.description,
                                            arguments)
         

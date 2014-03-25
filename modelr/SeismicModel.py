@@ -5,63 +5,81 @@ modelr.SeismicModel.py
 
 Container for handling seismic models.
 '''
-from modelr.constants import WAVELETS, wavelet_duration
+from modelr.constants import WAVELETS, wavelet_duration,\
+     REFLECTION_MODELS
 import numpy as np
-
+from modelr.web.urlargparse import SendHelp, ArgumentError, \
+     URLArgumentParser
+     
 class SeismicModel(object):
     '''
     Class to store earth models.
     '''
     
-    def __init__(self, seismic_params):
+    def __init__(self, seismic_params, namespace):
         """
         Class for handling seismic models.
 
         :param seismic_params: A SeismicModel JSON dictionary.
+        :param namespace: Name space of the modeling script
         """
 
-        script = seismic_params.pop('script', None)
-        namespace = self.eval_script(script)
+                # Parse additional arguments that may be required by the
+        # script
+        
+        add_arguments = namespace['add_arguments']
+        short_description = namespace.get('short_description',
+                                                  'No description')
+
+        parser = URLArgumentParser(short_description)
+        add_arguments(parser)
+        try:
+            args = parser.parse_params(seismic_params)
+        except SendHelp as helper:
+            raise SendHelp
+
+        self.args = args
+        self.script = namespace['run_script']
+
+        self.wavelet_model = args.wavelet
+        self.reflectivity_method = args.reflectivity_method
+
+        self.f_res = args.f_res
+        self.theta_res = args.theta_res
+        self.sensor_spacing = args.sensor_spacing
+        self.dt = args.dt
+        self.start_f = args.f1
+        self.end_f = args.f2
+
+        self.theta1 = args.theta1
+        self.theta2 = args.theta2
+
 
         
-        self.wavelet_model = \
-          WAVELETS.get(seismic_params["wavelet_type"])
-        self.reflectivity_model = \
-          REFLECTION_MODELS.get(seismic_params["reflectivity"])
-
-        self.f_res = seismic_params["f_res"]
-        self.theta_res = seismic_params["theta_res"]
-        self.sensor_spacing = seismic_params["sensor_spacing"] 
-        self.dt = seismic_params["dt"]
-        self.start_f = seismic_params["start_f"]
-        self.end_f = seismic_params["end_f"]
-
-        self.theta1 = seismic_params["theta1"]
-        self.theta2 = seismic_params["theta2"]
-
-        
-
     def wavelets(self):
 
         f = self.wavelet_cf()
 
         wavelet = self.wavelet_model(wavelet_duration,
                                      self.dt, f)
-
-        if wavelet.ndim==1:
-            wavelet = wavelet.flatten()
-
+        print wavelet.shape
         return wavelet
 
     def offset_angles(self):
 
-        return np.linspace(self.theta1, self.theta2, self.theta_res)
+        if ((self.theta2 - self.theta1) < self.theta_res):
+            return [self.theta1]
+        else:
+            return np.arange(self.theta1, self.theta2, self.theta_res)
     
 
     def wavelet_cf(self):
         # convenience
         f0 = self.start_f
         f1 = self.end_f
+
+        if f0 == f1:
+            return [f0]
         
         if self.f_res == "octave":
             f = np.logspace(max(np.log2(f0),np.log2(7)),
@@ -73,3 +91,10 @@ class SeismicModel(object):
 
         return f
         
+    def go(self,earth_model):
+
+        self.seismic, self.reflectivity = \
+          self.script(earth_model, self)
+    
+
+    
