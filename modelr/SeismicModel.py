@@ -10,7 +10,9 @@ from modelr.constants import WAVELETS, wavelet_duration,\
 import numpy as np
 from modelr.web.urlargparse import SendHelp, ArgumentError, \
      URLArgumentParser
-     
+
+from agilegeo.avo import time_to_depth, depth_to_time
+
 class SeismicModel(object):
     '''
     Class to store earth models.
@@ -45,7 +47,8 @@ class SeismicModel(object):
         self.reflectivity_method = args.reflectivity_method
 
         self.f_res = args.f_res
-        self.theta_res = args.theta_res
+        self.stack = args.stack
+        
         self.sensor_spacing = args.sensor_spacing
         self.dt = args.dt
         self.start_f = args.f1
@@ -66,11 +69,8 @@ class SeismicModel(object):
         return wavelet
 
     def offset_angles(self):
-
-        if ((self.theta2 - self.theta1) < self.theta_res):
-            return [self.theta1]
-        else:
-            return np.arange(self.theta1, self.theta2, self.theta_res)
+            
+        return np.linspace(self.theta1, self.theta2, self.stack)
     
 
     def wavelet_cf(self):
@@ -83,18 +83,20 @@ class SeismicModel(object):
         
         if self.f_res == "octave":
             f = np.logspace(max(np.log2(f0),np.log2(7)),
-                            np.log2(f1),300,
+                            np.log2(f1),50,
                             endpoint=True,
                             base=2.0)
         if self.f_res == "linear":
             f = np.linspace(f0, f1, (f1-f0)/.5)
 
         return f
+
         
     def go(self,earth_model):
 
         self.seismic, self.reflectivity = \
           self.script(earth_model, self)
+
     
 
     

@@ -75,7 +75,10 @@ def run_script(earth_model, seismic_model, plot_args):
     f = seismic_model.wavelet_cf()
     theta = seismic_model.offset_angles()
     plot_args.xscale = seismic_model.f_res
-    return modelr_plot(earth_model.image, seismic_model.reflectivity,
+
+ 
+    return modelr_plot(earth_model.get_data(),
+                       seismic_model.reflectivity,
                        seismic_model.seismic, traces, f, theta,
                        plot_args)
         
