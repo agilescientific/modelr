@@ -566,7 +566,7 @@ def multi_plot(model, reflectivity, seismic, traces,
                 vddata=plot_data
                 if vddata.ndim == 3:
                     vddata = np.sum(plot_data,axis=-1)
-                extreme = np.percentile(vddata,70)
+                extreme = np.percentile(vddata,99)
             
                 axarr[0, p].imshow( vddata,
                            cmap = args.colourmap,
@@ -644,7 +644,8 @@ def multi_plot(model, reflectivity, seismic, traces,
         axarr[0, p].set_xlabel(xlabel)
         axarr[0, p].set_ylabel('time [s]')
         axarr[0, p].set_title(args.title % locals())
-        
+
+        """
         #plot inst. amplitude at 150 ms (every 6 samples, we should parameterize)
         t = args.tslice
         t_index = np.amin([int(t*1000.0), plot_data.shape[0]-1])
@@ -658,7 +659,7 @@ def multi_plot(model, reflectivity, seismic, traces,
         aun_tuned = plot_data[t_index,-1]
 
         # instantaneous charts       
-        """axarr[1,p].plot(xax[:],y,'ko-',lw=3,alpha=0.2, color = 'g')
+        axarr[1,p].plot(xax[:],y,'ko-',lw=3,alpha=0.2, color = 'g')
         if args.xscale and args.slice=="frequency":    #check for log plot on graphs too
             if args.xscale=='octave':
                 axarr[1, p].set_xscale('log', basex=2)

@@ -12,7 +12,7 @@ from argparse import ArgumentParser
 
 from modelr.web.urlargparse import rock_properties_type
 
-from modelr.web.util import modelr_plot
+from modelr.web.util import multi_plot
 
 import modelr.modelbuilder as mb
 from modelr.web.defaults import default_parsers
