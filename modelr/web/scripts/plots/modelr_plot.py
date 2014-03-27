@@ -66,11 +66,22 @@ def add_arguments(parser):
                         default=0.050
                         )
 
-
     return parser
 
-def run_script(earth_model, seismic_data, reflectivity, args):
-    return modelr_plot(earth_model, reflectivity, seismic_data, args)
+def run_script(earth_model, seismic_model, plot_args):
+
+    # Get the axis
+    traces = range(seismic_model.seismic.shape[1])
+    f = seismic_model.wavelet_cf()
+    theta = seismic_model.offset_angles()
+    plot_args.xscale = seismic_model.f_res
+
+ 
+    return multi_plot(earth_model.get_data(),
+                       seismic_model.reflectivity,
+                       seismic_model.seismic, traces, f, theta,
+                       plot_args)
+        
     
 
     

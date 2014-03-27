@@ -106,7 +106,7 @@ def add_arguments(parser):
 
 
 def run_script(args):
-    from modelr.constants import dt, duration
+
     
     matplotlib.interactive(False)
         

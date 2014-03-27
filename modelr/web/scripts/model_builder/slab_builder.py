@@ -17,7 +17,7 @@ def add_arguments(parser):
     parser.add_argument("left", default='40,40', type=int,
                          action='list',
                          help="Thickness on the left-hand side")
-    parser.add_argument("right", default='40,-20', type=int,
+    parser.add_argument("right", default='40,20', type=int,
                         action='list',
                         help="Thickness on the right-hand side")
     parser.add_argument("layers", default=3, type=int,
