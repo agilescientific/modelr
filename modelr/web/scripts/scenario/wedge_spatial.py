@@ -26,7 +26,7 @@ def add_arguments(parser):
     
     default_parser_list = [
                            'base1','base2','overlay1','overlay2',
-                           'opacity', 'colourmap'
+                           'opacity', 'colourmap','f','theta'
                            ]
     
     default_parsers(parser,default_parser_list)
@@ -66,7 +66,6 @@ def add_arguments(parser):
 
 
 def run_script(args):
-    from modelr.constants import dt, duration
     
     matplotlib.interactive(False)
 

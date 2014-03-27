@@ -72,7 +72,6 @@ def add_arguments(parser):
     return parser
 
 def run_script(args):
-    from modelr.constants import dt, duration
     matplotlib.interactive(False)
     
     """if args.transparent == 'False' or args.transparent == 'No':
