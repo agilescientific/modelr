@@ -30,6 +30,7 @@ from modelr.EarthModel import EarthModel
 from modelr.SeismicModel import SeismicModel
 from modelr.ModelrPlot import ModelrPlot
 from modelr.ForwardModel import ForwardModel
+from modelr.ModelrScript import ModelrScript
 
 import requests
 import base64
@@ -58,21 +59,25 @@ class MyHandler(BaseHTTPRequestHandler):
 
         self.server._BaseServer__shutdown_request = True
         
-    def eval_script(self, script):
+    def eval_script(self, script, script_type):
         '''
         Evaluate a script in the scripts directory.
         '''
-        
         # If no script was passed, then tell the user
         if not script or len(script) != 1:
             print "++++++++++++++++++++++++++++++++++++"
             self.send_script_error("argument 'script' was omitted or malformed (got %r)" % (script))
             return
+
+        if script_type is None:
+            print "++++++++++++++++++++++++++++++++++++"
+            self.send_script_error("argument 'script_type' was omitted or malformed (got %r)" % (script))
+            return
         
         # Otherwise, run the script
         dirn = dirname(__file__)
-        script_path = join(dirn, 'scripts', script[0])
-    
+        script_path = join(dirn, 'scripts', script_type[0], script[0])
+
         if not isfile(script_path):
             self.send_script_error("argument 'script' '%r' was is not a valid script " % (script[0],))
             return
@@ -109,7 +114,10 @@ class MyHandler(BaseHTTPRequestHandler):
             if uri.path == '/script_help.json':
                 
                 script = parameters.pop('script', None)
-                namespace = self.eval_script(script)
+                script_type = parameters.pop('type', None)
+
+    
+                namespace = self.eval_script(script, script_type)
                 if namespace is None:
                     self.send_response(400)
                     self.end_headers()
@@ -140,8 +148,10 @@ class MyHandler(BaseHTTPRequestHandler):
                                  'X-Request, X-Requested-With')
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
+
+                script_type = parameters.pop('type', None)
                 
-                all_scripts = self.get_available_scripts()
+                all_scripts = self.get_available_scripts(script_type)
                 
                 data = json.dumps(all_scripts)
                 
@@ -151,29 +161,24 @@ class MyHandler(BaseHTTPRequestHandler):
 
             elif uri.path == '/plot.json':
 
-                # Get the JSON
-                #jsonurl = urllib.urlopen(self.uri)
-                #parameters = json.loads(jsonurl.read())
                 parameters = parse_qs(uri.query)
                 
-                script = parameters.pop("script")
+                script = parameters.pop("script", None)
+                script_type = parameters.pop("type", None)
                 
                 # Get the namespace
-                namespace = self.eval_script(script)
+                namespace = self.eval_script(script, script_type)
                 if namespace is None:
-                    print("test")
                     return
 
-                add_arguments = namespace['add_arguments']
-                script_main = namespace['run_script']
+                plot_generator = ModelrScript(parameters, namespace)
 
                 # Run in sub-process to prevent memory hogging
-                p = mp.Process(target=self.run_json,
-                               args=(script_main,
-                                     add_arguments,
-                                     parameters))
+                """p = mp.Process(target=self.run_json,
+                               args=(plot_generator,))
                 p.start()
-                p.join()
+                p.join()"""
+                self.run_json(plot_generator)
                 return
 
             
@@ -182,8 +187,8 @@ class MyHandler(BaseHTTPRequestHandler):
                 return
             
             script = parameters.pop('script', None)
-            
-            namespace = self.eval_script(script)
+            script_type = parameters.pop('type', None)
+            namespace = self.eval_script(script, script_type)
             if namespace is None:
                 return
                 
@@ -265,11 +270,17 @@ class MyHandler(BaseHTTPRequestHandler):
 
         del jpeg_data
         
-    def get_available_scripts(self):
+    def get_available_scripts(self, script_type=None):
         '''
         Returns a list of all the scripts in the scripts directory.
         '''
-        scripts_dir = join(dirname(__file__), 'scripts')
+
+        if script_type is None:
+            print "++++++++++++++++++++++++++++++++++++"
+            return
+
+        scripts_dir = join(dirname(__file__), 'scripts',
+                           script_type[0])
 
         available_scripts = []
         for script in listdir(scripts_dir):
@@ -303,7 +314,7 @@ class MyHandler(BaseHTTPRequestHandler):
         self.send_response(400)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        
+
         html = \
           template.render(msg=msg,
                     available_scripts=self.get_available_scripts())
@@ -345,19 +356,22 @@ class MyHandler(BaseHTTPRequestHandler):
 
             parameters = json.loads(raw_json)
             
-            print parameters.keys()
             earth_model = EarthModel(parameters["earth_model"])
 
-            seismic_script = parameters["seismic_model"].pop("script")
-            
-            seismic_namespace = self.eval_script([seismic_script])
+            seismic_script = parameters["seismic_model"].pop("script",
+                                                             None)
+            print seismic_script
+            seismic_namespace = self.eval_script([seismic_script],
+                                                 ['seismic'])
 
             
-            seismic_model = SeismicModel(parameters["seismic_model"]["args"],
+            seismic_model = \
+              SeismicModel(parameters["seismic_model"]["args"],
                                          seismic_namespace)
 
-            plot_script = parameters["plots"].pop("script")
-            plot_namespace = self.eval_script([plot_script])
+            plot_script = parameters["plots"].pop("script", None)
+            plot_namespace = self.eval_script([plot_script],
+                                              ['plots'])
 
             plots = ModelrPlot(parameters["plots"]["args"],
                                plot_namespace)
@@ -366,6 +380,7 @@ class MyHandler(BaseHTTPRequestHandler):
                                          plots)
             self.run_json(forward_model)
             return
+        
         self.send_error(404, 'Post request not supportd yet: %s'
                         % self.path)
 

@@ -11,6 +11,7 @@ from argparse import Namespace
 import json
 from modelr.constants import WAVELETS
 from modelr.constants import REFLECTION_MODELS
+import numpy as np
 
 def rock_properties_type(str_input):
     from modelr.rock_properties import RockProperties
@@ -93,7 +94,9 @@ class Argument(object):
                                     " must be one of %r (got %r)" %
                                     (self.name, self.choices, arg))
             try:
+                print arg
                 arg = self.type(arg)
+                
             except:
                 raise ArgumentError("argument %s: invalid %s" +
                                     " value: %r" %
@@ -106,6 +109,7 @@ class Argument(object):
             for arg in arg.split(','):
                 try:
                     value = self.type(arg)
+                    print "VALUE", value
                 except:
                     raise ArgumentError("argument %s: invalid %s"+
                                         " value: %r" %
@@ -182,11 +186,15 @@ class URLArgumentParser(object):
         if 'help' in params:
             params.pop('help')
             self.raise_help()
-        
+
         for parser in self.arguments:
-            
+
+           
             arg = params.pop(parser.name, None)
-            value = parser.parse_arg([arg])
+            if np.ndim(arg) == 0:
+                arg = [arg]
+                
+            value = parser.parse_arg(arg)
             result[parser.name] = value
             
         if params:
