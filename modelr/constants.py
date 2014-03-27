@@ -20,7 +20,7 @@ REFLECTION_MODELS = {
 WAVELETS = {
     'ricker': wavelet.ricker,
     'ormsby': wavelet.ormsby,
-    'sweep': wavelet.sweep,    
+#    'sweep': wavelet.sweep,    
     }
 
 dt = 0.001

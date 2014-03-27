@@ -1,14 +1,13 @@
-Welcome to modelr's documentation!
-==================================
+Welcome to modelr server
+========================
 
-Google charts like API for geophysics! Submit tasks via a script-plus-parameters, or via a URL.
+This is the documentation for the back-end modelr server software. You might be looking for `modelr.io <https://www.modelr.io/>`_
 
-Examples: 
+Modelr server is a Google-Charts-like API for geophysics! Submit tasks via a URL.
 
-* `<https://www.modelr.org:8081/plot.jpeg?script=stochastic_avo.py&plot_type=AVO&title=Plot&reflectivity_method=zoeppritz&Rpp0=2222%2C2222%2C2222%2C100%2C100%2C100&Rpp1=1500%2C1500%2C1500%2C10%2C50%2C100&iterations=1000>`_
-Or to get help just run:
+Example: 
 
-* `<https://www.modelr.org:8080/plot.jpeg>`_
+* `<https://www.modelr.org/plot.jpeg?script=stochastic_avo.py&Rock0=3000.0%2C2500.0%2C1600.0%2C%0A%09%20%2050.0%2C%2050.0%2C%2050.0&Rock1=2770.0%2C2185.0%2C1780.0%2C%0A%09%20%2050.0%2C%2050.0%2C%2050.0&iterations=250&reflectivity_method=zoeppritz>`_
 
 Full interface
 +++++++++++++
