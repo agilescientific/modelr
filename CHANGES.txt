@@ -1,3 +1,6 @@
+modelr-0.4.1
+Threaded server
+
 modelr-0.3.1-alpha
 Limited use case scripts for a public release.
 
