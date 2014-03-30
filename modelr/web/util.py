@@ -16,6 +16,7 @@ import numpy as np
 from scipy.signal import hilbert
 from modelr.reflectivity import get_reflectivity, do_convolve
 
+        
 def get_figure_data(transparent=False):
     '''
     Return the current plot as a binary blob. 
@@ -71,26 +72,26 @@ def wiggle(data, dt=1, line_colour='black', fill_colour='blue',
 
 def modelr_plot( model, colourmap, args ):
     """
-    Calculates reflectivities from the earth model then convolves
-    against a bank of wavelets. Figures of various slices are created
-    based on the args structure.
+Calculates reflectivities from the earth model then convolves
+against a bank of wavelets. Figures of various slices are created
+based on the args structure.
 
-    :param model: The earth model image to use for forward modeling.
-    :param colourmap: A Dict that maps colour values in the earth
-                      model to physical rock properties.
-    :param args: Structure of parsed arguments.
+:param model: The earth model image to use for forward modeling.
+:param colourmap: A Dict that maps colour values in the earth
+model to physical rock properties.
+:param args: Structure of parsed arguments.
 
-    :returns: a png graphic of the forward model results.
-    """
+:returns: a png graphic of the forward model results.
+"""
 
-    from modelr.constants import dt, duration
+    from modelr.constants import dt, wavelet_duration as duration
     model_aspect = float(model.shape[1]) / model.shape[0]
 
     if not hasattr(args, 'xscale'):
         args.xscale=0
     
     
-    if args.slice == 'spatial':       
+    if args.slice == 'spatial':
         traces = range( args.ntraces )
     else:
         traces = args.trace - 1
@@ -129,7 +130,7 @@ def modelr_plot( model, colourmap, args ):
         if (args.xscale) == 0:
             f = np.linspace(f0, f1, (int((f1-f0)/f_step)) )
         else:
-            f = np.logspace(max(np.log2(f0),np.log2(7)),np.log2(f1),300,endpoint=True, base=2.0) 
+            f = np.logspace(max(np.log2(f0),np.log2(7)),np.log2(f1),300,endpoint=True, base=2.0)
     else:
         f = args.f
 
@@ -158,7 +159,7 @@ def modelr_plot( model, colourmap, args ):
 
     nsamps, ntraces, ntheta, n_wavelets = warray_amp.shape
 
-    dx = 10    #trace offset (in metres)
+    dx = 10 #trace offset (in metres)
     
     #################################
     # Build the plot(s)
@@ -215,7 +216,288 @@ def modelr_plot( model, colourmap, args ):
     plot_data = np.nan_to_num(plot_data)
     
     # This doesn't work well for non-spatial slices
-    #aspect = float(warray_amp.shape[1]) / warray_amp.shape[0]                                        
+    #aspect = float(warray_amp.shape[1]) / warray_amp.shape[0]
+    
+    # This is *better* for non-spatial slices, but can't have
+    # overlays
+    
+    stretch = args.aspect_ratio
+    
+    pad = np.ceil((plot_data.shape[0] - model.shape[0]) / 2)
+
+    # First, set up the matplotlib figure
+    #fig = plt.figure(figsize=(width, 2*height))
+
+    fig, axarr = plt.subplots(2, len(plots)) #, sharex='col', sharey='row')
+    
+    if len(plots) == 1:
+        axarr = np.transpose(np.array([axarr]))
+    
+    # Work out the size of the figure
+    each_width = 6
+    fig.set_figwidth(each_width*len(plots))
+    fig.set_figheight(each_width*stretch*2)
+
+    # Start a loop for the figures...
+    for plot in plots:
+        
+        # If there's no base plot for this plot,
+        # then there are no more plots and we're done
+        if not plot[0]:
+            break
+            
+        # Establish what sort of subplot grid we need
+        p = plots.index(plot)
+    
+        if args.xscale:
+            axarr[0, p].set_xscale('log', basex = int(args.xscale) )
+        
+        # Each plot can have two layers (maybe more later?)
+        # Display the two layers by looping over the non-blank
+        # elements
+        # of the tuple
+        for layer in filter(None, plot):
+            
+            # for starters, find out if this is a base or an overlay
+            if plot.index(layer) == 1:
+                # then we're in an overlay so...
+                alpha = args.opacity
+            else:
+                alpha = 1.0
+            
+            # Now find out what sort of plot we're making on this
+            # loop...
+            if layer == 'earth-model':
+                axarr[0, p].imshow(model,
+                          cmap = plt.get_cmap('gist_earth'),
+                          vmin = np.amin(model)-np.amax(model)/2,
+                          vmax = np.amax(model)+np.amax(model)/2,
+                          alpha = alpha,
+                          aspect='auto',
+                          extent=[min(xax),max(xax),
+                                   plot_data.shape[0]*dt,0],
+                          origin = 'upper'
+                           )
+            
+            elif layer == 'variable-density':
+                vddata=plot_data
+                if vddata.ndim == 3:
+                    vddata = np.sum(plot_data,axis=-1)
+                extreme = np.percentile(vddata,99)
+            
+                axarr[0, p].imshow( vddata,
+                           cmap = args.colourmap,
+                           vmin = -extreme,
+                           vmax = extreme,
+                           alpha = alpha,
+                           aspect='auto',
+                           extent=[min(xax),max(xax),
+                                   plot_data.shape[0]*dt,0],
+                           origin = 'upper'
+                           )
+                
+    
+            elif layer == 'reflectivity':
+                # Show unconvolved reflectivities
+                #
+                #TO DO:put transparent when null / zero
+                #
+                masked_refl = np.ma.masked_where(reflectivity == 0.0,
+                                                 reflectivity)
+            
+                axarr[0,p].imshow(masked_refl,
+                           cmap = plt.get_cmap('Greys'),
+                           aspect='auto',
+                           extent=[min(xax),max(xax),
+                                   plot_data.shape[0]*dt,0],
+                           origin = 'upper' ,
+                           vmin = np.amin( masked_refl ),
+                           vmax = np.amax( masked_refl )
+                           )
+
+            elif layer == 'wiggle':
+            # wiggle needs an alpha setting too
+                wigdata=plot_data
+                if wigdata.ndim == 3:
+                    wigdata= np.sum(plot_data,axis=-1)
+                wiggle(wigdata,
+                       dt = dt,
+                       skipt = args.wiggle_skips,
+                       gain = args.wiggle_skips + 1,
+                       line_colour = 'black',
+                       fill_colour = 'black',
+                       opacity = args.opacity,
+                       xax = xax,
+                       quadrant = axarr[0, p]
+                       )
+                if plot.index(layer) == 0:
+                    # then we're in an base layer so...
+                    axarr[0, p].set_ylim(max(axarr[0, p].set_ylim()),min(axarr[0, p].set_ylim()))
+
+            elif layer == 'RGB':
+                exponent = 2
+                envelope = abs(hilbert(plot_data))
+                envelope = envelope**exponent
+                
+                envelope[:,:,0]= envelope[:,:,0]/np.amax(envelope[:,:,0])
+                envelope[:,:,1]= envelope[:,:,1]/np.amax(envelope[:,:,1])
+                envelope[:,:,2]= envelope[:,:,2]/np.amax(envelope[:,:,2])
+                
+                extreme = np.amax(abs(envelope))
+                axarr[0, p].imshow(envelope,
+                           cmap = args.colourmap,
+                           vmin = -extreme,
+                           vmax = extreme,
+                           alpha = alpha,
+                           aspect='auto',
+                           extent=[min(xax),max(xax),
+                                   envelope.shape[0]*dt,0],
+                           origin = 'upper'
+                           )
+            else:
+                # We should never get here
+                continue
+             
+        axarr[0, p].set_xlabel(xlabel)
+        axarr[0, p].set_ylabel('time [s]')
+        axarr[0, p].set_title(args.title % locals())
+        
+        #plot inst. amplitude at 150 ms (every 6 samples, we should parameterize)
+        t = args.tslice
+        t_index = np.amin([int(t*1000.0), plot_data.shape[0]-1])
+        y = plot_data[t_index,:].flatten()
+        
+        
+        
+        # compute lines for instantaneous chart
+        amax_tune = np.amax(y)
+        amin_tune = np.amin(y)
+        aun_tuned = plot_data[t_index,-1]
+
+        # instantaneous charts
+        axarr[1,p].plot(xax[:],y,'ko-',lw=3,alpha=0.2, color = 'g')
+        if args.xscale: #check for log plot on graphs too
+            axarr[1, p].set_xscale('log', basex = int(args.xscale) )
+        axarr[1,p].set_xlabel(xlabel)
+        
+        # horizontal line, plot min, plot max
+        axarr[1, p].axhline(y=amin_tune, alpha=0.15, lw=3, color = 'g')
+        axarr[1, p].axhline(y=amax_tune, alpha=0.15, lw=3, color = 'g' )
+        
+        #plot ave
+        axarr[1, p].axhline(y=aun_tuned, alpha=0.15, lw=3, color = 'g')
+        
+        # vertical line
+        axarr[1, p].axvline(x=xax[np.argmax(y)], alpha=0.15, lw=3, color='b' )
+        axarr[1, p].axvline(x=xax[np.argmin(y)], alpha=0.15, lw=3, color='b' )
+        axarr[0, p].axvline(x=xax[np.argmax(y)], alpha=0.15, lw=3, color='b' )
+        axarr[0, p].axvline(x=xax[np.argmin(y)], alpha=0.15, lw=3, color='b' )
+        # draw vertical line at onset of steady state
+        y_r = np.array(y[::-1])
+    
+        try:
+            steady_state = np.where(abs(np.gradient(y_r)) >= (0.001*np.ptp(y)))[0][0]
+            axarr[1, p].axvline(x=xax[-steady_state], alpha=0.15, lw=3, color='r' )
+            axarr[0, p].axvline(x=xax[-steady_state], alpha=0.15, lw=3, color='r' )
+        except:
+            pass
+        #labels
+        axarr[1, p].set_title('instantaneous attribute at %s ms' % int(t*1000.0))
+        axarr[1, p].set_ylabel('amplitude')
+        axarr[1,p].grid()
+        plt.xlim((xax[0], xax[-1]))
+        
+        #plot horizontal green line on model image, and steady state
+        axarr[0,p].axhline(y=t, alpha=0.5, lw=2, color = 'g')
+        
+
+    fig.tight_layout()
+
+    
+    return get_figure_data()
+
+def multi_plot(model, reflectivity, seismic, traces,
+               f, theta, args):
+    """
+    Calculates reflectivities from the earth model then convolves
+    against a bank of wavelets. Figures of various slices are created
+    based on the args structure.
+
+    :param model: The earth model image to use for forward modeling.
+    :param args: Structure of parsed arguments.
+
+    :returns: a png graphic of the forward model results.
+    """
+
+
+    from modelr.constants import dt, wavelet_duration as duration
+    print model.shape, seismic.shape, reflectivity.shape
+    model_aspect = float(model.shape[1]) / model.shape[0]
+
+    # Do convolution
+    if ( ( duration / dt ) > ( reflectivity.shape[0] ) ):
+        duration = reflectivity.shape[0] * dt
+
+    nsamps, ntraces, ntheta, n_wavelets = seismic.shape
+
+    dx = 10    #trace offset (in metres)
+    
+    #################################
+    # Build the plot(s)
+       
+    # Simplify the plot request a bit
+    # This will need to be a loop if we want to cope with
+    # an arbitrary number of base plots; or allow up to 6 (say)
+    
+    base1 = args.base1
+    
+    if args.overlay1 == 'none':
+        overlay1 = None
+    else:
+        overlay1 = args.overlay1
+    
+    if args.overlay2 == 'none':
+        overlay2 = None
+    else:
+        overlay2 = args.overlay2
+        
+    if args.base2 == 'none':
+        base2 = None
+        plots = [(base1, overlay1)]
+        
+    else:
+        base2 = args.base2
+        plots = [(base1, overlay1), (base2, overlay2)]
+
+    if( args.slice == 'spatial' ):
+        
+        plot_data = seismic[ :, :, 0,:]
+        reflectivity = reflectivity[:,:,0]
+        xax = traces
+        xlabel = 'trace'
+    elif( args.slice == 'angle' ):
+        plot_data = seismic[ :, 0, :, 0 ]
+        reflectivity = reflectivity[ :, 0, : ]
+        xax = theta
+        xlabel = 'angle'
+    elif( args.slice == 'frequency' ):
+        plot_data = seismic[ :, 0, 0, : ]
+        reflectivity = np.reshape( np.repeat( reflectivity[:,0,0],
+                                              seismic.shape[1] ),
+                                   ( reflectivity.shape[0],
+                                     seismic.shape[1] ) )
+        
+        xax = f
+        xlabel = 'frequency [Hz]'
+    else:
+        # Default to spatial
+        plot_data = seismic[ :, :, 0, 0 ]
+
+    # Calculate some basic stuff
+    plot_data = np.nan_to_num(plot_data)
+    
+    # This doesn't work well for non-spatial slices
+    #aspect = float(seismic.shape[1]) / seismic.shape[0]                                        
     
     # This is *better* for non-spatial slices, but can't have
     # overlays
@@ -248,8 +530,9 @@ def modelr_plot( model, colourmap, args ):
         # Establish what sort of subplot grid we need
         p = plots.index(plot)
     
-        if args.xscale:
-            axarr[0, p].set_xscale('log', basex = int(args.xscale) )    
+        if args.slice == "frequency" and args.xscale:
+            if args.xscale=='octave':
+                axarr[0, p].set_xscale('log', basex=int(2))    
         
         # Each plot can have two layers (maybe more later?)
         # Display the two layers by looping over the non-blank
@@ -267,8 +550,9 @@ def modelr_plot( model, colourmap, args ):
             # Now find out what sort of plot we're making on this
             # loop...        
             if layer == 'earth-model':
+                
                 axarr[0, p].imshow(model,
-                          cmap = plt.get_cmap('gist_earth'),
+                          cmap = plt.get_cmap('brg'),
                           vmin = np.amin(model)-np.amax(model)/2,
                           vmax = np.amax(model)+np.amax(model)/2,
                           alpha = alpha,
@@ -360,7 +644,8 @@ def modelr_plot( model, colourmap, args ):
         axarr[0, p].set_xlabel(xlabel)
         axarr[0, p].set_ylabel('time [s]')
         axarr[0, p].set_title(args.title % locals())
-        
+
+        """
         #plot inst. amplitude at 150 ms (every 6 samples, we should parameterize)
         t = args.tslice
         t_index = np.amin([int(t*1000.0), plot_data.shape[0]-1])
@@ -375,8 +660,9 @@ def modelr_plot( model, colourmap, args ):
 
         # instantaneous charts       
         axarr[1,p].plot(xax[:],y,'ko-',lw=3,alpha=0.2, color = 'g')
-        if args.xscale:    #check for log plot on graphs too
-            axarr[1, p].set_xscale('log', basex = int(args.xscale) )
+        if args.xscale and args.slice=="frequency":    #check for log plot on graphs too
+            if args.xscale=='octave':
+                axarr[1, p].set_xscale('log', basex=2)
         axarr[1,p].set_xlabel(xlabel)
         
         # horizontal line, plot min, plot max
@@ -408,11 +694,10 @@ def modelr_plot( model, colourmap, args ):
         
         #plot horizontal green line on model image, and steady state
         axarr[0,p].axhline(y=t, alpha=0.5, lw=2, color = 'g')
-        
+        """
 
     fig.tight_layout()
 
-    
     return get_figure_data()
 if __name__ == '__main__':
     dt =0.001

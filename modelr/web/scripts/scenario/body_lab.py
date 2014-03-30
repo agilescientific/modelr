@@ -11,22 +11,29 @@ import matplotlib.pyplot as plt
 from argparse import ArgumentParser
 from modelr.web.defaults import default_parsers
 from modelr.web.urlargparse import rock_properties_type
-from agilegeo.avo import zoeppritz
 
 from modelr.web.util import modelr_plot
-from agilegeo.wavelet import ricker
 
 import modelr.modelbuilder as mb
 
 from svgwrite import rgb
 
-short_description = 'Spatial view of a simple wedge model'
+short_description = 'Create a simple wedge or slab model.'
 
 def add_arguments(parser):
     
-    default_parser_list = [
+    default_parser_list = ['ntraces',
+                           'pad',
+                           'reflectivity_method',
+                           'title',
+                           'theta',
+                           'f',
+                           'colourmap',
+                           'wavelet', 
+                           'wiggle_skips',
+                           'aspect_ratio',
                            'base1','base2','overlay1','overlay2',
-                           'opacity','f', 'theta', 'colourmap'
+                           'opacity'
                            ]
     
     default_parsers(parser,default_parser_list)
@@ -54,35 +61,55 @@ def add_arguments(parser):
                         required=False,
                         default='2500,1200,2600'
                         )
+    
+    parser.add_argument('left',
+                        type=int,
+                        action='list',
+                        default='0,0',                        
+                        help='The thickness on the left-hand side'
+                        )
+                        
+    parser.add_argument('right',
+                        type=int,
+                        action='list',
+                        default='0,50',                        
+                        help='The thickness on the right-hand side'
+                        )
+                        
+    parser.add_argument('margin',
+                        type=int,
+                        help='Traces with zero thickness',
+                        default=1
+                        )
 
+    parser.add_argument('slice',
+                        type=str,
+                        help='Slice to return',
+                        default='spatial',
+                        choices=['spatial', 'angle', 'frequency']
+                        )
+                        
+    parser.add_argument('trace',
+                        type=int,
+                        help='Trace to use for non-spatial slice',
+                        default=150
+                        )
+    
     parser.add_argument('tslice',
                         type=float, 
                         help='time [s] along which to plot instantaneous amplitude ',
                         required=True,
-                        default=0.150
+                        default=0.050
                         )
-                      
+    
     return parser
 
 
 def run_script(args):
-    from modelr.constants import dt, duration
+
     
     matplotlib.interactive(False)
-
-    args.ntraces = 300
-    args.pad = 150
-    args.reflectivity_method = zoeppritz
-    args.title = 'Wedge model - spatial cross section'
-    args.wavelet = ricker
-    args.wiggle_skips = 10
-    args.aspect_ratio = 1
-    args.margin=1
-    args.left = (0,0)
-    args.right = (0,50)
-    args.slice='spatial'
-    args.trace = 0
-    
+        
     left = (args.left[0], args.left[1])
     right = (args.right[0], args.right[1])
 
@@ -127,4 +154,3 @@ def main():
     
 if __name__ == '__main__':
     main()
-

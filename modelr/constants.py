@@ -24,4 +24,4 @@ WAVELETS = {
     }
 
 dt = 0.001
-duration = 0.2
+wavelet_duration = 0.2

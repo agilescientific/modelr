@@ -19,12 +19,12 @@ from agilegeo.wavelet import ricker
 from svgwrite import rgb
 
 # This is required for Script help
-short_description = 'Wavelet bank in a channel model.'
+short_description = 'Spatial view of a channel'
 
 def add_arguments(parser):
     default_parser_list = [
                            'base1','base2','overlay1','overlay2',
-                           'opacity', 'theta','colourmap'
+                           'opacity','f', 'theta','colourmap'
                            ]
     
     default_parsers(parser,default_parser_list)
@@ -38,7 +38,7 @@ def add_arguments(parser):
                         
     parser.add_argument('Rock1',
                         type=rock_properties_type, 
-                        help='Channel rock type',
+                        help='Rock type of the channel',
                         required=True,
                         default='2200,1100,2300'
                         )
@@ -49,33 +49,20 @@ def add_arguments(parser):
                         required=False,
                         default='2500,1200,2600'
                         )
-    parser.add_argument('trace',
-                        type=int, 
-                        help='Trace location',
-                        required=False,
-                        default=150
-                        )
-
-    parser.add_argument('xscale',
-                        type=int, 
-                        help='0 for linear, 2 for log base 2, 10 for log Base 10', 
-                        required=True,
-                        default='0'
-                        )
-                        
+    
     parser.add_argument('tslice',
                         type=float, 
                         help='time [s] along which to plot instantaneous amplitude ',
                         required=True,
-                        default=0.150
+                        default=0.151
                         )
+                        
 
 
                         
     return parser
 
 def run_script(args):
-    from modelr.constants import dt, duration
     matplotlib.interactive(False)
     
     """if args.transparent == 'False' or args.transparent == 'No':
@@ -86,15 +73,14 @@ def run_script(args):
     args.ntraces = 300
     args.pad = 150
     args.reflectivity_method = zoeppritz
-    args.title = 'Channel Model - Wavelet Cross Section'
+    args.title = 'Channel Model - Spatial Cross Section'
     args.wavelet = ricker
     args.wiggle_skips = 10
     args.aspect_ratio = 1
     args.thickness = 50
     args.margin=1
-    args.f = (8,256,1)
-    args.slice='frequency'
-   
+    args.slice='spatial'
+    args.trace = 0
     
     transparent = False
     # This is a hack to conserve colors

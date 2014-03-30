@@ -87,14 +87,14 @@ def get_reflectivity(data,
 
     # Check if we only have one trace of data, and reform the array
     if( data.ndim == 2 ):
-        reflect_data = np.zeros( (data.size, 1, np.size( theta )) )
-        data = np.reshape( data, ( data.shape[0], 1, 3 ) )
+        reflect_data = np.zeros((data.size, 1, np.size(theta)))
+        data = np.reshape(data, (data.shape[0], 1, 3))
     else:
-        reflect_data = np.zeros( ( data.shape[0], data.shape[1],
-                                   np.size( theta ) ) )
+        reflect_data = np.zeros((data.shape[0], data.shape[1],
+                                np.size(theta)))
 
     # Make an array that only has the boundaries in it
-    boundaries = get_boundaries( data )
+    boundaries = get_boundaries(data)
 
     for i in boundaries:
 
@@ -103,9 +103,9 @@ def get_reflectivity(data,
         j[0] += 1
 
         # Get the colourmap dictionary keys
-        c1 = rgb( data[ i[0],i[1],0 ],  data[ i[0],i[1],1 ],
-                  data[ i[0],i[1],2 ] )
-        c2 = rgb( data[ j[0],j[1],0 ],  data[ j[0],j[1],1 ],
+        c1 = rgb(data[ i[0],i[1],0 ],  data[i[0],i[1],1 ],
+                  data[ i[0],i[1],2 ])
+        c2 = rgb( data[ j[0],j[1],0 ],  data[j[0],j[1],1 ],
                   data[ j[0],j[1],2 ] )
 
         # Don't calculate if not in the cmap. If the model was
@@ -154,12 +154,14 @@ def do_convolve( wavelets, data,
         n_wavelets = wavelets.shape[1]
     else:
         n_wavelets = 1
-        wavelets = np.reshape( wavelets.size, n_wavelets )
+        wavelets = wavelets[:, np.newaxis]
+        
 
     # Initialize the output
     output = np.zeros( ( nsamps, ntraces, ntheta,
                          n_wavelets ) )
 
+    
     # Loop through each combination of wavelet, trace, and theta
     for iters in \
       product( traces, range( ntheta), range( n_wavelets ) ):
@@ -167,8 +169,8 @@ def do_convolve( wavelets, data,
         output[:,iters[0],iters[1], iters[2]] = \
             np.convolve( data[:,iters[0], iters[1]],
                               wavelets[:,iters[2]], mode='same')
+        
 
-    
     return (output)
 
 

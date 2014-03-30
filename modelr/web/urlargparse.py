@@ -11,16 +11,18 @@ from argparse import Namespace
 import json
 from modelr.constants import WAVELETS
 from modelr.constants import REFLECTION_MODELS
+import numpy as np
 
 def rock_properties_type(str_input):
     from modelr.rock_properties import RockProperties
     args = str_input.split(',')
     assert ((len(args) == 3) or (len(args)==6))
 
-    if (len(args) == 3 ):
+    if (len(args) == 3):
         return RockProperties(vp = float(args[0]),
                               vs = float(args[1]), 
                               rho = float(args[2]))
+    
     return RockProperties(vp = float(args[0]),
                           vs = float(args[1]), 
                           rho = float(args[2]),
@@ -92,7 +94,9 @@ class Argument(object):
                                     " must be one of %r (got %r)" %
                                     (self.name, self.choices, arg))
             try:
+                print arg
                 arg = self.type(arg)
+                
             except:
                 raise ArgumentError("argument %s: invalid %s" +
                                     " value: %r" %
@@ -105,6 +109,7 @@ class Argument(object):
             for arg in arg.split(','):
                 try:
                     value = self.type(arg)
+                    print "VALUE", value
                 except:
                     raise ArgumentError("argument %s: invalid %s"+
                                         " value: %r" %
@@ -155,13 +160,13 @@ class URLArgumentParser(object):
     Modeled after http://docs.python.org/dev/library/argparse.html
     '''
     
-    def __init__(self, description):
+    def __init__(self, description='No Description'):
         '''
         Constructor
         '''
         self.description = description
 #        self.arguments = {'help': Argument('help')}
-        self.arguments = {}
+        self.arguments = []
         
     def add_argument(self, name, required=False, default=None,
                      type=str, action='store', help='', choices=None):
@@ -170,7 +175,7 @@ class URLArgumentParser(object):
         '''
         arg = Argument(name, required, default, type, action,
                        help, choices)
-        self.arguments[name] = arg
+        self.arguments.append(arg)
         
     def parse_params(self, params):
         '''
@@ -181,13 +186,16 @@ class URLArgumentParser(object):
         if 'help' in params:
             params.pop('help')
             self.raise_help()
-        
-        for key in self.arguments:
-            
-            arg = params.pop(key, None)
-            
-            value = self.arguments[key].parse_arg(arg)
-            result[key] = value
+
+        for parser in self.arguments:
+
+           
+            arg = params.pop(parser.name, None)
+            if np.ndim(arg) == 0:
+                arg = [arg]
+                
+            value = parser.parse_arg(arg)
+            result[parser.name] = value
             
         if params:
             key, value = params.popitem()
@@ -209,15 +217,15 @@ class URLArgumentParser(object):
     @property
     def json_data(self):
         obj = {'description': self.description,
-               'arguments': {k:v.json_dict for (k, v)
-                             in self.arguments.items()}}
+               'arguments': [arg.json_dict
+                             for arg in self.arguments]}
         return json.dumps(obj)
     
     @property
     def help_html(self):
         
         arguments = '\n'.join(arg.html_help for arg in
-                              self.arguments.values())
+                              self.arguments)
         return '<p>%s</p><ul>\n%s</ul>' % (self.description,
                                            arguments)
         
