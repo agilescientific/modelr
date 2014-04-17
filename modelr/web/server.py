@@ -403,9 +403,6 @@ def main():
     parser.add_argument('--local', type=bool, default=False)
     args = parser.parse_args()
     try:
-        server = ThreadedHTTPServer((args.host, args.port), MyHandler)
-        server.jenv = Environment(loader=PackageLoader('modelr',
-                                                    'web/templates'))
         # This provides SSL, serving over HTTPS.
         # This approach will not allow service over HTTP.
         # I think we should allow both, since there is no
@@ -415,13 +412,20 @@ def main():
         # will satisfy the browser and that's enough.
         
         if not args.local:
+            server = ThreadedHTTPServer((args.host, args.port), MyHandler)
+        
             server.socket = ssl.wrap_socket(server.socket,
                                             certfile=CERTFILE,
                                             keyfile=KEYFILE,
                                             server_side=True
                                             )
             server.socket.settimeout(8.0)
-        
+
+        else:
+            server = HTTPServer((args.host, args.port), MyHandler)
+            
+        server.jenv = Environment(loader=PackageLoader('modelr',
+                                                    'web/templates'))
                                         
         print 'started httpserver...'
         server.serve_forever()
