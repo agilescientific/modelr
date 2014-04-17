@@ -37,8 +37,8 @@ class EarthModel(object):
         image.load()
         self.image = np.asarray(image, dtype="int32")
         
-        self.depth = earth_structure["depth"]
-        self.length = earth_structure["length"]
+        self.depth = float(earth_structure["depth"])
+        self.length = float(earth_structure["length"])
 
         self.units = earth_structure["units"]
 

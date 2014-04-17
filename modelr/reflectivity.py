@@ -143,7 +143,7 @@ def do_convolve( wavelets, data,
     """
 
     # Set up the right dimensionality
-    nsamps = data.shape[0]
+    nsamps = max((data.shape[0], wavelets.shape[0]))
     
     if( traces == None ):
         traces = np.arange( data.shape[1] )
