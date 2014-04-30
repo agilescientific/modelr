@@ -62,6 +62,14 @@ def add_arguments(parser):
                         default=0.150
                         )
                       
+    parser.add_argument('scale',
+                        type=float,
+                        action='list', 
+                        help='0 for auto scale, and (optional) clip percentile (e.g. 99)',
+                        required=True,
+                        default='1.0,99'
+                        )
+
     return parser
 
 
