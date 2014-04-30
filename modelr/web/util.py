@@ -9,7 +9,7 @@ Created on May 3, 2012
 '''
 
 import tempfile
-import matplotlib
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 from agilegeo.wavelet import ricker
 import numpy as np
@@ -227,23 +227,18 @@ def modelr_plot( model, colourmap, args ):
     if len(plots) == 1:
         axarr = np.transpose(np.array([axarr]))
     
-    print(axarr.shape)
-    
     # Work out the size of the figure
     each_width = 6
     fig.set_figwidth(each_width*len(plots))
     fig.set_figheight(each_width*stretch*2)
 
     # Start a loop for the figures...
-    for plot in plots:
+    for p, plot in enumerate(plots):
         
         # If there's no base plot for this plot,
         # then there are no more plots and we're done
         if not plot[0]:
             break
-            
-        # Establish what sort of subplot grid we need
-        p = plots.index(plot)
     
         if args.xscale:
             axarr[0, p].set_xscale('log', basex = int(args.xscale) )    
@@ -279,9 +274,15 @@ def modelr_plot( model, colourmap, args ):
                 vddata=plot_data
                 if vddata.ndim == 3:
                     vddata = np.sum(plot_data,axis=-1)
-                extreme = np.percentile(vddata,99)
-                print "SHAPE", p
-                axarr[0, p].imshow( vddata,
+                #for "scalar tuple (scale, clip percentage)
+                if len(args.scale) == 1:
+                    args.scale.append(99)
+                if args.scale[0] == 0:
+                    extreme = np.percentile(vddata, float(args.scale[1]))
+                else:    
+                    extreme = float(args.scale[0])
+                print "+++++++++++++:", p
+                im = axarr[0, p].imshow( vddata,
                            cmap = args.colourmap,
                            vmin = -extreme,
                            vmax = extreme,
@@ -290,8 +291,15 @@ def modelr_plot( model, colourmap, args ):
                            extent=[min(xax),max(xax),
                                    plot_data.shape[0]*dt,0], 
                            origin = 'upper'
-                           )
-                
+                           )         
+                                              
+                # Put colorbar legend
+                colorbar_ax = fig.add_axes([(0.045*p) + 0.9*( float((p+1)) / len(plots) ), 0.875, 0.03/len(plots), 0.07])
+                fig.colorbar(im, cax=colorbar_ax)
+                colorbar_ax.text( 0.5, -0.1, '%3.2f' % -extreme, transform=colorbar_ax.transAxes, horizontalalignment='center',verticalalignment='top')
+                colorbar_ax.text(0.5, 1.1, '%3.2f' % extreme, transform=colorbar_ax.transAxes, horizontalalignment='center')
+                colorbar_ax.set_axis_off()
+                    
     
             elif layer == 'reflectivity':
                 # Show unconvolved reflectivities
@@ -352,7 +360,7 @@ def modelr_plot( model, colourmap, args ):
             else:
                 # We should never get here
                 continue   
-             
+            
         axarr[0, p].set_xlabel(xlabel)
         axarr[0, p].set_ylabel('time [s]')
         axarr[0, p].set_title(args.title % locals())
@@ -388,7 +396,6 @@ def modelr_plot( model, colourmap, args ):
         axarr[0, p].axvline(x=xax[np.argmin(y)], alpha=0.15, lw=3, color='b' )
         # draw vertical line at onset of steady state
         y_r = np.array(y[::-1])
-        print y
         try:
             steady_state = np.where(abs(np.gradient(y_r)) >= (0.001*np.ptp(y)))[0][0]
             axarr[1, p].axvline(x=xax[-steady_state], alpha=0.15, lw=3, color='r' )
@@ -399,7 +406,7 @@ def modelr_plot( model, colourmap, args ):
         axarr[1, p].set_title('instantaneous attribute at %s ms' % int(t*1000.0))
         axarr[1, p].set_ylabel('amplitude')
         axarr[1,p].grid()
-        plt.xlim((xax[0], xax[-1]))
+        axarr[1,p].set_xlim(xax[0], xax[-1])
         
         #plot horizontal green line on model image, and steady state
         axarr[0,p].axhline(y=t, alpha=0.5, lw=2, color = 'g')
