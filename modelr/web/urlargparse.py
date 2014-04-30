@@ -187,6 +187,7 @@ class URLArgumentParser(object):
             params.pop('help')
             self.raise_help()
 
+        print self.arguments
         for parser in self.arguments:
 
            

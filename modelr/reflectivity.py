@@ -171,7 +171,7 @@ def do_convolve( wavelets, data,
                               wavelets[:,iters[2]], mode='same')
         
 
-    return (output)
+    return output
 
 
 

@@ -28,32 +28,34 @@ def add_arguments(parser):
 
     
 
-    parser.add_argument('f1', type=float, default=15.0,
+    """parser.add_argument('f1', type=float, default=15.0,
                         help="First center frequency of the wavelet bank")
     parser.add_argument('f2', type=float, default=15.0,
                         help="Last center frequency of the wavelet bank")
     parser.add_argument('f_res', type=str, default="octave",
                         choices=["linear", "octave"],
                         help="Wavelet bank resolution")
+    """
     parser.add_argument('wavelet',
                             type=wavelet_type,
                             help='Wavelet type',
                             default='ricker',
                             choices=WAVELETS.keys()
                             )
-
+    """
     parser.add_argument('theta1', type=float, default=0.0,
                        help="First offset angle of the experiment")
     parser.add_argument('theta2', type=float, default=0.0,
                         help="Last offset angle of the experiment")
     parser.add_argument('stack', type=int, default=1,
                         help="Number of offset measurements")
-
+    """
+    """
     parser.add_argument("sensor_spacing", type=float, default=1,
                         help="Spacing of the sensors")
     parser.add_argument("dt", type=float, default=0.001,
                         help="Sampling rate of the experiment")
-    
+    """
     parser.add_argument('reflectivity_method',
                             type=reflectivity_type,
                             help='Reflectivity Algorithm',
@@ -71,9 +73,10 @@ def run_script(earth_model, seismic_model):
         earth_model.depth2time(seismic_model.dt)
 
     # get the sensor locations
-    spacing = seismic_model.sensor_spacing
+    # spacing = seismic_model.sensor_spacing
     length = earth_model.length
-    samples = np.arange(0, length, spacing)
+    samples = np.linspace(0, length, seismic_model.n_sensors,
+                          endpoint=True)
     
     
     reflectivity = \

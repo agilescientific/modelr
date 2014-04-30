@@ -13,6 +13,8 @@ from modelr.web.urlargparse import SendHelp, ArgumentError, \
 
 from agilegeo.avo import time_to_depth, depth_to_time
 
+import h5py
+
 class SeismicModel(object):
     '''
     Class to store earth models.
@@ -46,16 +48,16 @@ class SeismicModel(object):
         self.wavelet_model = args.wavelet
         self.reflectivity_method = args.reflectivity_method
 
-        self.f_res = args.f_res
-        self.stack = args.stack
+        self.f_res = 'octave' #args.f_res
+        self.stack = 45 #args.stack
         
-        self.sensor_spacing = args.sensor_spacing
-        self.dt = args.dt
-        self.start_f = args.f1
-        self.end_f = args.f2
+        self.n_sensors = 75 #args.sensor_spacing
+        self.dt = 0.005 #args.dt
+        self.start_f = 8 #args.f1
+        self.end_f = 100 #args.f2
 
-        self.theta1 = args.theta1
-        self.theta2 = args.theta2
+        self.theta1 = 0.0 #args.theta1
+        self.theta2 = 45.0 #args.theta2
 
 
         
@@ -65,7 +67,6 @@ class SeismicModel(object):
 
         wavelet = self.wavelet_model(wavelet_duration,
                                      self.dt, f)
-        print wavelet.shape
         return wavelet
 
     def offset_angles(self):
@@ -97,6 +98,21 @@ class SeismicModel(object):
         self.seismic, self.reflectivity = \
           self.script(earth_model, self)
 
+          
+
+    def save(self, filename):
+
+
+        with h5py.File(filename,'w') as f:
+        
+            seismic = f.create_dataset("seismic",
+                                       data=self.seismic)
+            reflectivity = f.create_dataset("reflectivity",
+                                            data=self.reflectivity)
+    
+
+
+        
     
 
     

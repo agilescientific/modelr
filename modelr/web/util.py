@@ -699,6 +699,13 @@ def multi_plot(model, reflectivity, seismic, traces,
     fig.tight_layout()
 
     return get_figure_data()
+
+
+
+    
+
+    
+    
 if __name__ == '__main__':
     dt =0.001
     gain = 1

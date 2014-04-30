@@ -81,13 +81,9 @@ class EarthModel(object):
         
         dz = self.depth / data.shape[0]
         
-        self.image = np.asarray([depth_to_time(data[:,:,i],vp_data, dz, dt)
+        self.image = np.asarray([depth_to_time(data[:,:,i],vp_data,
+                                               dz, dt)
                       for i in range(data.shape[-1])]).transpose(1,2,0)
-        
-        print "AJDKLASJLK", self.image.shape
-        
-        
-
         
         
     def vp_data(self):
@@ -115,7 +111,8 @@ class EarthModel(object):
         res = self.image.shape[1] / float(self.length)
 
         pixel_samples = (samples * res)
-        print pixel_samples
+        pixel_samples = \
+          pixel_samples[pixel_samples < self.image.shape[1]]
 
         return self.image[:, pixel_samples.astype(int),:]
 

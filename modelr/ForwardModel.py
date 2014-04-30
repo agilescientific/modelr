@@ -1,5 +1,6 @@
 
 from modelr.reflectivity import get_reflectivity, do_convolve
+import os
 
 class ForwardModel(object):
 
@@ -11,12 +12,10 @@ class ForwardModel(object):
 
     def go(self):
 
-        # Do time to depth conversions
-        self.seismic_model.go(self.earth_model)
-
-        ## TODO calculate metadata
-
-        # TODO make plots a loop
+        if not os.path.exists('testfile.hdf5'):
+            
+            self.seismic_model.go(self.earth_model)
+            self.seismic_model.save('testfile.hdf5')
 
         self.plots.go(self.earth_model, self.seismic_model)
 
