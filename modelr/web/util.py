@@ -431,7 +431,7 @@ def multi_plot(model, reflectivity, seismic, traces,
 
 
     from modelr.constants import dt, wavelet_duration as duration
-    print model.shape, seismic.shape, reflectivity.shape
+
     model_aspect = float(model.shape[1]) / model.shape[0]
 
     # Do convolution

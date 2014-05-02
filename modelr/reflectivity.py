@@ -51,11 +51,12 @@ def rock_reflectivity( Rp0, Rp1, theta=0.0,
     :returns: the p-wave reflection coefficients for each value of
              theta.
     """
-    ref = method( Rp0.vp, Rp0.vs, Rp0.rho,
-                  Rp1.vp, Rp1.vs, Rp1.rho,
-                  theta )
+    ref = method(Rp0.vp, Rp0.vs, Rp0.rho,
+                 Rp1.vp, Rp1.vs, Rp1.rho,
+                 theta)
 
-    return ref
+    return np.nan_to_num(ref)
+    
 
 
 
@@ -123,8 +124,8 @@ def get_reflectivity(data,
     
     return reflect_data
 
-def do_convolve( wavelets, data,
-                 traces=None ):
+def do_convolve(wavelets, data,
+                traces=None, theta=None):
     """
     Convolves wavelets against a reflectivity dataset.
 
@@ -142,33 +143,41 @@ def do_convolve( wavelets, data,
              [samples, traces, wavelet]. 
     """
 
-    # Set up the right dimensionality
+    # Set up the right dimensionalit
     nsamps = max((data.shape[0], wavelets.shape[0]))
     
-    if( traces == None ):
-        traces = np.arange( data.shape[1] )
-    ntraces = traces.size
-    ntheta = data.shape[2]
+    if traces is None:
+        traces = np.arange(data.shape[1])
+    ntraces = np.size(traces)
+
+    if theta is None:
+        theta = np.arange(data.shape[2])
+
+    ntheta = np.size(theta)
     
-    if ( wavelets.ndim  > 1 ):
+    if (wavelets.ndim > 1):
         n_wavelets = wavelets.shape[1]
     else:
         n_wavelets = 1
         wavelets = wavelets[:, np.newaxis]
         
 
+    print data.shape
     # Initialize the output
-    output = np.zeros( ( nsamps, ntraces, ntheta,
-                         n_wavelets ) )
+    output = np.zeros((nsamps, ntraces, ntheta,
+                       n_wavelets))
 
     
     # Loop through each combination of wavelet, trace, and theta
     for iters in \
-      product( traces, range( ntheta), range( n_wavelets ) ):
+      product(range(np.size(traces)), range(ntheta),
+              range(n_wavelets)):
       
         output[:,iters[0],iters[1], iters[2]] = \
-            np.convolve( data[:,iters[0], iters[1]],
-                              wavelets[:,iters[2]], mode='same')
+            scipy.signal.fftconvolve( data[:,traces[iters[0]],
+                                           iters[1]],
+                                      wavelets[:,iters[2]],
+                                      mode='same')
         
 
     return output

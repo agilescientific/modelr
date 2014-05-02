@@ -37,6 +37,7 @@ import base64
 
 import h5py
 
+import cProfile as prof
 socket.setdefaulttimeout(6)
 
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
@@ -329,6 +330,7 @@ class MyHandler(BaseHTTPRequestHandler):
         """
 
         # Run the script
+
         image_data = plot_generator.go()
 
         # Encode for http send
@@ -357,9 +359,16 @@ class MyHandler(BaseHTTPRequestHandler):
             raw_json = self.rfile.read(content_len)
 
             parameters = json.loads(raw_json)
-            
-            earth_model = EarthModel(parameters["earth_model"])
 
+            earth_script = parameters["earth_model"].pop("script",
+                                                         None)
+            earth_namespace = self.eval_script([earth_script],
+                                                 ['earth'])
+            
+            earth_model = EarthModel(parameters["earth_model"],
+                                     earth_namespace)
+            
+            
             seismic_script = parameters["seismic_model"].pop("script",
                                                              None)
             
@@ -380,6 +389,11 @@ class MyHandler(BaseHTTPRequestHandler):
 
             forward_model = ForwardModel(earth_model, seismic_model,
                                          plots)
+
+            #prof.runctx('self.run_json(forward_model)',
+            #            {'self': self, 'forward_model':forward_model},
+            #            {},
+            #            'profile.test')
             self.run_json(forward_model)
             return
 

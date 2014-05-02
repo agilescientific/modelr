@@ -10,16 +10,14 @@ import matplotlib.pyplot as plt
 
 from argparse import ArgumentParser
 
-from modelr.web.urlargparse import  wavelet_type, reflectivity_type
+from modelr.web.urlargparse import  wavelet_type
 
-from modelr.web.util import modelr_plot
-from modelr.constants import WAVELETS, REFLECTION_MODELS 
-import modelr.modelbuilder as mb
+from modelr.constants import WAVELETS 
+
 from modelr.web.defaults import default_parsers
-from svgwrite import rgb
 
 
-from modelr.reflectivity import get_reflectivity, do_convolve
+from modelr.reflectivity import do_convolve
 
 short_description = ("Do a convolution seismic model across spatial, angle, and wavelet domains")
 
@@ -27,21 +25,29 @@ short_description = ("Do a convolution seismic model across spatial, angle, and 
 def add_arguments(parser):
 
     
+    parser.add_argument('wavelet',
+                        type=wavelet_type,
+                        help='Wavelet',
+                        default='ricker',
+                        choices=WAVELETS.keys())
+    
+    parser.add_argument('f', type=float, default=15.0,
+                        help="frequency",
+                        interface='slider',
+                        range=[8,100])
+    
+    parser.add_argument('phase', type=float, default=15.0,
+                        help="phase",
+                        interface='slider',
+                        range=[0,180])
 
-    """parser.add_argument('f1', type=float, default=15.0,
-                        help="First center frequency of the wavelet bank")
-    parser.add_argument('f2', type=float, default=15.0,
+    """parser.add_argument('f2', type=float, default=15.0,
                         help="Last center frequency of the wavelet bank")
     parser.add_argument('f_res', type=str, default="octave",
                         choices=["linear", "octave"],
                         help="Wavelet bank resolution")
     """
-    parser.add_argument('wavelet',
-                            type=wavelet_type,
-                            help='Wavelet type',
-                            default='ricker',
-                            choices=WAVELETS.keys()
-                            )
+
     """
     parser.add_argument('theta1', type=float, default=0.0,
                        help="First offset angle of the experiment")
@@ -56,36 +62,28 @@ def add_arguments(parser):
     parser.add_argument("dt", type=float, default=0.001,
                         help="Sampling rate of the experiment")
     """
-    parser.add_argument('reflectivity_method',
-                            type=reflectivity_type,
-                            help='Reflectivity Algorithm',
-                            default='zoeppritz',
-                            choices=REFLECTION_MODELS.keys()
-                            ) 
  
     return parser
 
-def run_script(earth_model, seismic_model):
+def run_script(earth_model, seismic_model, theta=None,
+               traces=None):
 
+    if earth_model.reflectivity() is None:
 
-    # convert to time
-    if earth_model.units == 'depth':
-        earth_model.depth2time(seismic_model.dt)
+        if earth_model.units == "depth":
+            earth_model.depth2time(seismic_model.dt)
 
-    # get the sensor locations
-    # spacing = seismic_model.sensor_spacing
-    length = earth_model.length
-    samples = np.linspace(0, length, seismic_model.n_sensors,
-                          endpoint=True)
+        earth_model.update_reflectivity(seismic_model.offset_angles(),
+                                        seismic_model.n_sensors)
+
+        
     
-    
-    reflectivity = \
-          get_reflectivity(data=earth_model.get_data(samples=samples),
-                           colourmap=earth_model.property_map,
-                           theta=seismic_model.offset_angles(),
-                           reflectivity_method=seismic_model.reflectivity_method)
+    wavelets = seismic_model.wavelets()
 
-    
-    seismic = do_convolve(seismic_model.wavelets(), reflectivity)
 
-    return seismic, reflectivity
+    seismic = do_convolve(wavelets,
+                          earth_model.reflectivity(theta=theta),
+                          traces=traces,
+                          theta=theta)
+
+    return seismic

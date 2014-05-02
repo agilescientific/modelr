@@ -1,6 +1,8 @@
 
 from modelr.web.urlargparse import SendHelp, ArgumentError, \
      URLArgumentParser
+
+ 
 class ModelrPlot(object):
 
     def __init__(self, plot_json, namespace):
@@ -22,8 +24,9 @@ class ModelrPlot(object):
         self.args = args
         self.script = namespace['run_script']
     
-    def go(self, earth_model, seismic_model):
+    def go(self, seismic_model, earth_model):
 
-        self.plot = self.script(earth_model, seismic_model,
+        self.plot = self.script(earth_model,
+                                seismic_model,
                                 self.args)
         

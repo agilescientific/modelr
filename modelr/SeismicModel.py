@@ -13,6 +13,8 @@ from modelr.web.urlargparse import SendHelp, ArgumentError, \
 
 from agilegeo.avo import time_to_depth, depth_to_time
 
+from agilegeo.wavelet import rotate_phase
+
 import h5py
 
 class SeismicModel(object):
@@ -46,15 +48,15 @@ class SeismicModel(object):
         self.script = namespace['run_script']
 
         self.wavelet_model = args.wavelet
-        self.reflectivity_method = args.reflectivity_method
 
         self.f_res = 'octave' #args.f_res
-        self.stack = 45 #args.stack
-        
+        self.stack = 50 #args.stack
+
+        self.phase = args.phase * np.pi / 180.0
         self.n_sensors = 75 #args.sensor_spacing
         self.dt = 0.005 #args.dt
-        self.start_f = 8 #args.f1
-        self.end_f = 100 #args.f2
+        self.start_f = args.f #args.f1
+        self.end_f = args.f #args.f2
 
         self.theta1 = 0.0 #args.theta1
         self.theta2 = 45.0 #args.theta2
@@ -67,7 +69,7 @@ class SeismicModel(object):
 
         wavelet = self.wavelet_model(wavelet_duration,
                                      self.dt, f)
-        return wavelet
+        return rotate_phase(wavelet, self.phase)
 
     def offset_angles(self):
             
@@ -93,22 +95,12 @@ class SeismicModel(object):
         return f
 
         
-    def go(self,earth_model):
+    def go(self,earth_model, theta=None, traces=None):
 
-        self.seismic, self.reflectivity = \
-          self.script(earth_model, self)
+        self.seismic = self.script(earth_model, self,
+                                   theta=theta,
+                                   traces=traces)
 
-          
-
-    def save(self, filename):
-
-
-        with h5py.File(filename,'w') as f:
-        
-            seismic = f.create_dataset("seismic",
-                                       data=self.seismic)
-            reflectivity = f.create_dataset("reflectivity",
-                                            data=self.reflectivity)
     
 
 

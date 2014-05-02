@@ -70,7 +70,8 @@ class Argument(object):
     A place holder for a url argument.
     '''
     def __init__(self, name, required=False, default=None, type=str,
-                 action='store', help='', choices=None):
+                 action='store', help='', choices=None,
+                 interface=None, range=None):
         self.name = name
         self.required = required
         self.default = default
@@ -78,6 +79,10 @@ class Argument(object):
         self.action = action
         self.help = help
         self.choices = choices
+        self.interface = interface
+        self.range = range
+
+        
     
     def parse_arg(self, args):
         if not args or not args[0] or args[0] == 'null':
@@ -131,6 +136,8 @@ class Argument(object):
         'action':self.action,
         'help': self.help,
         'choices': self.choices,
+        'interface': self.interface,
+        'range': self.range
         }
 
     @property
@@ -169,12 +176,13 @@ class URLArgumentParser(object):
         self.arguments = []
         
     def add_argument(self, name, required=False, default=None,
-                     type=str, action='store', help='', choices=None):
+                     type=str, action='store', help='', choices=None,
+                     interface=None, range=None):
         '''
         add an argument
         '''
         arg = Argument(name, required, default, type, action,
-                       help, choices)
+                       help, choices, interface, range)
         self.arguments.append(arg)
         
     def parse_params(self, params):
