@@ -16,7 +16,6 @@ import numpy as np
 
 from PIL import Image
 from StringIO import StringIO
-from svgwrite import rgb
 
 from modelr.web.urlargparse import SendHelp, ArgumentError, \
      URLArgumentParser, rock_properties_type
@@ -50,7 +49,7 @@ class EarthModel(object):
         self.reflect_file = str(earth_structure["datafile"])
         
         # Load the image data
-        if earth_structure.get('update', None):
+        if earth_structure.get('update_model', None):
             response = requests.get(earth_structure["image"])
 
             if os.path.exists(self.reflect_file):
@@ -69,11 +68,17 @@ class EarthModel(object):
             # Keep only a direct map for legacy. Input data has name
             # attribute we are going to ignore
             mapping = earth_structure["mapping"]
-    
-            for colour in mapping:
-                rock = mapping[colour]["property"]
 
-                self.property_map[colour] = rock_properties_type(rock)
+            self.vp_lookup = np.zeros((256,256,256))
+            for colour in mapping:
+                rock = \
+                  rock_properties_type(mapping[colour]["property"])
+
+                rgb = colour.split('(')[1].split(')')[0].split(',')
+                self.vp_lookup[int(rgb[0]), int(rgb[1]),
+                               int(rgb[2])] = rock.vp
+                                             
+                self.property_map[colour] = rock
     
 
     def time2depth(self, dz):
@@ -102,7 +107,7 @@ class EarthModel(object):
         data = self.get_data()
         
         dz = self.depth / data.shape[0]
-        
+
         self.image =\
           np.asarray([depth_to_time(data[:,:,i],vp_data,dz, dt)
                     for i in range(data.shape[-1])]).transpose(1,2,0)
@@ -114,13 +119,13 @@ class EarthModel(object):
     
         vp_data = np.zeros(data.shape[0:2])
 
+        test = np.take(self.vp_lookup, data[0:10,0:10,:], axis=2)
         # TODO this could likely be done without nested loops
         for i in range(data.shape[0]):
             for j in range(data.shape[1]):
                 value = data[i,j,:]
-                rgb_string = rgb(value[0], value[1], value[2])
-                vp_data[i,j] = self.property_map.get(rgb_string).vp
-
+                vp_data[i,j] = self.vp_lookup[value[0],value[1],
+                                              value[2]]
         return vp_data
 
 

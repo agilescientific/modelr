@@ -396,50 +396,7 @@ class MyHandler(BaseHTTPRequestHandler):
             #            'profile.test')
             self.run_json(forward_model)
             return
-
-        if (uri.path == '/plot_test'):
-
-            content_len = int(self.headers.getheader('content-length'))
-            raw_json = self.rfile.read(content_len)
-
-            parameters = json.loads(raw_json)
-            datafile = h5py.File('testfile.hdf5')
-
-            plot_script = parameters["plots"].pop("script", None)
-            
-            plot_namespace = self.eval_script([plot_script],
-                                              ['plots'])
-
-            add_arguments = plot_namespace['add_arguments']
-            short_description = plot_namespace.get('short_description',
-                                                  'No description')
-
-            parser = URLArgumentParser(short_description)
-            add_arguments(parser)
-            args = parser.parse_params(parameters["plots"]["args"])
-            script = plot_namespace['run_script']
-
-            output = script(datafile, args)
-            
-            # Encode for http send
-            encoded_image = base64.b64encode(output)
-
-            # convert to json
-            data = json.dumps({'data': encoded_image})
         
-            # Set the response headers for json
-            self.send_response(200)
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.send_header('Access-Control-Allow-Headers',
-                             'X-Request, X-Requested-With')
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-
-            # Write response
-            self.wfile.write(data)
-
-            
-            return
         self.send_error(404, 'Post request not supportd yet: %s'
                         % self.path)
 
