@@ -150,6 +150,10 @@ def do_convolve(wavelets, data,
         traces = np.arange(data.shape[1])
     ntraces = np.size(traces)
 
+    if ntraces==1:
+        traces = [traces]
+    
+
     if theta is None:
         theta = np.arange(data.shape[2])
 

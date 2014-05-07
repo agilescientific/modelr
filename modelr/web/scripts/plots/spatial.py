@@ -13,7 +13,6 @@ import matplotlib.gridspec as gridspec
 
 from argparse import ArgumentParser
 
-from modelr.web.urlargparse import rock_properties_type
 
 from modelr.web.util import get_figure_data
 
