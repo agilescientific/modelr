@@ -2,6 +2,8 @@ from modelr.web.urlargparse import reflectivity_type
 from modelr.constants import REFLECTION_MODELS
 from modelr.reflectivity import get_reflectivity
 
+
+short_description = ('Define the physical limits, domain, and reflectivity model of the earth')
 def add_arguments(parser):
 
     
@@ -14,7 +16,7 @@ def add_arguments(parser):
     parser.add_argument('reflectivity_method',
                         type=reflectivity_type,
                         help='Reflectivity Algorithm',
-                        default='zoeppritz',
+                        default='akirichards',
                         choices=REFLECTION_MODELS.keys()) 
  
     return parser

@@ -19,27 +19,34 @@ from modelr.web.defaults import default_parsers
 
 from modelr.reflectivity import do_convolve
 
-short_description = ("Do a convolution seismic model across spatial, angle, and wavelet domains")
+short_description = ("Convolution model with synthetic wavelets")
 
 
 def add_arguments(parser):
 
+    
+    
+    
+    parser.add_argument('f', type=float, default=8,
+                        help="frequency [hz]",
+                        interface='slider',
+                        range=[0,100])
+    
+    parser.add_argument('phase', type=float, default=0.0,
+                        help="phase [deg]",
+                        interface='slider',
+                        range=[-180,180])
+
+    #parser.add_argument('noise', type=float, default=0.0,
+    #                    help="noise",
+    #                    interface='slider',
+    #                    range=[0,100])
     
     parser.add_argument('wavelet',
                         type=wavelet_type,
                         help='Wavelet',
                         default='ricker',
                         choices=WAVELETS.keys())
-    
-    parser.add_argument('f', type=float, default=15.0,
-                        help="frequency",
-                        interface='slider',
-                        range=[8,100])
-    
-    parser.add_argument('phase', type=float, default=15.0,
-                        help="phase",
-                        interface='slider',
-                        range=[0,180])
 
     """parser.add_argument('f2', type=float, default=15.0,
                         help="Last center frequency of the wavelet bank")
@@ -71,7 +78,8 @@ def run_script(earth_model, seismic_model, theta=None,
     if earth_model.reflectivity() is None:
 
         if earth_model.units == "depth":
-            earth_model.depth2time(seismic_model.dt)
+            earth_model.depth2time(seismic_model.dt,
+                                   samples=seismic_model.n_sensors)
 
         earth_model.update_reflectivity(seismic_model.offset_angles(),
                                         seismic_model.n_sensors)
@@ -81,8 +89,13 @@ def run_script(earth_model, seismic_model, theta=None,
     wavelets = seismic_model.wavelets()
 
 
+    ref = earth_model.reflectivity(theta=theta)
+    #noise = np.random.randn(ref.shape[0], ref.shape[1],
+    #                        ref.shape[2]) * seismic_model.noise
+    
+        
     seismic = do_convolve(wavelets,
-                          earth_model.reflectivity(theta=theta),
+                          ref,
                           traces=traces,
                           theta=theta)
 

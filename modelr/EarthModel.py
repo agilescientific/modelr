@@ -55,7 +55,8 @@ class EarthModel(object):
             if os.path.exists(self.reflect_file):
                 os.remove(self.reflect_file)
 
-            image = Image.open(StringIO(response.content)).convert("RGB")
+            image = \
+              Image.open(StringIO(response.content)).convert("RGB")
             image.load()
             self.image = np.asarray(image, dtype="int32")
 
@@ -69,6 +70,9 @@ class EarthModel(object):
             # attribute we are going to ignore
             mapping = earth_structure["mapping"]
 
+            # Make a lookup table for vp. This is terribly
+            # inefficient for memory, but quicker than looping
+            # dictionaries. There is for sure a better way
             self.vp_lookup = np.zeros((256,256,256))
             for colour in mapping:
                 rock = \
@@ -97,35 +101,40 @@ class EarthModel(object):
                            for i in range(data.shape[-1])])
 
 
-    def depth2time(self, dt):
+    def depth2time(self, dt, samples=None):
 
         if self.units == 'time':
             raise ValueError
         
-        vp_data = self.vp_data()
+        vp_data = self.vp_data(samples=samples)
         
-        data = self.get_data()
+        data = self.get_data(samples=samples)
+
+        print '+++++++|', vp_data.shape
+
+        indices = \
+          np.array([np.arange(vp_data.shape[0]) for \
+                    i in range(vp_data.shape[1])]).transpose()
+
         
+                            
         dz = self.depth / data.shape[0]
 
-        self.image =\
-          np.asarray([depth_to_time(data[:,:,i],vp_data,dz, dt)
-                    for i in range(data.shape[-1])]).transpose(1,2,0)
-        
-        
-    def vp_data(self):
+        time_index = depth_to_time(indices, vp_data,
+                                   dz, dt).astype(int)
 
-        data = self.get_data()
+        self.image = \
+          np.asarray([data[time_index[:,i],i,:] for \
+                     i in range(data.shape[1])]).transpose(1,0,2)
+
+        
+    def vp_data(self, samples=None):
+
+        data = self.get_data(samples=samples)
     
-        vp_data = np.zeros(data.shape[0:2])
-
-        test = np.take(self.vp_lookup, data[0:10,0:10,:], axis=2)
-        # TODO this could likely be done without nested loops
-        for i in range(data.shape[0]):
-            for j in range(data.shape[1]):
-                value = data[i,j,:]
-                vp_data[i,j] = self.vp_lookup[value[0],value[1],
-                                              value[2]]
+        vp_data = self.vp_lookup[data[:,:,0],
+                                 data[:,:,1],
+                                 data[:,:,2]]
         return vp_data
 
 
@@ -139,7 +148,6 @@ class EarthModel(object):
                            theta=offset_angles,
                            reflectivity_method=self.reflectivity_method)
 
-        
         with h5py.File(self.reflect_file,'w') as f:
             f.create_dataset("reflectivity",
                              data=reflectivity)
@@ -156,7 +164,7 @@ class EarthModel(object):
 
         except:
             data = None
-            
+
         return data
 
     

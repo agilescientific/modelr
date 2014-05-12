@@ -143,9 +143,6 @@ def do_convolve(wavelets, data,
              [samples, traces, wavelet]. 
     """
 
-    # Set up the right dimensionalit
-    nsamps = max((data.shape[0], wavelets.shape[0]))
-    
     if traces is None:
         traces = np.arange(data.shape[1])
     ntraces = np.size(traces)
@@ -166,11 +163,17 @@ def do_convolve(wavelets, data,
         wavelets = wavelets[:, np.newaxis]
         
 
-    print data.shape
-    # Initialize the output
-    output = np.zeros((nsamps, ntraces, ntheta,
-                       n_wavelets))
+    # Check if we need zero padding
+    if wavelets.shape[0] > data.shape[0]:
+        pad = wavelets.shape[0]
+        data = np.pad(data,((wavelets.shape[0], 0),(0,0),(0,0)),
+                      mode='constant',
+                      constant_values=((0,0),(0,0),(0,0)))
+    else: pad = 0
 
+    # Initialize the output
+    output = np.zeros((data.shape[0], ntraces, ntheta,
+                       n_wavelets))
     
     # Loop through each combination of wavelet, trace, and theta
     for iters in \
@@ -184,7 +187,7 @@ def do_convolve(wavelets, data,
                                       mode='same')
         
 
-    return output
+    return output[pad:, :,:,:]
 
 
 

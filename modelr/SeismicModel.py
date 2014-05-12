@@ -47,13 +47,14 @@ class SeismicModel(object):
         self.args = args
         self.script = namespace['run_script']
 
+        #self.noise = args.noise / 1000.0
         self.wavelet_model = args.wavelet
 
         self.f_res = 'octave' #args.f_res
         self.stack = 50 #args.stack
 
         self.phase = args.phase * np.pi / 180.0
-        self.n_sensors = 75 #args.sensor_spacing
+        self.n_sensors = 350 #args.sensor_spacing
         self.dt = 0.005 #args.dt
         self.start_f = args.f #args.f1
         self.end_f = args.f #args.f2
@@ -67,8 +68,15 @@ class SeismicModel(object):
 
         f = self.wavelet_cf()
 
-        wavelet = self.wavelet_model(wavelet_duration,
-                                     self.dt, f)
+        if self.wavelet_model == WAVELETS['ormsby']:
+            wavelet = np.zeros((wavelet_duration/self.dt,len(f)))
+            for ind, freq in enumerate(f):
+                wavelet[:,ind] = self.wavelet_model(wavelet_duration,
+                                                    self.dt, freq)
+        else:   
+            wavelet = self.wavelet_model(wavelet_duration,
+                                         self.dt, f)
+
         return rotate_phase(wavelet, self.phase)
 
     def offset_angles(self):

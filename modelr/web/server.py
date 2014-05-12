@@ -331,13 +331,14 @@ class MyHandler(BaseHTTPRequestHandler):
 
         # Run the script
 
-        image_data = plot_generator.go()
+        image_data, metadata = plot_generator.go()
 
         # Encode for http send
         encoded_image = base64.b64encode(image_data)
 
         # convert to json
-        data = json.dumps({'data': encoded_image})
+        data = json.dumps({'data': encoded_image,
+                           'metadata': metadata})
         
         # Set the response headers for json
         self.send_response(200)
@@ -390,11 +391,11 @@ class MyHandler(BaseHTTPRequestHandler):
             forward_model = ForwardModel(earth_model, seismic_model,
                                          plots)
 
-            #prof.runctx('self.run_json(forward_model)',
-            #            {'self': self, 'forward_model':forward_model},
-            #            {},
-            #            'profile.test')
-            self.run_json(forward_model)
+            prof.runctx('self.run_json(forward_model)',
+                        {'self': self, 'forward_model':forward_model},
+                        {},
+                        'profile.test')
+            #self.run_json(forward_model)
             return
         
         self.send_error(404, 'Post request not supportd yet: %s'
