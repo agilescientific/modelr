@@ -174,16 +174,17 @@ def do_convolve(wavelets, data,
     # Initialize the output
     output = np.zeros((data.shape[0], ntraces, ntheta,
                        n_wavelets))
-    
+
+    print wavelets.shape, data.shape, n_wavelets
     # Loop through each combination of wavelet, trace, and theta
     for iters in \
       product(range(np.size(traces)), range(ntheta),
               range(n_wavelets)):
-      
+
         output[:,iters[0],iters[1], iters[2]] = \
             scipy.signal.fftconvolve( data[:,traces[iters[0]],
-                                           iters[1]],
-                                      wavelets[:,iters[2]],
+                                           iters[1]].flatten(),
+                                      wavelets[:,iters[2]].flatten(),
                                       mode='same')
         
 

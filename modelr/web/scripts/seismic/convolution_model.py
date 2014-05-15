@@ -28,12 +28,12 @@ def add_arguments(parser):
     
     
     parser.add_argument('f', type=float, default=8,
-                        help="frequency [hz]",
+                        help="frequency",
                         interface='slider',
                         range=[0,100])
     
     parser.add_argument('phase', type=float, default=0.0,
-                        help="phase [deg]",
+                        help="phase",
                         interface='slider',
                         range=[-180,180])
 

@@ -15,6 +15,9 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from argparse import ArgumentParser
 from os import listdir
 from os.path import isfile, join, dirname
+
+import os
+
 from urlparse import urlparse, parse_qs
 from modelr.web.urlargparse import SendHelp, ArgumentError, \
      URLArgumentParser
@@ -350,6 +353,14 @@ class MyHandler(BaseHTTPRequestHandler):
 
         # Write response
         self.wfile.write(data)
+
+
+    
+        
+        
+ 
+        
+        
         
     def do_POST(self):
         uri = urlparse(self.path)
@@ -397,7 +408,17 @@ class MyHandler(BaseHTTPRequestHandler):
                         'profile.test')
             #self.run_json(forward_model)
             return
-        
+
+        elif (uri.path == '/delete_model'):
+
+            content_len = int(self.headers.getheader('content-length'))
+            raw_json = self.rfile.read(content_len)
+
+            parameters = json.loads(raw_json)
+
+            os.remove(str(parameters["filename"]))
+            return
+            
         self.send_error(404, 'Post request not supportd yet: %s'
                         % self.path)
 
