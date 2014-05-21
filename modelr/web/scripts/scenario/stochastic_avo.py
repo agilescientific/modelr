@@ -105,20 +105,19 @@ def run_script(args):
                         Rprop0.vs - ( 3.* Rprop1.vs_sig ) ) ),
                         np.amax((Rprop1.vs + ( 3.* Rprop1.vs_sig ),
                         Rprop0.vs + ( 3.* Rprop1.vs_sig ) ) ) )
+                        
     rho_lim = ( np.amin((Rprop1.rho - ( 3.* Rprop1.rho_sig ),
                         Rprop0.rho - ( 3.* Rprop1.rho_sig ) ) ),
                         np.amax((Rprop1.rho + ( 3.* Rprop1.rho_sig ),
                         Rprop0.rho + ( 3.* Rprop1.rho_sig ) ) ) )
     
-    limits = np.array([[ vp_lim,vs_lim,rho_lim ],
-                       [ vp_lim,vs_lim,rho_lim ] ])
+    limits = np.array([[ vp_lim, vs_lim, rho_lim ],
+                       [ vp_lim, vs_lim, rho_lim ] ])
     
     for i in range( args.iterations ):
         
-        reflect.append( args.reflectivity_method( vp0[i], vs0[i],
-                                                  rho0[i],
-                                                  vp1[i], vs1[i],
-                                                  rho1[i],
+        reflect.append( args.reflectivity_method( vp0[i], vs0[i], rho0[i],
+                                                  vp1[i], vs1[i], rho1[i],
                                                   theta) )
     reflect = np.array(reflect)
     temp = np.concatenate( (vp0, vs0, rho0, vp1, vs1, rho1), axis=0)
@@ -137,7 +136,7 @@ def run_script(args):
         G = matplotlib.gridspec.GridSpec(2,6)
         shift=0
     
-    # ax_3, ax_4, ax_5, ax_6, ax_7, ax_8
+    # histogram plots (ax_3, ax_4, ax_5, ax_6, ax_7, ax_8)
     hist_max = 0
     for k in np.arange(len(prop_samples)):
         hist_max = max(hist_max,max(np.histogram(prop_samples[k],
@@ -152,11 +151,13 @@ def run_script(args):
                      normed = True
                      )
             temp = plt.gca()
+            
+            # Annotation and making it look nice
             plt.axis([limits[j][i][0], limits[j][i][1],
                       temp.axis()[2], hist_max ])
             plt.yticks([])
             plt.xticks( rotation=90,horizontalalignment='left' )
-            ax = plt.gca()  # gca stands for 'get current axis'
+            ax = plt.gca()  
             ax.spines['right'].set_color('none')
             ax.spines['left'].set_color('none')
             ax.spines['top'].set_color('none')
@@ -178,15 +179,20 @@ def run_script(args):
     # ax_1 the AVO plot
     plt.subplot(G[0:3,:])
     plt.hold(True)
-    for i in range( args.iterations -1):        
+    for i in range( args.iterations -1):
+        # Do the AVO template as an underlay
+        # HERE        
+        
+        # Do the plots --> This step might not need to be in a loop
         plt.plot( theta, reflect[i] ,color = 'red', alpha = np.min((10./args.iterations, 0.5)))
         if vp1[i] > vp0[i]:
             theta_crit = arcsin( vp0[i] / vp1[i] )*180/np.pi
             plt.axvline( x= theta_crit , color='black', alpha = np.min((10./args.iterations,0.5)))
     plt.plot( theta, ave_reflect, color='green', alpha = 0.5 )
     plt.grid()
-    #plt.xticks([]), plt.yticks([])
-    ax = plt.gca()  # gca stands for 'get current axis'
+    
+    # Annotation and making it look nice
+    ax = plt.gca()  
     ax.spines['right'].set_color('none')
     ax.spines['top'].set_color('none')
     ax.xaxis.set_ticks_position('bottom')
@@ -217,14 +223,31 @@ def run_script(args):
     plt.subplot(G[0+shift:3+shift,:])
     plt.hold(True)
     for i in range( args.iterations -1):
+        # Do the underlay for the intercept-gradient template
+        # load image...or make rectangles:
+        
+        # Class 1
+        
+        # Class 2
+        
+        # Class 2p
+        
+        # Class 3
+        
+        # Class 4
+        
+        # Plot the dots
         plt.scatter( reflect[i,0], (reflect[i,50]-reflect[i,0] ),
                      color = 'red' , s=20,
                      alpha = np.min((10./args.iterations,0.5)) )
-        #data += np.nan_to_num( reflect ) 
+                     
+    # Plot the average of the dots
     plt.scatter( ave_reflect[0], ave_reflect[50]- ave_reflect[0],
                  color = 'green' , s=20, alpha=.5 )  
+    
+    # Annotation and making it nice
     plt.xticks([]), plt.yticks([])
-    ax = plt.gca()  # gca stands for 'get current axis'
+    ax = plt.gca()    
     ax.spines['right'].set_color('none')
     ax.spines['top'].set_color('none')
     ax.xaxis.set_ticks_position('bottom')
@@ -233,6 +256,7 @@ def run_script(args):
     ax.yaxis.set_ticks_position('left')
     ax.spines['left'].set_position(('data',0))
     ax.spines['left'].set_alpha(0.5)
+    
     ax.text(0.05, 0.95, 'Intercept-Gradient\ncrossplot',
             verticalalignment='top',
             horizontalalignment='left',
@@ -245,11 +269,13 @@ def run_script(args):
                             edgecolor='None',
                             alpha=0.35))
     plt.grid()
+    # axis limits
     plt.ylim((np.amin((-.3,np.nanmin(reflect[:,50]-reflect[:,0]))),
               np.amax((.3,np.nanmax(reflect[:,50]-reflect[:,0])))) )
     
     plt.xlim((np.amin((-.3,np.nanmin(reflect[:,0]))),
               np.amax((.3,np.nanmax(reflect[:,0])))))
+    # axis labels
     ax.text(1.0, 0.55, 'intercept',
                     verticalalignment='top',
                     horizontalalignment='right',

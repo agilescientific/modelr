@@ -55,7 +55,7 @@ class SeismicModel(object):
 
         self.phase = args.phase * np.pi / 180.0
         self.n_sensors = 350 #args.sensor_spacing
-        self.dt = 0.005 #args.dt
+        self.dt = 0.001 #args.dt
         self.start_f = args.f #args.f1
         self.end_f = args.f #args.f2
 
