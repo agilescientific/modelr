@@ -56,8 +56,11 @@ class SeismicModel(object):
         self.phase = args.phase * np.pi / 180.0
         self.n_sensors = 350 #args.sensor_spacing
         self.dt = 0.005 #args.dt
-        self.start_f = args.f #args.f1
-        self.end_f = args.f #args.f2
+
+        self.f = args.f
+        
+        self.start_f = 8.0 #args.f1
+        self.end_f = 100.0 #args.f2
 
         self.theta1 = 0.0 #args.theta1
         self.theta2 = 45.0 #args.theta2
@@ -68,8 +71,9 @@ class SeismicModel(object):
 
         f = self.wavelet_cf()
 
-        if self.wavelet_model == WAVELETS['ormsby']:
-            wavelet = np.zeros((wavelet_duration/self.dt,len(f)))
+        if ((self.wavelet_model == WAVELETS['ormsby']) and
+            (np.size(f) > 1)):
+            wavelet = np.zeros((wavelet_duration/self.dt,np.size(f)))
             for ind, freq in enumerate(f):
                 wavelet[:,ind] = self.wavelet_model(wavelet_duration,
                                                     self.dt, freq)
@@ -100,10 +104,11 @@ class SeismicModel(object):
         if self.f_res == "linear":
             f = np.linspace(f0, f1, (f1-f0)/.5)
 
-        return f
+        return f[self.f]
 
         
-    def go(self,earth_model, theta=None, traces=None):
+    def go(self,earth_model, theta=None, traces=None,
+           wavelet=None):
 
         self.seismic = self.script(earth_model, self,
                                    theta=theta,
