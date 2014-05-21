@@ -102,7 +102,8 @@ class EarthModel(object):
 
     def resample(self, dt):
 
-        res = (self.depth/1000.0) / self.image.shape[0]
+        depth = self.depth / 1000.0
+        res = (self.depth) / self.image.shape[0]
 
         model_time = np.arange(0, self.depth, res)
         new_time = np.arange(0, self.depth, dt)
