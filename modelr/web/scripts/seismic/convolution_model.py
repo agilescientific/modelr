@@ -81,6 +81,9 @@ def run_script(earth_model, seismic_model, theta=None,
             earth_model.depth2time(seismic_model.dt,
                                    samples=seismic_model.n_sensors)
 
+        else:
+            earth_model.resample(seismic_model.dt)
+
         earth_model.update_reflectivity(seismic_model.offset_angles(),
                                         seismic_model.n_sensors)
 

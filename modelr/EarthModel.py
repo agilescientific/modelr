@@ -23,6 +23,7 @@ import h5py
 
 import os
 
+from scipy.interpolate import interp1d
 class EarthModel(object):
     '''
     Class to store earth models.
@@ -93,14 +94,26 @@ class EarthModel(object):
         vp_data = self.vp_data()
         dt = self.depth / vp_data[0]
 
-        data = np.zeros
-
         # This could be sped up if need be
         data = np.asarray([time_to_depth(self.get_data(), vp_data,
                                          dt, dz)
                            for i in range(data.shape[-1])])
 
 
+    def resample(self, dt):
+
+        res = (self.depth/1000.0) / self.image.shape[0]
+
+        model_time = np.arange(0, self.depth, res)
+        new_time = np.arange(0, self.depth, dt)
+        
+
+        f = interp1d(model_time, self.image, kind='nearest',
+                     axis=0, bounds_error=False)
+        self.image = f(new_time)
+
+        
+        
     def depth2time(self, dt, samples=None):
 
         if self.units == 'time':
@@ -110,7 +123,7 @@ class EarthModel(object):
         
         data = self.get_data(samples=samples)
 
-        print '+++++++|', vp_data.shape
+        
 
         indices = \
           np.array([np.arange(vp_data.shape[0]) for \
