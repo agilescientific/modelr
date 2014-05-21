@@ -117,8 +117,13 @@ def run_script(earth_model, seismic_model,
     colorbar_ax.text(0.5, 1.1, '%3.2f' % extr1, transform=colorbar_ax.transAxes, horizontalalignment='center')
     colorbar_ax.set_axis_off()
 
+    if args.time > seismic_data.shape[0]:
+        args.time = seismic_data.shape[0]-1
+    
     axarr[1][0].plot(seismic_data[args.time,:,
-                                  0, 0], 'g', lw = 3)
+                                  0, 0], 'g',
+                                  lw = 3)
+    
     axarr[1][0].set_ylim(-extr1,extr1)
     axarr[1][0].set_xlim(0,seismic_data.shape[1])
     axarr[1][0].set_ylabel('amplitude')

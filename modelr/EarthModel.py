@@ -110,7 +110,8 @@ class EarthModel(object):
         
 
         f = interp1d(model_time, self.image, kind='nearest',
-                     axis=0, bounds_error=False)
+                     axis=0, bounds_error=False,
+                     fill_value=-1)
         self.image = f(new_time)
 
         
