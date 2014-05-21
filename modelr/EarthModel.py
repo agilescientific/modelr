@@ -103,10 +103,10 @@ class EarthModel(object):
     def resample(self, dt):
 
         depth = self.depth / 1000.0
-        res = (self.depth) / self.image.shape[0]
+        res = depth / self.image.shape[0]
 
-        model_time = np.arange(0, self.depth, res)
-        new_time = np.arange(0, self.depth, dt)
+        model_time = np.arange(0, depth, res)
+        new_time = np.arange(0, depth, dt)
         
 
         f = interp1d(model_time, self.image, kind='nearest',
