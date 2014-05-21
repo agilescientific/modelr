@@ -176,10 +176,18 @@ def run_script(earth_model, seismic_model,
 
 
     
+<<<<<<< HEAD
     # wavelet gather
     f = seismic_model.start_f
     seismic_model.start_f = 8.0
     seismic_model.end_f = 100.0
+=======
+    # wavelet
+    f = seismic_model.f
+
+    seismic_model.f = np.arange(0,50)
+    
+>>>>>>> 2b94d55ec477cab2271ad90a4e114a6e2561f04e
     seismic_model.go(earth_model, traces=args.trace-1,
                      theta=args.theta)
     seismic_data = seismic_model.seismic

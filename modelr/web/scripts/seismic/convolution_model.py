@@ -27,7 +27,7 @@ def add_arguments(parser):
     
     
     
-    parser.add_argument('f', type=float, default=8,
+    parser.add_argument('f', type=float, default=8.0,
                         help="frequency",
                         interface='slider',
                         range=[0,100])
@@ -87,10 +87,8 @@ def run_script(earth_model, seismic_model, theta=None,
         earth_model.update_reflectivity(seismic_model.offset_angles(),
                                         seismic_model.n_sensors)
 
-        
     
     wavelets = seismic_model.wavelets()
-
 
     ref = earth_model.reflectivity(theta=theta)
     #noise = np.random.randn(ref.shape[0], ref.shape[1],
