@@ -147,17 +147,19 @@ def run_script(earth_model, seismic_model,
     
     axarr[0][1].imshow(seismic_data[:, 0, :, 0], 
                        aspect='auto', cmap=cmap, 
-                       extent=[0, seismic_data.shape[1],
+                       extent=[0, seismic_data.shape[2],
                                       1000*seismic_model.dt*seismic_data.shape[0],
                                       0],
                                  vmin = -extr1, vmax = extr1,
                        interpolation='spline16'
                                  )
 
-
+    axarr[0][1].set_xlim(left=0, right=seismic_data.shape[1])
+    axarr[0][1].set_ylim(top=0,
+                         bottom=1000*seismic_model.dt*seismic_data.shape[0])
     
     axarr[0][1].axvline(x=args.theta, lw=3, color='r', alpha = 0.25)
-    axarr[0][1].axhline(y=args.time,
+    axarr[0][1].axhline(y=args.time*seismic_model.dt*1000,
                         lw=3, color='g')
     axarr[0][1].set_title('angle gather')
     axarr[0][1].set_yticklabels(' ')
@@ -166,7 +168,7 @@ def run_script(earth_model, seismic_model,
 
     # Put wiggle trace on AVO cross-section
     trace2 = seismic_data[:,0, args.theta, 0]
-    x = np.arange(seismic_data.shape[0])
+    x = np.arange(seismic_data.shape[0]) * 1000.0 * seismic_model.dt
     
     gain2 = (float(width_ratios[0])/width_ratios[1]) * (seismic_data.shape[2] / gain1)
 
@@ -206,12 +208,17 @@ def run_script(earth_model, seismic_model,
                        aspect='auto', cmap=cmap, 
                        extent = [seismic_model.wavelet_cf()[0],
                          seismic_model.wavelet_cf()[-1],
-                                 seismic_data.shape[0], 0],
+                         seismic_data.shape[0]*seismic_model.dt*1000,
+                        0],
                        vmin = -extr1, vmax = extr1,
                        interpolation='spline16'
                        )
+
+    axarr[0][2].set_xlim(left=0, right=seismic_data.shape[3])
+    axarr[0][2].set_ylim(top=0,
+                         bottom=1000*seismic_model.dt*seismic_data.shape[0])
     axarr[0][2].axvline(x=freq, lw=3, color='m', alpha = 0.25)
-    axarr[0][2].axhline(y=args.time,
+    axarr[0][2].axhline(y=args.time*seismic_model.dt*1000.0,
                         lw=3, color='g')
     axarr[0][2].set_xscale('log', basex=2)
     
@@ -225,7 +232,7 @@ def run_script(earth_model, seismic_model,
     # Put wiggle trace on wavelet cross-section
     
     trace3 = seismic_data[:,0, 0, f]
-    x = np.arange(seismic_data.shape[0])
+    x = np.arange(seismic_data.shape[0]) * seismic_model.dt * 1000.0
     
     gain3 = 2*(float(width_ratios[0])/width_ratios[2]) * (seismic_data.shape[3] / gain1)
 
