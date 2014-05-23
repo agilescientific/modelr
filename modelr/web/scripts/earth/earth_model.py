@@ -7,7 +7,7 @@ short_description = ('Define the physical limits, domain, and reflectivity model
 def add_arguments(parser):
 
     
-    parser.add_argument('depth', type=float, default=5000.0,
+    parser.add_argument('depth', type=float, default=1000.0,
                        help="Depth of the model")
     parser.add_argument('units', type=str, default='depth',
                         help="Model domain",

@@ -22,8 +22,8 @@ class ForwardModel(object):
         metadata["f"] = tuple(self.seismic_model.wavelet_cf())
         metadata["time"] = \
           tuple(np.arange(self.seismic_model.seismic.shape[0]) *
-                self.seismic_model.dt*100)
-        
+                self.seismic_model.dt*1000)
+
         return self.plots.plot, metadata
           
           
