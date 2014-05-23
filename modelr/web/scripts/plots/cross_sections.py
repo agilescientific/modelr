@@ -74,11 +74,12 @@ def run_script(earth_model, seismic_model,
     seismic_model.go(earth_model, theta=args.theta)
     seismic_data = np.nan_to_num(seismic_model.seismic)
     
-    seis_ratios = [ seismic_data.shape[1] , seismic_data.shape[2] , seismic_data.shape[3] ] 
+    seis_ratios = [ seismic_data.shape[1], seismic_data.shape[2] ,
+                    seismic_data.shape[3] ] 
     
     im = axarr[0][0].imshow(seismic_data[:,:, 0, 0], 
                             aspect='auto', cmap=cmap, 
-                            extent = [0, seismic_data.shape[1],
+                            extent =[0, seismic_data.shape[1],
                                       1000*seismic_model.dt*seismic_data.shape[0],
                                       0],
                                       vmin = -extr1,
@@ -114,8 +115,14 @@ def run_script(earth_model, seismic_model,
     # Put colorbar legend on spatial cross section
     colorbar_ax = fig.add_axes([0.55,0.775,0.010,0.08])
     fig.colorbar(im, cax=colorbar_ax)
-    colorbar_ax.text( 0.5, -0.1, '%3.2f' % -extr1, transform=colorbar_ax.transAxes, horizontalalignment='center',verticalalignment='top')
-    colorbar_ax.text(0.5, 1.1, '%3.2f' % extr1, transform=colorbar_ax.transAxes, horizontalalignment='center')
+    colorbar_ax.text( 0.5, -0.1, '%3.2f' % -extr1,
+                      transform=colorbar_ax.transAxes,
+                      horizontalalignment='center',
+                      verticalalignment='top')
+    colorbar_ax.text(0.5, 1.1, '%3.2f' % extr1,
+                     transform=colorbar_ax.transAxes,
+                     horizontalalignment='center')
+    
     colorbar_ax.set_axis_off()
 
     if args.time > seismic_data.shape[0]:
@@ -140,9 +147,9 @@ def run_script(earth_model, seismic_model,
     
     axarr[0][1].imshow(seismic_data[:, 0, :, 0], 
                        aspect='auto', cmap=cmap, 
-                       extent=[0, seismic_data.shape[2], 
-                             seismic_data.shape[0],
-                                 0],
+                       extent=[0, seismic_data.shape[1],
+                                      1000*seismic_model.dt*seismic_data.shape[0],
+                                      0],
                                  vmin = -extr1, vmax = extr1,
                        interpolation='spline16'
                                  )
