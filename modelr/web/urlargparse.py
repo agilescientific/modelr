@@ -31,7 +31,15 @@ def rock_properties_type(str_input):
                           rho_sig = float(args[5]))
 
 
-          
+def earth_model_type(str_input):
+
+    data = json.loads(str_input)
+
+    return {"image": data["image"],
+            "mapping": data["mapping"]}
+
+    
+
 def wavelet_type(str_input):
     '''
     To be used as the 'type' value in an Argument. 
