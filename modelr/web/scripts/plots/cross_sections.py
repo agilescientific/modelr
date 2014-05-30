@@ -22,7 +22,7 @@ def add_arguments(parser):
                         
     parser.add_argument('trace',
                         type=int,
-                        help='trace',
+                        help='Trace',
                         default=25,
                         interface='slider',
                         range=[1,350])
@@ -32,12 +32,12 @@ def add_arguments(parser):
                         range=[0,100],
                         default=0,
                         interface='slider',
-                        help='twt')
+                        help='TWT')
                         
     parser.add_argument('theta',
                         type=float,
                         default=0,
-                        help="offset angle",
+                        help="Offset angle",
                         interface='slider',
                         range=[0,45])
 
