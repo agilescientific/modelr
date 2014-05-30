@@ -15,8 +15,8 @@ def add_arguments(parser):
 
     parser.add_argument('reflectivity_method',
                         type=reflectivity_type,
-                        help='Reflectivity Algorithm',
-                        default='akirichards',
+                        help='Reflectivity model',
+                        default='zoeppritz',
                         choices=REFLECTION_MODELS.keys()) 
  
     return parser
