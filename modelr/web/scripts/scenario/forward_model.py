@@ -24,7 +24,7 @@ from svgwrite import rgb
 from StringIO import StringIO
 
 from PIL import Image
-short_description = 'Spatial view of a simple wedge model'
+short_description = 'Spatial view of an image-based model'
 
 def add_arguments(parser):
     
@@ -85,7 +85,6 @@ def run_script(args):
         rock = rock_properties_type(mapping[colour]["property"])
         mapping[colour] = rock
 
-    print mapping
     args.ntraces =  model.shape[1]
                                              
     return modelr_plot(model, mapping, args)
