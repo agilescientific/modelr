@@ -22,7 +22,7 @@ def add_arguments(parser):
                         
     parser.add_argument('trace',
                         type=int,
-                        help='trace',
+                        help='Trace',
                         default=25,
                         interface='slider',
                         range=[1,350])
@@ -32,12 +32,12 @@ def add_arguments(parser):
                         range=[0,100],
                         default=0,
                         interface='slider',
-                        help='twt')
+                        help='TWT')
                         
     parser.add_argument('theta',
                         type=float,
                         default=0,
-                        help="offset angle",
+                        help="Offset angle",
                         interface='slider',
                         range=[0,45])
 
@@ -77,7 +77,9 @@ def run_script(earth_model, seismic_model,
     seis_ratios = [ seismic_data.shape[1], seismic_data.shape[2] ,
                     seismic_data.shape[3] ] 
     
-    im = axarr[0][0].imshow(seismic_data[:,:, 0, 0], 
+    dec = 5    # number of traces to skip, hack for decimation of jitteryness
+    
+    im = axarr[0][0].imshow(seismic_data[:,::dec, 0, 0], 
                             aspect='auto', cmap=cmap, 
                             extent =[0, seismic_data.shape[1],
                                       1000*seismic_model.dt*seismic_data.shape[0],
@@ -113,7 +115,7 @@ def run_script(earth_model, seismic_model,
 
 
     # Put colorbar legend on spatial cross section
-    colorbar_ax = fig.add_axes([0.55,0.775,0.010,0.08])
+    colorbar_ax = fig.add_axes([0.565,0.825,0.010,0.08])
     fig.colorbar(im, cax=colorbar_ax)
     colorbar_ax.text( 0.5, -0.1, '%3.2f' % -extr1,
                       transform=colorbar_ax.transAxes,
@@ -264,4 +266,6 @@ def run_script(earth_model, seismic_model,
 
     seismic_model.start_f = 8
     seismic_model.end_f = 100
+    
+    fig.subplots_adjust(left=0.05, right=0.98, top=0.95, bottom=0.05)
     return get_figure_data()
