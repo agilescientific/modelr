@@ -4,20 +4,20 @@ import numpy as np
 short_description = "Build a 3 layer slab model"
 def add_arguments(parser):
 
-    parser.add_argument('interface_depth', default=100,
+    parser.add_argument('interface_depth', default=80,
                         type=int, help="The time in milliseconds " + 
                         "above and below the wedge")
-    parser.add_argument('x_samples', default=300, type=int,
+    parser.add_argument('x_samples', default=350, type=int,
                         help="Number of samples in the " +
                         "x-direction. Will correspond to the number "+
                         "of traces in a seismogram")
 
-    parser.add_argument("margin", default=15, type=int,
+    parser.add_argument("margin", default=50, type=int,
                         help="X location of zero thickness")
-    parser.add_argument("left", default='40,40', type=int,
+    parser.add_argument("left", default='0,40', type=int,
                          action='list',
                          help="Thickness on the left-hand side")
-    parser.add_argument("right", default='40,20', type=int,
+    parser.add_argument("right", default='30,130', type=int,
                         action='list',
                         help="Thickness on the right-hand side")
     parser.add_argument("layers", default=3, type=int,
