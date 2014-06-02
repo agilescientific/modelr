@@ -50,7 +50,7 @@ def run_script(earth_model, seismic_model,
                args):
 
 
-    cmap = 'seismic'
+    cmap = 'seismic_r'
     #max/min amplitude for plot and colorbar scaling
     extr1 = 1.0
 
