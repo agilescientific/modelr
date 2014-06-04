@@ -30,7 +30,7 @@ def add_arguments(parser):
     parser.add_argument('time',
                         type=float,
                         range=[0,100],
-                        default=0,
+                        default=50,
                         interface='slider',
                         help='TWT')
                         
