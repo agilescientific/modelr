@@ -402,11 +402,17 @@ class MyHandler(BaseHTTPRequestHandler):
             forward_model = ForwardModel(earth_model, seismic_model,
                                          plots)
 
-            prof.runctx('self.run_json(forward_model)',
-                        {'self': self, 'forward_model':forward_model},
-                        {},
-                        'profile.test')
-            #self.run_json(forward_model)
+            #prof.runctx('self.run_json(forward_model)',
+            #            {'self': self, 'forward_model':forward_model},
+            #            {},
+            #            'profile.test')
+
+            p = mp.Process(target=self.run_json,
+                           args=(forward_model,))
+
+            p.start()
+            p.join()
+
             return
 
         elif (uri.path == '/delete_model'):
