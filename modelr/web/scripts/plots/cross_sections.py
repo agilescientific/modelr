@@ -267,5 +267,5 @@ def run_script(earth_model, seismic_model,
     seismic_model.start_f = 8
     seismic_model.end_f = 100
     
-    fig.subplots_adjust(left=0.05, right=0.98, top=0.95, bottom=0.05)
+    fig.subplots_adjust(left=0.05, right=0.98, top=0.95, bottom=0.07)
     return get_figure_data()
