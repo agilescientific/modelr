@@ -406,7 +406,13 @@ class MyHandler(BaseHTTPRequestHandler):
                         {'self': self, 'forward_model':forward_model},
                         {},
                         'profile.test')
-            #self.run_json(forward_model)
+
+            #p = mp.Process(target=self.run_json,
+            #               args=(forward_model,))
+
+            #p.start()
+            #p.join()
+
             return
 
         elif (uri.path == '/delete_model'):

@@ -21,19 +21,20 @@ def get_figure_data(transparent=False):
     '''
     Return the current plot as a binary blob. 
     '''
-    fig_path = tempfile.NamedTemporaryFile(suffix='.png', delete=True)
-    plt.savefig(fig_path.name, transparent=transparent)
+    fig_path = tempfile.SpooledTemporaryFile(suffix='.png')
+    plt.savefig(fig_path, transparent=transparent)
     plt.close()
-    with open(fig_path.name, 'rb') as fd:
+
+    fig_path.seek(0)
+    with fig_path as fd:
         data = fd.read()
-             
+
         
     # Alternative approach to do it in memory rather than on disk
     #image_file = tempfile.SpooledTemporaryFile(suffix='.png')
     #plt.savefig(image_file, format='png') 
     #data = image_file.read()
     #image_file.close()
-    gc.collect()
     return data
 
 def wiggle(data, dt=1, line_colour='black', fill_colour='blue',
