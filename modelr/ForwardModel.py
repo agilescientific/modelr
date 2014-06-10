@@ -24,6 +24,9 @@ class ForwardModel(object):
           tuple(np.arange(self.seismic_model.seismic.shape[0]) *
                 self.seismic_model.dt*1000)
 
+        metadata["trace"] = \
+          tuple(range(1,self.seismic_model.n_sensors +1))
+
         return self.plots.plot, metadata
           
           

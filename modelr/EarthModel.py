@@ -13,6 +13,7 @@ import requests
 from modelr.reflectivity import get_reflectivity
 
 import numpy as np
+from scipy.interpolate import interp1d
 
 from PIL import Image
 from StringIO import StringIO
@@ -188,11 +189,18 @@ class EarthModel(object):
         if samples is None:
             return self.image
 
-        step = int(self.image.shape[1] / samples)
-        
-        return self.image[:,
-                          np.arange(0,self.image.shape[1],step),
-                          :]
+        step = self.image.shape[1] / samples
+
+        # Check for interpolation
+        if step % int(step):
+            interp = interp1d(np.arange(self.image.shape[1]),
+                              self.image.shape,kind="nearest", axis=1)
+            return interp(np.arange(samples))
+        else:
+            
+            return self.image[:,
+                              np.arange(0,self.image.shape[1],step),
+                              :]
 
         
         

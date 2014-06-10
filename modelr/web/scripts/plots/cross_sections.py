@@ -25,11 +25,11 @@ def add_arguments(parser):
                         help='Trace',
                         default=25,
                         interface='slider',
-                        range=[1,350])
+                        range=[0,1000])
 
     parser.add_argument('time',
                         type=float,
-                        range=[0,100],
+                        range=[0,1000],
                         default=50,
                         interface='slider',
                         help='TWT')
@@ -49,7 +49,7 @@ def add_arguments(parser):
 def run_script(earth_model, seismic_model,
                args):
 
-
+    
     cmap = 'seismic_r'
     #max/min amplitude for plot and colorbar scaling
     extr1 = 1.0
@@ -266,6 +266,6 @@ def run_script(earth_model, seismic_model,
 
     seismic_model.start_f = 8
     seismic_model.end_f = 100
-    
+
     fig.subplots_adjust(left=0.05, right=0.98, top=0.95, bottom=0.05)
     return get_figure_data()

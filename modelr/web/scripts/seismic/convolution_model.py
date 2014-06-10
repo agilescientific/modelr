@@ -30,7 +30,7 @@ def add_arguments(parser):
     parser.add_argument('f', type=float, default=8.0,
                         help="Frequency",
                         interface='slider',
-                        range=[0,100])
+                        range=[0,1000])
     
     parser.add_argument('phase', type=float, default=0.0,
                         help="Phase",
