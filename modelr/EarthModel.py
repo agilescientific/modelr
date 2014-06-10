@@ -195,11 +195,14 @@ class EarthModel(object):
         if step % int(step):
             interp = interp1d(np.arange(self.image.shape[1]),
                               self.image,kind="nearest", axis=1)
-            return interp(np.arange(samples))
+            data = interp(np.arange(samples))
+            print data.shape
+            return data
         else:
             
             return self.image[:,
-                              np.arange(0,self.image.shape[1],step),
+                              np.arange(0,self.image.shape[1],
+                                        int(step)),
                               :]
 
         
