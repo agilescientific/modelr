@@ -194,7 +194,7 @@ class EarthModel(object):
         # Check for interpolation
         if step % int(step):
             interp = interp1d(np.arange(self.image.shape[1]),
-                              self.image.shape,kind="nearest", axis=1)
+                              self.image,kind="nearest", axis=1)
             return interp(np.arange(samples))
         else:
             
