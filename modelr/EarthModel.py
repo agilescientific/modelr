@@ -146,8 +146,7 @@ class EarthModel(object):
         
     def vp_data(self, samples=None):
 
-        data = self.get_data(samples=samples)
-    
+        data = self.get_data(samples=samples).astype(int)   
         vp_data = self.vp_lookup[data[:,:,0],
                                  data[:,:,1],
                                  data[:,:,2]]
@@ -190,16 +189,15 @@ class EarthModel(object):
             return self.image
 
         step = self.image.shape[1] / float(samples)
-
+        print "WTF", self.image.shape
         # Check for interpolation
         if step % int(step):
             interp = interp1d(np.arange(self.image.shape[1]),
-                              self.image,kind="nearest", axis=1)
-            data = interp(np.arange(samples))
-            print data.shape
+                              self.image,kind="nearest", axis=1,
+                              )
+            data = interp(np.linspace(0,self.image.shape[1]-1,samples))
             return data
         else:
-            
             return self.image[:,
                               np.arange(0,self.image.shape[1],
                                         int(step)),
