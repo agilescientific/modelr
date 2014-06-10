@@ -189,7 +189,7 @@ class EarthModel(object):
         if samples is None:
             return self.image
 
-        step = self.image.shape[1] / samples
+        step = self.image.shape[1] / float(samples)
 
         # Check for interpolation
         if step % int(step):
