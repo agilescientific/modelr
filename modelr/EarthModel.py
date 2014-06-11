@@ -189,7 +189,6 @@ class EarthModel(object):
             return self.image
 
         step = self.image.shape[1] / float(samples)
-        print "WTF", self.image.shape
         # Check for interpolation
         if step % int(step):
             interp = interp1d(np.arange(self.image.shape[1]),
