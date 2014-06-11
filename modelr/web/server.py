@@ -417,12 +417,17 @@ class MyHandler(BaseHTTPRequestHandler):
 
         elif (uri.path == '/delete_model'):
 
+            self.send_response(200)
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+
             content_len = int(self.headers.getheader('content-length'))
             raw_json = self.rfile.read(content_len)
 
             parameters = json.loads(raw_json)
-
+          
             os.remove(str(parameters["filename"]))
+
             return
             
         self.send_error(404, 'Post request not supportd yet: %s'
