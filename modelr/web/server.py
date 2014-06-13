@@ -366,6 +366,10 @@ class MyHandler(BaseHTTPRequestHandler):
         uri = urlparse(self.path)
 
         if uri.path == '/forward_model.json':
+
+            self.send_response(200)
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
             
             content_len = int(self.headers.getheader('content-length'))
             raw_json = self.rfile.read(content_len)
