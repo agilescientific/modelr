@@ -24,7 +24,7 @@ short_description = 'Spatial view of a channel'
 def add_arguments(parser):
     default_parser_list = [
                            'base1','base2','overlay1','overlay2',
-                           'opacity','f', 'theta'
+                           'opacity','f', 'theta','colourmap'
                            ]
     
     default_parsers(parser,default_parser_list)
@@ -50,6 +50,12 @@ def add_arguments(parser):
                         default='2500,1200,2600'
                         )
     
+    parser.add_argument('tslice',
+                        type=float, 
+                        help='time [s] along which to plot instantaneous amplitude ',
+                        required=True,
+                        default=0.151
+                        )
                         
 
 
@@ -69,7 +75,6 @@ def run_script(args):
     args.pad = 150
     args.reflectivity_method = zoeppritz
     args.title = 'Channel Model - Spatial Cross Section'
-    args.colourmap = 'Greys'
     args.wavelet = ricker
     args.wiggle_skips = 10
     args.aspect_ratio = 1

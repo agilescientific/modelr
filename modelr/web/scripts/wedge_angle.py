@@ -24,7 +24,7 @@ short_description = 'Angle gather in a wedge model.'
 def add_arguments(parser):
     default_parser_list = [
                            'base1','base2','overlay1','overlay2',
-                           'opacity', 'f'
+                           'opacity', 'f','colourmap'
                            ]
     
     default_parsers(parser,default_parser_list)
@@ -56,7 +56,12 @@ def add_arguments(parser):
                         default=150
                         )
                         
-
+    parser.add_argument('tslice',
+                        type=float, 
+                        help='time [s] along which to plot instantaneous amplitude ',
+                        required=True,
+                        default=0.151
+                        )
 
                         
     return parser
@@ -73,9 +78,8 @@ def run_script(args):
     args.ntraces = 300
     args.pad = 150
     args.reflectivity_method = zoeppritz
-    args.title = 'Wedge Model - Angle Cross Section'
+    args.title = 'Wedge - AVA gather'
     args.theta = (0.0,50,.5)
-    args.colourmap = 'Greys'
     args.wavelet = ricker
     args.wiggle_skips = 10
     args.aspect_ratio = 1
