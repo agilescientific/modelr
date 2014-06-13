@@ -1,3 +1,11 @@
+
+modelr-0.5
+Added hdf5 file writing support, json passbacks, and new forward
+model api
+
+modelr-0.4.1
+Threaded server
+
 modelr-0.3.1-alpha
 Limited use case scripts for a public release.
 
