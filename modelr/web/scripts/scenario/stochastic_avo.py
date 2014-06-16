@@ -95,12 +95,10 @@ def run_script(args):
     vp0, rho0, vs0 = make_normal_dist( Rprop0, args.iterations )
     vp1, rho1, vs1 = make_normal_dist( Rprop1, args.iterations )
     reflect = []
-    names = np.array([[r'$V_{P0}$',r'$\rho_{0}$', r'$V_{S0}$'],
-                      [r'$V_{P1}$',r'$\rho_{1}$', r'$V_{S1}$']])
                       
-    hist_titles = ['P-wave velocity \n' + r'$m/s$',
-                    'Density \n' + r'$kg / m^3$',
-                    'S-wave velocity \n' + r'$m/s$']
+    hist_titles = [[r'$V_{P}$' ,  r'$m/s$'],
+                    [r'$V_{S}$' ,  r'$m/s$'],
+                    [r'$\rho$' ,  r'$kg / m^3$']]
     nbins = 15
 
     vp_lim = ( np.amin((Rprop1.vp - ( 3.* Rprop1.vp_sig ),
@@ -198,25 +196,33 @@ def run_script(args):
             # upper text label
             
             mean_props = [  [ Rprop0.vp, Rprop1.vp ],
-                            [ Rprop0.rho, Rprop1.rho ],
-                            [ Rprop0.vs, Rprop1.vs ] 
+                            [ Rprop0.vs, Rprop1.vs ],
+                            [ Rprop0.rho, Rprop1.rho ] 
                             ]
+                            
+            which_label = ['upper','lower']  
 
-            ax.text( x = limits[0,i,1], y = hist_max / 2.0, s = hist_titles[i], 
-                    color='black', fontsize=10, alpha=0.75, 
+            # Main label
+            ax.text( x = limits[0,i,1], y = hist_max * 0.5, s = hist_titles[i][0], 
+                    color='black', fontsize=14, alpha=0.75, 
                     horizontalalignment = 'left', verticalalignment = 'center' )   
-                
-            ax.text( x = float(mean_props[i][0]), y = hist_max / 4.0, s = names[0,i],
-                         alpha=1.0, color=upper_color,
-                         fontsize = '12',
+            # Label for units
+            ax.text( x = limits[0,i,1], y = hist_max * 0.25, s = hist_titles[i][1], 
+                    color='black', fontsize=10, alpha=0.75, 
+                    horizontalalignment = 'left', verticalalignment = 'center' )  
+            
+                    
+            ax.text( x = float(mean_props[i][0]), y = hist_max / 5.0, s = which_label[1],
+                         alpha=0.75, color=upper_color,
+                         fontsize = '9',
                          horizontalalignment = 'center',
                          verticalalignment = 'center',
                          )
                          
             #lower text label             
-            ax.text( x = float(mean_props[i][1]), y = hist_max / 4, s = names[1,i],
-                         alpha=1.0, color=lower_color,
-                         fontsize = '12',
+            ax.text( x = float(mean_props[i][1]), y = hist_max / 5.0, s = which_label[0],
+                         alpha=0.75, color=lower_color,
+                         fontsize = '9',
                          horizontalalignment = 'center',
                          verticalalignment = 'center'
                          )
@@ -302,7 +308,7 @@ def run_script(args):
     ax.spines['left'].set_position(('data',0))
     ax.spines['left'].set_alpha(0.5)
     
-    ax.text(0.05, 0.95, 'Intercept-Gradient\ncrossplot',
+    ax.text(0.01, 0.95, 'Gradient vs Intercept',
             verticalalignment='top',
             horizontalalignment='left',
             transform=ax.transAxes,
