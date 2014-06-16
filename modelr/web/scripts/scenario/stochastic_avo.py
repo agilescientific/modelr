@@ -86,14 +86,21 @@ def run_script(args):
 
     args.plot_type = 'dashboard'
     Rprop0 = args.Rock0
+    print "Rprop0:", Rprop0
     Rprop1 = args.Rock1
+    print "Rprop1:", Rprop1
 
     theta = np.arange(0,90)
     
-    vp0, vs0, rho0 = make_normal_dist( Rprop0, args.iterations )
-    vp1, vs1, rho1 = make_normal_dist( Rprop1, args.iterations )
+    vp0, rho0, vs0 = make_normal_dist( Rprop0, args.iterations )
+    vp1, rho1, vs1 = make_normal_dist( Rprop1, args.iterations )
     reflect = []
-    names = np.array([['Vp0','Vs0','rho0'],['Vp1','Vs1','rho1']])
+    names = np.array([[r'$V_{P0}$',r'$\rho_{0}$', r'$V_{S0}$'],
+                      [r'$V_{P1}$',r'$\rho_{1}$', r'$V_{S1}$']])
+                      
+    hist_titles = ['P-wave velocity \n' + r'$m/s$',
+                    'Density \n' + r'$kg / m^3$',
+                    'S-wave velocity \n' + r'$m/s$']
     nbins = 15
 
     vp_lim = ( np.amin((Rprop1.vp - ( 3.* Rprop1.vp_sig ),
@@ -112,7 +119,7 @@ def run_script(args):
                         Rprop0.rho + ( 3.* Rprop1.rho_sig ) ) ) )
     
     limits = np.array([[ vp_lim, vs_lim, rho_lim ],
-                       [ vp_lim, vs_lim, rho_lim ] ])
+                       [ vp_lim, vs_lim, rho_lim ] ])                      
     
     for i in range( args.iterations ):
         
@@ -120,13 +127,13 @@ def run_script(args):
                                                   vp1[i], vs1[i], rho1[i],
                                                   theta) )
     reflect = np.array(reflect)
-    temp = np.concatenate( (vp0, vs0, rho0, vp1, vs1, rho1), axis=0)
+    temp = np.concatenate( (vp0, rho0, vs0, vp1, rho1, vs1,), axis=0)
     prop_samples = np.reshape(temp, (6, args.iterations))
     ave_reflect = np.mean(reflect,axis=0)
     nbins = 15
     # DO PLOTTING
         
-    plt.figure(figsize = (4,10))
+    plt.figure(figsize = (4,13))
     plt.subplots_adjust(bottom=0.1, left=0.1, top = 1, right=0.9)
     plt.hold(True)
     if args.plot_type == 'dashboard':
@@ -138,16 +145,31 @@ def run_script(args):
     
     # histogram plots (ax_3, ax_4, ax_5, ax_6, ax_7, ax_8)
     hist_max = 0
+    
     for k in np.arange(len(prop_samples)):
+        
         hist_max = max(hist_max,max(np.histogram(prop_samples[k],
                                                  density=True)[0]))
     
     for j in np.arange(2):
+        
+        upper_color = 'blue'   #color of upper histogram
+        lower_color = 'green'  #color of lower histogram 
+        
         for i in np.arange(3):
-            plt.subplot(G[3+i+shift,j])
-            plt.hist( prop_samples[i+(3*j)], nbins, 
-                     facecolor='gray', 
-                     alpha=0.25,
+                
+            plt.subplot(G[3+i+shift,0])
+            
+            plt.hist( prop_samples[i], nbins, 
+                     facecolor = upper_color,
+                     histtype='stepfilled', 
+                     alpha = 0.25,
+                     normed = True
+                     )
+            plt.hist( prop_samples[i+(3)], nbins, 
+                     facecolor = lower_color, 
+                     histtype='stepfilled',
+                     alpha = 0.25,
                      normed = True
                      )
             temp = plt.gca()
@@ -162,10 +184,7 @@ def run_script(args):
             ax.spines['left'].set_color('none')
             ax.spines['top'].set_color('none')
             ax.spines['bottom'].set_alpha(0.5)
-            ax.text(0.5, 0.8, names[j,i],
-                    verticalalignment='bottom', horizontalalignment='center',
-                    transform=ax.transAxes, 
-                    color='black', fontsize=8, alpha=0.75)
+                    
             for label in ax.get_xticklabels() + ax.get_yticklabels():
                 label.set_fontsize(6)
                 label.set_alpha(0.5)
@@ -174,8 +193,34 @@ def run_script(args):
                 
             for tick in ax.xaxis.get_major_ticks():
                 tick.tick1On = True
-                tick.tick2On = False      
-    
+                tick.tick2On = False
+            
+            # upper text label
+            
+            mean_props = [  [ Rprop0.vp, Rprop1.vp ],
+                            [ Rprop0.rho, Rprop1.rho ],
+                            [ Rprop0.vs, Rprop1.vs ] 
+                            ]
+
+            ax.text( x = limits[0,i,1], y = hist_max / 2.0, s = hist_titles[i], 
+                    color='black', fontsize=10, alpha=0.75, 
+                    horizontalalignment = 'left', verticalalignment = 'center' )   
+                
+            ax.text( x = float(mean_props[i][0]), y = hist_max / 4.0, s = names[0,i],
+                         alpha=1.0, color=upper_color,
+                         fontsize = '12',
+                         horizontalalignment = 'center',
+                         verticalalignment = 'center',
+                         )
+                         
+            #lower text label             
+            ax.text( x = float(mean_props[i][1]), y = hist_max / 4, s = names[1,i],
+                         alpha=1.0, color=lower_color,
+                         fontsize = '12',
+                         horizontalalignment = 'center',
+                         verticalalignment = 'center'
+                         )
+                
     # ax_1 the AVO plot
     plt.subplot(G[0:3,:])
     plt.hold(True)
