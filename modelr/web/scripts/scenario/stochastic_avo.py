@@ -96,8 +96,8 @@ def run_script(args):
     vp1, rho1, vs1 = make_normal_dist( Rprop1, args.iterations )
     reflect = []
                       
-    hist_titles = [[r'$V_{P}$' ,  r'$m/s$'],
-                    [r'$V_{S}$' ,  r'$m/s$'],
+    hist_titles = [[r'$V_\mathrm{P}$' ,  r'$m/s$'],
+                    [r'$V_\mathrm{S}$' ,  r'$m/s$'],
                     [r'$\rho$' ,  r'$kg / m^3$']]
     nbins = 15
 
