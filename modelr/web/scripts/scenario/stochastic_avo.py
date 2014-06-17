@@ -212,7 +212,7 @@ def run_script(args):
                     horizontalalignment = 'left', verticalalignment = 'center' )  
             
                     
-            ax.text( x = float(mean_props[i][0]), y = hist_max / 5.0, s = which_label[1],
+            ax.text( x = float(mean_props[i][0]), y = hist_max / 5.0, s = which_label[0],
                          alpha=0.75, color=upper_color,
                          fontsize = '9',
                          horizontalalignment = 'center',
@@ -220,7 +220,7 @@ def run_script(args):
                          )
                          
             #lower text label             
-            ax.text( x = float(mean_props[i][1]), y = hist_max / 5.0, s = which_label[0],
+            ax.text( x = float(mean_props[i][1]), y = hist_max / 5.0, s = which_label[1],
                          alpha=0.75, color=lower_color,
                          fontsize = '9',
                          horizontalalignment = 'center',
