@@ -247,7 +247,7 @@ def run_script(args):
             theta_crit = arcsin( vp0[i] / vp1[i] )*180/np.pi
             plt.axvline( x= theta_crit , color='black', lw = 1.0, alpha = np.min((30./args.iterations, 0.5)))
             
-    plt.plot( theta, ave_reflect, color='white', alpha = 0.75, lw= 1.5 )
+    plt.plot( theta, ave_reflect, color='black', alpha = 0.5, lw= 1.5 )
     plt.grid()
     
     # Annotation and making it look nice
@@ -450,7 +450,7 @@ def run_script(args):
                      
     # Plot the average of the dots
     plt.scatter( ave_reflect[0], ave_reflect[50]- ave_reflect[0],
-                 color = 'white' , s = 40, alpha= 0.95 )  
+                 color = 'black' , s = 40, alpha= 0.5 )  
     
     # Annotation and making it nice
     plt.xticks([]), plt.yticks([])
