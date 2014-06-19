@@ -37,7 +37,7 @@ def get_figure_data(transparent=False):
     #image_file.close()
     return data
 
-def wiggle(data, dt=1, line_colour='black', fill_colour='blue',
+def wiggle(data, tstart, tstop, dt=1, line_colour='black', fill_colour='blue',
            opacity= 0.5, skipt=0, gain=1, lwidth=.5, xax=1,
            quadrant=plt):
     """
@@ -51,17 +51,21 @@ def wiggle(data, dt=1, line_colour='black', fill_colour='blue',
     :param xax: scaler of axis to match image plot
     """  
   
-    t = np.arange(data.shape[0])*dt
+    t = np.linspace(tstart, tstop, num = data.shape[0])
+    
+    print "::::::::::::LENGTH OF t:::::::::::::", len(t)
+    print "::::::::::::LENGTH OF data.shape[0]:::::::::::::", data.shape[0]
+    
     for i in range(0,data.shape[1],skipt+1):
 
         trace = data[:,i]
         
-        trace[0]=0
-        trace[-1]=0 
-        new_trace = gain*(trace/np.amax(data))
-
-        scaler = (np.amax(xax)-np.amin(xax))/float( len(xax))
+        trace[0]=0      # make trace start at zero
+        trace[-1]=0     # make trace end at zero
         
+        new_trace = gain*(trace/np.amax(data))   # gain
+
+        scaler = (np.amax(xax)-np.amin(xax))/float( len(xax)) # scale for window     
         
         quadrant.plot( (i + new_trace) * scaler + min(xax), t, color=line_colour, 
                   linewidth=lwidth,alpha=opacity)
@@ -276,7 +280,8 @@ model to physical rock properties.
                           alpha = alpha,
                           aspect='auto',
                           extent=[min(xax),max(xax),
-                                   plot_data.shape[0]*dt,0],
+                                   args.twt_range[1], args.twt_range[0]
+                                 ],
                           origin = 'upper'
                            )
             
@@ -293,7 +298,8 @@ model to physical rock properties.
                            alpha = alpha,
                            aspect='auto',
                            extent=[min(xax),max(xax),
-                                   plot_data.shape[0]*dt,0],
+                                   args.twt_range[1], args.twt_range[0]
+                                   ],
                            origin = 'upper'
                            )
                 
@@ -310,18 +316,21 @@ model to physical rock properties.
                            cmap = plt.get_cmap('Greys'),
                            aspect='auto',
                            extent=[min(xax),max(xax),
-                                   plot_data.shape[0]*dt,0],
+                                   args.twt_range[1], args.twt_range[0]
+                                   ],
                            origin = 'upper' ,
                            vmin = np.amin( masked_refl ),
                            vmax = np.amax( masked_refl )
                            )
 
             elif layer == 'wiggle':
-            # wiggle needs an alpha setting too
+            
                 wigdata=plot_data
                 if wigdata.ndim == 3:
                     wigdata= np.sum(plot_data,axis=-1)
-                wiggle(wigdata,
+                wiggle(wigdata, 
+                       tstart = args.twt_range[0], 
+                       tstop = args.twt_range[1],
                        dt = dt,
                        skipt = args.wiggle_skips,
                        gain = args.wiggle_skips + 1,
@@ -352,7 +361,8 @@ model to physical rock properties.
                            alpha = alpha,
                            aspect='auto',
                            extent=[min(xax),max(xax),
-                                   envelope.shape[0]*dt,0],
+                                   args.twt_range[1], args.twt_range[0]
+                                   ],
                            origin = 'upper'
                            )
             else:
@@ -360,7 +370,7 @@ model to physical rock properties.
                 continue
              
         axarr[0, p].set_xlabel(xlabel)
-        axarr[0, p].set_ylabel('time [s]')
+        axarr[0, p].set_ylabel('time [ms]')
         axarr[0, p].set_title(args.title % locals())
         
         #plot inst. amplitude at 150 ms (every 6 samples, we should parameterize)
@@ -556,7 +566,8 @@ def multi_plot(model, reflectivity, seismic, traces,
                           alpha = alpha,
                           aspect='auto',
                           extent=[min(xax),max(xax),
-                                   plot_data.shape[0]*dt,0],
+                                   args.twt_range[1], args.twt_range[0]
+                                   ],
                           origin = 'upper'  
                            )
             
@@ -581,7 +592,7 @@ def multi_plot(model, reflectivity, seismic, traces,
                            alpha = alpha,
                            aspect='auto',
                            extent=[min(xax),max(xax),
-                                   plot_data.shape[0]*dt,0], 
+                                   args.twt_range[1], args.twt_range[0]], 
                            origin = 'upper'
                            )         
                                               
@@ -605,7 +616,8 @@ def multi_plot(model, reflectivity, seismic, traces,
                            cmap = plt.get_cmap('Greys'),
                            aspect='auto',
                            extent=[min(xax),max(xax),
-                                   plot_data.shape[0]*dt,0],
+                                   args.twt_range[1], args.twt_range[0]
+                                   ],
                            origin = 'upper' ,
                            vmin = np.amin( masked_refl ),
                            vmax = np.amax( masked_refl )
@@ -616,7 +628,9 @@ def multi_plot(model, reflectivity, seismic, traces,
                 wigdata=plot_data
                 if wigdata.ndim == 3:
                     wigdata= np.sum(plot_data,axis=-1)
-                wiggle(wigdata,
+                wiggle(wigdata, 
+                       tstart = args.twt_range[0], 
+                       tstop = args.twt_range[1],
                        dt = dt,
                        skipt = args.wiggle_skips,
                        gain = args.wiggle_skips + 1,
@@ -647,7 +661,8 @@ def multi_plot(model, reflectivity, seismic, traces,
                            alpha = alpha,
                            aspect='auto',
                            extent=[min(xax),max(xax),
-                                   envelope.shape[0]*dt,0], 
+                                   args.twt_range[1], args.twt_range[0]
+                                   ], 
                            origin = 'upper'
                            )
             else:
@@ -655,7 +670,7 @@ def multi_plot(model, reflectivity, seismic, traces,
                 continue   
             
         axarr[0, p].set_xlabel(xlabel)
-        axarr[0, p].set_ylabel('time [s]')
+        axarr[0, p].set_ylabel('time [ms]')
         axarr[0, p].set_title(args.title % locals())
 
         
