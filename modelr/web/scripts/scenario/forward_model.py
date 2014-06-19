@@ -116,11 +116,11 @@ def run_script(args):
     print "::::MAX OF X:::::", np.amax(x)
     print ":::LENGTH OF X:::", len(x)
     
-    y = model
+    f = interp1d(x, model.astype("float"), axis=0, kind="nearest")
+
+    print dt
     
-    f = interp1d(x, y, axis=0)
-    
-    xnew = np.arange(args.twt_range[0],args.twt_range[1], dt)
+    xnew = np.arange(args.twt_range[0],args.twt_range[1], dt * 1000.0)
     xnew = xnew[np.where(xnew < np.amax(x))] 
     
     print "::::MAX OF XNEW:::::", np.amax(xnew)

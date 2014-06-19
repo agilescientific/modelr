@@ -179,12 +179,18 @@ class MyHandler(BaseHTTPRequestHandler):
 
                 plot_generator = ModelrScript(parameters, namespace)
 
+                self.send_response(200)
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Access-Control-Allow-Headers',
+                                 'X-Request, X-Requested-With')
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
                 # Run in sub-process to prevent memory hogging
-                """p = mp.Process(target=self.run_json,
+                p = mp.Process(target=self.run_json,
                                args=(plot_generator,))
                 p.start()
-                p.join()"""
-                self.run_json(plot_generator)
+                p.join()
+                #self.run_json(plot_generator)
                 return
 
             
