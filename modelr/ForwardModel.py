@@ -3,6 +3,8 @@ from modelr.reflectivity import get_reflectivity, do_convolve
 import os
 import numpy as np
 
+import json
+
 class ForwardModel(object):
 
     def __init__(self, earth_model, seismic_model, plots):
