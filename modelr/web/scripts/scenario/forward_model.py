@@ -41,8 +41,20 @@ def add_arguments(parser):
                         required=True
                         )
                         
-    
-
+    parser.add_argument('twt_range',
+                        type=float, 
+                        action='list', 
+                        help='Range of two-way-time [ms] for earth model',
+                        required=True,
+                        default='0,1000'
+                        )
+                        
+    parser.add_argument('wiggle_skips',
+                        type=int,
+                        help='number of traces to skip in display',
+                        required = True, 
+                        default = 10,
+                        )
 
     parser.add_argument('tslice',
                         type=float, 
@@ -69,7 +81,6 @@ def run_script(args):
     args.reflectivity_method = zoeppritz
     args.title = 'Forward model - spatial cross section'
     args.wavelet = ricker
-    args.wiggle_skips = 10
     args.aspect_ratio = 1
     args.margin=1
     args.slice='spatial'
