@@ -127,9 +127,10 @@ def run_script(earth_model, seismic_model,
     
     colorbar_ax.set_axis_off()
 
-    if args.time > seismic_data.shape[0]:
+    if args.time > (seismic_data.shape[0]-1):
         args.time = seismic_data.shape[0]-1
-    
+
+
     axarr[1][0].plot(seismic_data[args.time,:,
                                   0, 0], 'g',
                                   lw = 3)
@@ -203,8 +204,6 @@ def run_script(earth_model, seismic_model,
     seismic_model.go(earth_model, traces=args.trace-1,
                      theta=args.theta)
     seismic_data = seismic_model.seismic
-
-   
     
     axarr[0][2].imshow(seismic_data[:, 0, 0, :],
                        aspect='auto', cmap=cmap, 

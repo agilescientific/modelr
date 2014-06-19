@@ -1,7 +1,0 @@
-modelr-0.3.1-alpha
-Limited use case scripts for a public release.
-
-modelr-0.2.2-alpha
-Uses SVG drawing scripts to build models, deprecated most of the old
-scripts. Moved scientific code into the agilegeo library, refactored
-most of the plotting code. Added stochastic avo scripts and unit tests

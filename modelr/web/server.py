@@ -179,12 +179,18 @@ class MyHandler(BaseHTTPRequestHandler):
 
                 plot_generator = ModelrScript(parameters, namespace)
 
+                self.send_response(200)
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Access-Control-Allow-Headers',
+                                 'X-Request, X-Requested-With')
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
                 # Run in sub-process to prevent memory hogging
-                """p = mp.Process(target=self.run_json,
+                p = mp.Process(target=self.run_json,
                                args=(plot_generator,))
                 p.start()
-                p.join()"""
-                self.run_json(plot_generator)
+                p.join()
+                #self.run_json(plot_generator)
                 return
 
             
@@ -344,13 +350,7 @@ class MyHandler(BaseHTTPRequestHandler):
                            'metadata': metadata})
         
 
-        # Set the response headers for json
-        self.send_response(200)
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Headers',
-                             'X-Request, X-Requested-With')
-        self.send_header('Content-type', 'application/json')
-        self.end_headers()
+
 
         # Write response
         self.wfile.write(data)
@@ -369,7 +369,13 @@ class MyHandler(BaseHTTPRequestHandler):
         if uri.path == '/forward_model.json':
 
         
-            
+            # Set the response headers for json
+            self.send_response(200)
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Headers',
+                             'X-Request, X-Requested-With')
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
             
             content_len = int(self.headers.getheader('content-length'))
             raw_json = self.rfile.read(content_len)
@@ -406,16 +412,16 @@ class MyHandler(BaseHTTPRequestHandler):
             forward_model = ForwardModel(earth_model, seismic_model,
                                          plots)
 
-            prof.runctx('self.run_json(forward_model)',
-                        {'self': self, 'forward_model':forward_model},
-                        {},
-                        'profile.test')
+            #prof.runctx('self.run_json(forward_model)',
+            #            {'self': self, 'forward_model':forward_model},
+            #            {},
+            #            'profile.test')
 
-            #p = mp.Process(target=self.run_json,
-            #               args=(forward_model,))
+            p = mp.Process(target=self.run_json,
+                           args=(forward_model,))
 
-            #p.start()
-            #p.join()
+            p.start()
+            p.join()
 
             return
 

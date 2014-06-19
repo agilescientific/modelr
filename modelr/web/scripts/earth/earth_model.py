@@ -8,7 +8,8 @@ def add_arguments(parser):
 
     
     parser.add_argument('depth', type=float, default=1000.0,
-                       help="Depth of the model")
+                       help="Z range of the model")
+    
     parser.add_argument('units', type=str, default='depth',
                         help="Model domain",
                         choices=['time', 'depth'])
