@@ -115,15 +115,17 @@ def run_script(args):
     
     print "::::MAX OF X:::::", np.amax(x)
     print ":::LENGTH OF X:::", len(x)
+    print ":::DT = :::", dt
     
     y = model
     
-    f = interp1d(x, y, axis=0)
+    f = interp1d(x, y, axis=0, interpolation = 'nearest')
     
-    xnew = np.arange(args.twt_range[0],args.twt_range[1], dt)
+    xnew = np.arange(args.twt_range[0],args.twt_range[1], int(dt*1000))
     xnew = xnew[np.where(xnew < np.amax(x))] 
     
     print "::::MAX OF XNEW:::::", np.amax(xnew)
+    print "::::shape of XNEW:::", len(xnew)
     
     model_new = f(xnew)
     
