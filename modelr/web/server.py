@@ -57,7 +57,7 @@ class MyHandler(BaseHTTPRequestHandler):
         '''
         shut down the application
         '''
-        print "terminate requested"
+        # "terminate requested"
         
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
@@ -72,12 +72,12 @@ class MyHandler(BaseHTTPRequestHandler):
         '''
         # If no script was passed, then tell the user
         if not script or len(script) != 1:
-            print "++++++++++++++++++++++++++++++++++++"
+            # "++++++++++++++++++++++++++++++++++++"
             self.send_script_error("argument 'script' was omitted or malformed (got %r)" % (script))
             return
 
         if script_type is None:
-            print "++++++++++++++++++++++++++++++++++++"
+            # "++++++++++++++++++++++++++++++++++++"
             self.send_script_error("argument 'script_type' was omitted or malformed (got %r)" % (script))
             return
         
@@ -108,7 +108,7 @@ class MyHandler(BaseHTTPRequestHandler):
         '''
         handle a get request.
         '''
-        print "my do GET"
+        # "my do GET"
         try:
             uri = urlparse(self.path)
             
@@ -180,12 +180,18 @@ class MyHandler(BaseHTTPRequestHandler):
 
                 plot_generator = ModelrScript(parameters, namespace)
 
+                self.send_response(200)
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Access-Control-Allow-Headers',
+                                 'X-Request, X-Requested-With')
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
                 # Run in sub-process to prevent memory hogging
-                """p = mp.Process(target=self.run_json,
+                p = mp.Process(target=self.run_json,
                                args=(plot_generator,))
                 p.start()
-                p.join()"""
-                self.run_json(plot_generator)
+                p.join()
+                #self.run_json(plot_generator)
                 return
 
             
@@ -204,7 +210,7 @@ class MyHandler(BaseHTTPRequestHandler):
             short_description = namespace.get('short_description',
                                               'No description')
             
-            print "parameters", parameters
+            # "parameters", parameters
             p = mp.Process(
                 target=self.run_script, args=(script[0],script_main,
                                               add_arguments,
@@ -252,7 +258,7 @@ class MyHandler(BaseHTTPRequestHandler):
             template = \
               self.server.jenv.get_template('ScriptHelp.html')
             
-            print parameters
+            # parameters
             html = template.render(script=script, parser=parser,
                                    parameters=parameters)
             self.wfile.write(html)
@@ -283,7 +289,7 @@ class MyHandler(BaseHTTPRequestHandler):
         '''
 
         if script_type is None:
-            print "++++++++++++++++++++++++++++++++++++"
+            # "++++++++++++++++++++++++++++++++++++"
             return
 
         scripts_dir = join(dirname(__file__), 'scripts',
@@ -302,7 +308,7 @@ class MyHandler(BaseHTTPRequestHandler):
                     exec fd.read() in namespace
                 short_doc = namespace.get('short_description',
                                           'No doc')
-                print script, namespace
+                # script, namespace
                 available_scripts.append((script, short_doc))
             except Exception, e:
                 print script, e
@@ -345,13 +351,7 @@ class MyHandler(BaseHTTPRequestHandler):
                            'metadata': metadata})
         
 
-        # Set the response headers for json
-        self.send_response(200)
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Headers',
-                             'X-Request, X-Requested-With')
-        self.send_header('Content-type', 'application/json')
-        self.end_headers()
+
 
         # Write response
         self.wfile.write(data)
@@ -370,7 +370,13 @@ class MyHandler(BaseHTTPRequestHandler):
         if uri.path == '/forward_model.json':
 
         
-            
+            # Set the response headers for json
+            self.send_response(200)
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Headers',
+                             'X-Request, X-Requested-With')
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
             
             content_len = int(self.headers.getheader('content-length'))
             raw_json = self.rfile.read(content_len)
@@ -407,16 +413,16 @@ class MyHandler(BaseHTTPRequestHandler):
             forward_model = ForwardModel(earth_model, seismic_model,
                                          plots)
 
-            prof.runctx('self.run_json(forward_model)',
-                        {'self': self, 'forward_model':forward_model},
-                        {},
-                        'profile.test')
+            #prof.runctx('self.run_json(forward_model)',
+            #            {'self': self, 'forward_model':forward_model},
+            #            {},
+            #            'profile.test')
 
-            #p = mp.Process(target=self.run_json,
-            #               args=(forward_model,))
+            p = mp.Process(target=self.run_json,
+                           args=(forward_model,))
 
-            #p.start()
-            #p.join()
+            p.start()
+            p.join()
 
             return
 
