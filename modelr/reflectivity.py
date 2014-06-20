@@ -175,7 +175,7 @@ def do_convolve(wavelets, data,
     output = np.zeros((data.shape[0], ntraces, ntheta,
                        n_wavelets))
 
-    print wavelets.shape, data.shape, n_wavelets
+
     # Loop through each combination of wavelet, trace, and theta
     for iters in \
       product(range(np.size(traces)), range(ntheta),

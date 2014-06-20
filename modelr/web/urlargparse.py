@@ -107,7 +107,6 @@ class Argument(object):
                                     " must be one of %r (got %r)" %
                                     (self.name, self.choices, arg))
             try:
-                print arg
                 arg = self.type(arg)
                 
             except:
@@ -122,7 +121,7 @@ class Argument(object):
             for arg in arg.split(','):
                 try:
                     value = self.type(arg)
-                    print "VALUE", value
+                 
                 except:
                     raise ArgumentError("argument %s: invalid %s"+
                                         " value: %r" %
@@ -203,7 +202,6 @@ class URLArgumentParser(object):
             params.pop('help')
             self.raise_help()
 
-        print self.arguments
         for parser in self.arguments:
 
            

@@ -27,7 +27,7 @@ def add_arguments(parser):
     
     
     
-    parser.add_argument('f', type=float, default=8.0,
+    parser.add_argument('f', type=float, default=12,
                         help="Frequency",
                         interface='slider',
                         range=[0,1000])
