@@ -278,7 +278,7 @@ model to physical rock properties.
             # Now find out what sort of plot we're making on this
             # loop...
             if layer == 'earth-model':
-                axarr[0, p].imshow(model,
+                axarr[0, p].imshow(model.astype('uint8'),
                           cmap = plt.get_cmap('gist_earth'),
                           vmin = np.amin(model)-np.amax(model)/2,
                           vmax = np.amax(model)+np.amax(model)/2,
