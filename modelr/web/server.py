@@ -310,7 +310,8 @@ class MyHandler(BaseHTTPRequestHandler):
                 # script, namespace
                 available_scripts.append((script, short_doc))
             except Exception, e:
-                # script, e
+                print script, e
+                pass
             
         return available_scripts
             
@@ -486,10 +487,10 @@ def main():
         server.jenv = Environment(loader=PackageLoader('modelr',
                                                     'web/templates'))
                                         
-        # 'started httpserver...'
+        print 'started httpserver...'
         server.serve_forever()
     except KeyboardInterrupt:
-        # '^C received, shutting down server'
+        print '^C received, shutting down server'
         server.socket.close()
 
 

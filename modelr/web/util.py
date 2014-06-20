@@ -37,12 +37,9 @@ def get_figure_data(transparent=False):
     #image_file.close()
     return data
 
-<<<<<<< HEAD
-def wiggle(data, tstart, dt=1, line_colour='black', fill_colour='blue',
-=======
+
 def wiggle(data, tstart,dt=1, line_colour='black',
            fill_colour='blue',
->>>>>>> df8a05949c9387f320bff32a81cdcfa1989c5d52
            opacity= 0.5, skipt=0, gain=1, lwidth=.5, xax=1,
            quadrant=plt):
     """
@@ -56,12 +53,9 @@ def wiggle(data, tstart,dt=1, line_colour='black',
     :param xax: scaler of axis to match image plot
     """  
   
-<<<<<<< HEAD
-    t = np.arange(data.shape[0]) * dt * 1000 + tstart
-=======
+
     t = (np.arange(data.shape[0]) * dt * 1000) + tstart
-    
->>>>>>> df8a05949c9387f320bff32a81cdcfa1989c5d52
+
     # Need to resample this time axis to the same size as data.shape[1]
 
     for i in range(0,data.shape[1],skipt+1):
@@ -286,10 +280,10 @@ model to physical rock properties.
             # Now find out what sort of plot we're making on this
             # loop...
             if layer == 'earth-model':
-                axarr[0, p].imshow(model.astype('int'),
-                          #cmap = plt.get_cmap('gist_earth'),
-                          #vmin = np.amin(model)-np.amax(model)/2,
-                          #vmax = np.amax(model)+np.amax(model)/2,
+                axarr[0, p].imshow(model.astype('uint8'),
+                          cmap = plt.get_cmap('gist_earth'),
+                          vmin = np.amin(model)-np.amax(model)/2,
+                          vmax = np.amax(model)+np.amax(model)/2,
                           alpha = alpha,
                           aspect='auto',
                           extent=[min(xax),max(xax),
@@ -357,11 +351,7 @@ model to physical rock properties.
                 if wigdata.ndim == 3:
                     wigdata= np.sum(plot_data,axis=-1)
                 wiggle(wigdata, 
-<<<<<<< HEAD
-                       tstart = int(args.twt_range[0]), 
-=======
-                       tstart = args.twt_range[0],
->>>>>>> df8a05949c9387f320bff32a81cdcfa1989c5d52
+                       tstart = int(args.twt_range[0]),
                        dt = dt,
                        skipt = args.wiggle_skips,
                        gain = args.wiggle_skips + 1,
