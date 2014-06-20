@@ -280,7 +280,7 @@ def run_script(args):
    # Patches for the Background template AVO plot STARTS here
    #  
       
-    a1 = 0.20    # transparency for AVO background template patches
+    a1 = 0.10    # transparency for AVO background template patches
     rangex = 90  
     band = 0.02  # thickness of Class 2 band
     # CLASS 1
@@ -400,7 +400,7 @@ def run_script(args):
     
     fs = 10 # fontsize 
     
-    a2 = 0.3   # transparency value for Gradient vs Intercept text 
+    a2 = 0.4   # transparency value for Gradient vs Intercept text 
                 
     ax.text( xctrs, ylabelcntrs[0], 'CLASS 1',
                 verticalalignment='center',
@@ -502,20 +502,18 @@ def run_script(args):
     
     shift2 = 0.04 #width for class2 width in plot
     
-    a = 0.05
-    
     height_ellipse = 0.05
     width_ellipse = 3.0
     
     # Plot background trend (diagonal line)
-    ax.plot(x, s0, color='black', alpha = a)
+    ax.plot(x, s0, color='black', alpha = a1)
     
     # add a rectangle for class 2 neg
     lowleft2 = (-shift2,-1.0)
     
     class2neg = mpatches.Rectangle( lowleft2, width = abs(lowleft2[0]), height = 1.0,
                                 color = 'green',
-                                alpha = a,
+                                alpha = a1,
                                 ec = "white",
                                 lw = 4)
     ax.add_patch(class2neg)
@@ -524,7 +522,7 @@ def run_script(args):
     lowleft2pos = (0.0, 0.0)
     class2pos = mpatches.Rectangle( lowleft2pos, width = abs(lowleft2[0]), height = 1.0,
                                 color = 'green',
-                                alpha = a,
+                                alpha = a1,
                                 ec="white",
                                 lw = 4)   
     ax.add_patch(class2pos)
@@ -533,7 +531,7 @@ def run_script(args):
     lowleft2Ppos = (-shift2, 0.0)
     class2Ppos = mpatches.Rectangle( lowleft2Ppos, width = abs(lowleft2[0]), height = 1.0,
                                 color = 'yellow',
-                                alpha = a,
+                                alpha = a1,
                                 ec="white",
                                 lw = 4)   
     ax.add_patch(class2Ppos)
@@ -542,7 +540,7 @@ def run_script(args):
     lowleft2Pneg = (0.0, -1.0)
     class2Ppos = mpatches.Rectangle( lowleft2Pneg, width = abs(lowleft2[0]), height = 1.0,
                                 color = 'yellow',
-                                alpha = a,
+                                alpha = a1,
                                 ec="white",
                                 lw = 4)   
     ax.add_patch(class2Ppos)
@@ -551,7 +549,7 @@ def run_script(args):
     lowleft3neg = (-1.0, -1.0)
     class3neg = mpatches.Rectangle(lowleft3neg, width = 1.0 + lowleft2[0], height = 1.0, 
                                     color = 'blue',
-                                    alpha = a,
+                                    alpha = a1,
                                     ec = 'none')
     ax.add_patch(class3neg)
     
@@ -559,7 +557,7 @@ def run_script(args):
     lowleft3pos = (shift2, 0)
     class3pos = mpatches.Rectangle(lowleft3pos, width = 1.0 + lowleft2[0], height = 1.0,
                                     color = 'blue',
-                                    alpha = a,
+                                    alpha = a1,
                                     ec = 'none')
     ax.add_patch(class3pos)
     
@@ -576,7 +574,7 @@ def run_script(args):
     codes4u, verts4u = zip(*path_data4u)
     path4u = mpath.Path(verts4u, codes4u)
     patch4u = mpatches.PathPatch(path4u, facecolor = '#B048B5',    # purple
-                        alpha = a,
+                        alpha = a1,
                         ec = 'none')
     ax.add_patch(patch4u)
     
@@ -593,7 +591,7 @@ def run_script(args):
     codes4l, verts4l = zip(*path_data4l)
     path4l = mpath.Path(verts4l, codes4l)
     patch4l = mpatches.PathPatch(path4l, facecolor = '#B048B5',    # purple
-                        alpha = a,
+                        alpha = a1,
                         ec = 'none')
     ax.add_patch(patch4l)
     
@@ -610,7 +608,7 @@ def run_script(args):
     codes1u, verts1u = zip(*path_data1u)
     path1u = mpath.Path(verts1u, codes1u)
     patch1u = mpatches.PathPatch(path1u, facecolor = 'red',
-                        alpha = a,
+                        alpha = a1,
                         ec = 'none')
     ax.add_patch(patch1u)
     
@@ -625,7 +623,7 @@ def run_script(args):
     codes1l, verts1l = zip(*path_data1l)
     path1l = mpath.Path(verts1l, codes1l)
     patch1l = mpatches.PathPatch(path1l, facecolor = 'red',
-                        alpha = a,
+                        alpha = a1,
                         ec = 'none')
     ax.add_patch(patch1l)
     
@@ -701,11 +699,14 @@ def run_script(args):
                 horizontalalignment='right',
                 color='#B048B5', fontsize=fs, fontweight = 'bold', alpha=a2)
                 
-    # Background label     
+    # Background label  
+    angle = -45
+          
     ax.text( 0.1 * height_ellipse, 0.1 * height_ellipse, 'background',
                 verticalalignment='center',
                 horizontalalignment='center',
-                rotation = -45,
+                rotation = angle,
+                transform=ax.transData,
                 color='black', fontsize=fs, fontweight = 'bold', alpha=a2/2.0)
                               
     return get_figure_data()
