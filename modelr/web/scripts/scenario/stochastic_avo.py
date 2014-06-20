@@ -282,15 +282,15 @@ def run_script(args):
       
     a1 = 0.10    # transparency for AVO background template patches
     rangex = 90  
-    band = 0.02  # thickness of Class 2 band
+    band = 0.04  # thickness of Class 2 band
     # CLASS 1
     
     Path1 = mpath.Path
     path_data1 = [
         (Path1.MOVETO, (rangex * 0, 0.04)),
-        (Path1.CURVE4, (rangex *0.4, 0.0)),
-        (Path1.CURVE4, (rangex *0.7, -0.015)),
-        (Path1.CURVE4, (rangex *1.0, -0.05)),
+        (Path1.CURVE4, (rangex *0.4, 0.05)),
+        (Path1.CURVE4, (rangex *0.6, -0.015)),
+        (Path1.CURVE4, (rangex *1.0, -band)),
         (Path1.LINETO, (rangex *1.0, 1.0)),
         (Path1.LINETO, (rangex *0.0, 1.0)),
         (Path1.CLOSEPOLY, (rangex *0.0, 1.0)),
@@ -308,13 +308,13 @@ def run_script(args):
     
     Path2P = mpath.Path
     path_data2P = [
-        (Path2P.MOVETO, (rangex * 0, 0.04)),
-        (Path2P.CURVE4, (rangex * 0.4, 0.0)),
-        (Path2P.CURVE4, (rangex * 0.7, -0.015)),
-        (Path2P.CURVE4, (rangex * 1.0, -0.035)),
-        (Path2P.LINETO, (rangex * 1.0, -0.060)),
-        (Path2P.CURVE4, (rangex * 0.6, -0.03)),
-        (Path2P.CURVE4, (rangex * 0.4, -0.015)),
+        (Path2P.MOVETO, (rangex * 0, band)),
+        (Path2P.CURVE4, (rangex * 0.4, 0.05)),
+        (Path2P.CURVE4, (rangex * 0.6, -0.015)),
+        (Path2P.CURVE4, (rangex * 1.0, - band)),
+        (Path2P.LINETO, (rangex * 1.0, - (band + band) )),
+        (Path2P.CURVE4, (rangex * 0.6, -(0.015 + band))),
+        (Path2P.CURVE4, (rangex * 0.4, 0.05 - band)),
         (Path2P.CURVE4, (rangex * 0.0, 0.0)),
         (Path2P.CLOSEPOLY, (rangex * 0.0, 0.0)),
         ]
@@ -332,13 +332,13 @@ def run_script(args):
     Path2 = mpath.Path
     path_data2 = [
         (Path2.MOVETO, (rangex * 0.0, 0.0)),
-        (Path2.CURVE4, (rangex * 0.4, -0.015)),
-        (Path2.CURVE4, (rangex * 0.6, -0.03)),
-        (Path2.CURVE4, (rangex * 1.0, -0.06)),
-        (Path2.LINETO, (rangex * 1.0,  -0.1 - band)),
-        (Path2.CURVE4, (rangex * 0.6, -0.03 - band)),
-        (Path2.CURVE4, (rangex * 0.4, -0.015 - band)),
-        (Path2.CURVE4, (rangex * 0.0, - band - 0.01)),
+        (Path2.CURVE4, (rangex * 0.4, 0.05 - band)),
+        (Path2.CURVE4, (rangex * 0.6, -(0.015 + band))),
+        (Path2.CURVE4, (rangex * 1.0, - (band + band))),
+        (Path2.LINETO, (rangex * 1.0,  - (3 * band))),
+        (Path2.CURVE4, (rangex * 0.6, - (0.015 + 2*band))),
+        (Path2.CURVE4, (rangex * 0.4, 0.05 - (0.0 + 2*band))),
+        (Path2.CURVE4, (rangex * 0.0, - band)),
         (Path2.CLOSEPOLY, (rangex * 0.0, 0.0)),
         ]
     codes2, verts2 = zip(*path_data2)
@@ -354,10 +354,10 @@ def run_script(args):
     # CLASS 3
     Path3 = mpath.Path
     path_data3 = [
-        (Path3.MOVETO, (rangex * 0.0, - band - 0.01)),
-        (Path3.CURVE4, (rangex * 0.4, -0.015 - band)),
-        (Path3.CURVE4, (rangex * 0.6, -0.03 - band)),
-        (Path3.CURVE4, (rangex * 1.0, -0.1 - band)),
+        (Path3.MOVETO, (rangex * 0.0, - band)),
+        (Path3.CURVE4, (rangex * 0.4, 0.05 - (0.0 + 2*band))),
+        (Path3.CURVE4, (rangex * 0.6, - (0.015 + 2*band))),
+        (Path3.CURVE4, (rangex * 1.0, - (3 * band))),
         (Path3.LINETO, (rangex * 1.0, -1.0)),
         (Path3.LINETO, (rangex * 0.0, -1.0)),
         (Path3.CLOSEPOLY, (rangex * 0.0, -1.0)),
@@ -422,17 +422,17 @@ def run_script(args):
                 color='green', fontsize=fs, fontweight = 'bold', alpha=a2)
                 
     # Class 3 label     
-    ax.text( 3 * xctrs, ylabelcntrs[3],  'CLASS 3',
+    ax.text( xctrs, ylabelcntrs[3],  'CLASS 3',
                 verticalalignment='center',
-                horizontalalignment='center',
+                horizontalalignment='left',
                 rotation = -15,
                 color='blue', fontsize=fs, fontweight = 'bold', alpha=a2)   
                 
     # Class 4 label     
-    ax.text( 2 * xctrs, ylabelcntrs[4],  'CLASS 4',
+    ax.text( xctrs, ylabelcntrs[4],  'CLASS 4',
                 verticalalignment='center',
-                horizontalalignment='center',
-                rotation = 25,
+                horizontalalignment='left',
+                rotation = 15,
                 color='#B048B5', fontsize=fs, fontweight = 'bold', alpha=a2)  
     #
     # Patches for background template AVO plot ENDS here
