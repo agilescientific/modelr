@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+'''
+===================
+ForwardModel.py
+===================
+
+Provide the forward model object.
+
+@author: Ben Bougher
+'''
 
 from modelr.reflectivity import get_reflectivity, do_convolve
 import os
@@ -8,7 +18,6 @@ class ForwardModel(object):
     def __init__(self, earth_model, seismic_model, plots):
 
         self.earth_model = earth_model
-
         
         self.seismic_model = seismic_model
         self.plots = plots
@@ -27,13 +36,17 @@ class ForwardModel(object):
         metadata["trace"] = \
           tuple(range(1,self.seismic_model.n_sensors +1))
 
-        return self.plots.plot, metadata
-          
-          
-                                                      
-        
-                                        
-        
+        # --------------------------
+        # Added June 2014 by Matt
+        # We're going to get a dictionary of rock properties back
+        # from rock.get_moduli(). Planning to pass it to the
+        # front end and tabulate.
+        metadata["moduli"] = {}
+        for k,v in self.earth_model.property_map.iteritems():
+            metadata["moduli"][k] = v.get_moduli()
 
+        # --------------------------
+        # Resuming normal service
+        return self.plots.plot, metadata
 
     
