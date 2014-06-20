@@ -56,7 +56,7 @@ class MyHandler(BaseHTTPRequestHandler):
         '''
         shut down the application
         '''
-        print "terminate requested"
+        # "terminate requested"
         
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
@@ -71,12 +71,12 @@ class MyHandler(BaseHTTPRequestHandler):
         '''
         # If no script was passed, then tell the user
         if not script or len(script) != 1:
-            print "++++++++++++++++++++++++++++++++++++"
+            # "++++++++++++++++++++++++++++++++++++"
             self.send_script_error("argument 'script' was omitted or malformed (got %r)" % (script))
             return
 
         if script_type is None:
-            print "++++++++++++++++++++++++++++++++++++"
+            # "++++++++++++++++++++++++++++++++++++"
             self.send_script_error("argument 'script_type' was omitted or malformed (got %r)" % (script))
             return
         
@@ -107,7 +107,7 @@ class MyHandler(BaseHTTPRequestHandler):
         '''
         handle a get request.
         '''
-        print "my do GET"
+        # "my do GET"
         try:
             uri = urlparse(self.path)
             
@@ -209,7 +209,7 @@ class MyHandler(BaseHTTPRequestHandler):
             short_description = namespace.get('short_description',
                                               'No description')
             
-            print "parameters", parameters
+            # "parameters", parameters
             p = mp.Process(
                 target=self.run_script, args=(script[0],script_main,
                                               add_arguments,
@@ -257,7 +257,7 @@ class MyHandler(BaseHTTPRequestHandler):
             template = \
               self.server.jenv.get_template('ScriptHelp.html')
             
-            print parameters
+            # parameters
             html = template.render(script=script, parser=parser,
                                    parameters=parameters)
             self.wfile.write(html)
@@ -288,7 +288,7 @@ class MyHandler(BaseHTTPRequestHandler):
         '''
 
         if script_type is None:
-            print "++++++++++++++++++++++++++++++++++++"
+            # "++++++++++++++++++++++++++++++++++++"
             return
 
         scripts_dir = join(dirname(__file__), 'scripts',
@@ -307,10 +307,10 @@ class MyHandler(BaseHTTPRequestHandler):
                     exec fd.read() in namespace
                 short_doc = namespace.get('short_description',
                                           'No doc')
-                print script, namespace
+                # script, namespace
                 available_scripts.append((script, short_doc))
             except Exception, e:
-                print script, e
+                # script, e
             
         return available_scripts
             
@@ -486,10 +486,10 @@ def main():
         server.jenv = Environment(loader=PackageLoader('modelr',
                                                     'web/templates'))
                                         
-        print 'started httpserver...'
+        # 'started httpserver...'
         server.serve_forever()
     except KeyboardInterrupt:
-        print '^C received, shutting down server'
+        # '^C received, shutting down server'
         server.socket.close()
 
 

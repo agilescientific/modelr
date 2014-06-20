@@ -37,7 +37,8 @@ def get_figure_data(transparent=False):
     #image_file.close()
     return data
 
-def wiggle(data, tstart, tstop, dt=1, line_colour='black', fill_colour='blue',
+def wiggle(data, tstart,dt=1, line_colour='black',
+           fill_colour='blue',
            opacity= 0.5, skipt=0, gain=1, lwidth=.5, xax=1,
            quadrant=plt):
     """
@@ -51,7 +52,8 @@ def wiggle(data, tstart, tstop, dt=1, line_colour='black', fill_colour='blue',
     :param xax: scaler of axis to match image plot
     """  
   
-    t = np.arange(tstart, tstop, dt)
+    t = (np.arange(data.shape[0]) * dt * 1000) + tstart
+    
     # Need to resample this time axis to the same size as data.shape[1]
 
     for i in range(0,data.shape[1],skipt+1):
@@ -73,7 +75,7 @@ def wiggle(data, tstart, tstop, dt=1, line_colour='black', fill_colour='blue',
                 
         quadrant.axis('tight')
 
-def modelr_plot( model, colourmap, args ):
+def modelr_plot(model, colourmap, args):
     """
 Calculates reflectivities from the earth model then convolves
 against a bank of wavelets. Figures of various slices are created
@@ -91,8 +93,13 @@ model to physical rock properties.
     model_aspect = float(model.shape[1]) / model.shape[0]
 
     if not hasattr(args, 'xscale'):
-        args.xscale=0
+        args.xscale = 0
     
+    if not hasattr(args, "twt_range"):
+        args.twt_range = (0, model.shape[0] * dt * 1000.0)
+    
+    if not hasattr(args, 'fs'):
+        args.fs = 10
     
     if args.slice == 'spatial':
         traces = range( args.ntraces )
@@ -278,7 +285,8 @@ model to physical rock properties.
                           alpha = alpha,
                           aspect='auto',
                           extent=[min(xax),max(xax),
-                                   args.twt_range[1], args.twt_range[0]
+                                   args.twt_range[1],
+                                   args.twt_range[0]
                                  ],
                           origin = 'upper'
                            )
@@ -296,7 +304,8 @@ model to physical rock properties.
                            alpha = alpha,
                            aspect='auto',
                            extent=[min(xax),max(xax),
-                                   args.twt_range[1], args.twt_range[0]
+                                   args.twt_range[1],
+                                   args.twt_range[0]
                                    ],
                            origin = 'upper'
                            )
@@ -327,8 +336,7 @@ model to physical rock properties.
                 if wigdata.ndim == 3:
                     wigdata= np.sum(plot_data,axis=-1)
                 wiggle(wigdata, 
-                       tstart = args.twt_range[0], 
-                       tstop = args.twt_range[1],
+                       tstart = args.twt_range[0],
                        dt = dt,
                        skipt = args.wiggle_skips,
                        gain = args.wiggle_skips + 1,

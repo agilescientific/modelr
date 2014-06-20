@@ -89,9 +89,9 @@ def run_script(args):
 
     args.plot_type = 'dashboard'
     Rprop0 = args.Rock0
-    print "Rprop0:", Rprop0
+
     Rprop1 = args.Rock1
-    print "Rprop1:", Rprop1
+
 
     theta = np.arange(0,90)
     

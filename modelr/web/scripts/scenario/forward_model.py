@@ -109,21 +109,19 @@ def run_script(args):
     
     ds = float(args.twt_range[1] - args.twt_range[0]) / float(model.shape[0])
     
-    print ":::::DS:::::", ds
+
     
     x = (np.arange(0, model.shape[0]) * ds) + args.twt_range[0] 
     
-    print "::::MAX OF X:::::", np.amax(x)
-    print ":::LENGTH OF X:::", len(x)
-    
+
     f = interp1d(x, model.astype("float"), axis=0, kind="nearest")
 
-    print dt
+
     
     xnew = np.arange(args.twt_range[0],args.twt_range[1], dt * 1000.0)
     xnew = xnew[np.where(xnew < np.amax(x))] 
     
-    print "::::MAX OF XNEW:::::", np.amax(xnew)
+
     
     model_new = f(xnew)
     
