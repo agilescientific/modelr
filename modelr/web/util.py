@@ -37,6 +37,7 @@ def get_figure_data(transparent=False):
     #image_file.close()
     return data
 
+
 def wiggle(data, tstart,dt=1, line_colour='black',
            fill_colour='blue',
            opacity= 0.5, skipt=0, gain=1, lwidth=.5, xax=1,
@@ -52,8 +53,9 @@ def wiggle(data, tstart,dt=1, line_colour='black',
     :param xax: scaler of axis to match image plot
     """  
   
+
     t = (np.arange(data.shape[0]) * dt * 1000) + tstart
-    
+
     # Need to resample this time axis to the same size as data.shape[1]
 
     for i in range(0,data.shape[1],skipt+1):
@@ -68,7 +70,7 @@ def wiggle(data, tstart,dt=1, line_colour='black',
         scaler = (np.amax(xax)-np.amin(xax))/float( len(xax)) # scale for window     
         
         quadrant.plot( (i + new_trace) * scaler + min(xax), t, color=line_colour, 
-                  linewidth=lwidth,alpha=opacity)
+                  linewidth = lwidth, alpha = opacity)
                 
         quadrant.fill_betweenx(t, ((i + new_trace) * scaler)+min(xax), (i * scaler)+min(xax) ,  new_trace > 0,
                          color=fill_colour, alpha=opacity, lw=0)
@@ -331,12 +333,25 @@ model to physical rock properties.
                            )
 
             elif layer == 'wiggle':
-            
+                
+                if hasattr(args, 'twt_range'):
+                    tstart = args.twt_range[0]
+                    
+                else:
+                    tstart = 0.0
+                
+                if hasattr(args, 'fs'): #if has fontsize
+                    fs = int(args.fs)
+                else:
+                    fs = 10
+
+           
+                
                 wigdata=plot_data
                 if wigdata.ndim == 3:
                     wigdata= np.sum(plot_data,axis=-1)
                 wiggle(wigdata, 
-                       tstart = args.twt_range[0],
+                       tstart = int(args.twt_range[0]),
                        dt = dt,
                        skipt = args.wiggle_skips,
                        gain = args.wiggle_skips + 1,
@@ -375,15 +390,15 @@ model to physical rock properties.
                 # We should never get here
                 continue
              
-        axarr[0, p].set_xlabel(xlabel, fontsize=int(args.fs))
-        axarr[0, p].set_ylabel('time [ms]', fontsize=int(args.fs))
-        axarr[0, p].set_title(args.title % locals(), fontsize=int(args.fs) )
+        axarr[0, p].set_xlabel(xlabel, fontsize=fs)
+        axarr[0, p].set_ylabel('time [ms]', fontsize=fs)
+        axarr[0, p].set_title(args.title % locals(), fontsize=fs )
         
         for tick in axarr[0,p].xaxis.get_major_ticks():
-            tick.label.set_fontsize(int(args.fs)) 
+            tick.label.set_fontsize(fs) 
         
         for tick in axarr[0,p].yaxis.get_major_ticks():
-            tick.label.set_fontsize(int(args.fs)) 
+            tick.label.set_fontsize(fs) 
         
         #plot inst. amplitude at 150 ms (every 6 samples, we should parameterize)
         t = args.tslice
@@ -401,7 +416,7 @@ model to physical rock properties.
         axarr[1,p].plot(xax[:],y,'ko-',lw=3,alpha=0.2, color = 'g')
         if args.xscale: #check for log plot on graphs too
             axarr[1, p].set_xscale('log', basex = int(args.xscale) )
-        axarr[1,p].set_xlabel(xlabel, fontsize=int(args.fs))
+        axarr[1,p].set_xlabel(xlabel, fontsize=fs)
         
         # horizontal line, plot min, plot max
         axarr[1, p].axhline(y=amin_tune, alpha=0.15, lw=3, color = 'g')
@@ -426,16 +441,16 @@ model to physical rock properties.
             pass
         #labels
         axarr[1, p].set_title('instantaneous attribute at %s ms' % int(t),
-                               fontsize=int(args.fs)
+                               fontsize=fs
                               )
-        axarr[1, p].set_ylabel('amplitude', fontsize=int(args.fs))
+        axarr[1, p].set_ylabel('amplitude', fontsize=fs)
         axarr[1,p].grid()
         
         for tick in axarr[1,p].xaxis.get_major_ticks():
-            tick.label.set_fontsize(int(args.fs)) 
+            tick.label.set_fontsize(fs) 
         
         for tick in axarr[1,p].yaxis.get_major_ticks():
-            tick.label.set_fontsize(int(args.fs))
+            tick.label.set_fontsize(fs)
              
         plt.xlim((xax[0], xax[-1]))
         
@@ -580,10 +595,10 @@ def multi_plot(model, reflectivity, seismic, traces,
             # loop...        
             if layer == 'earth-model':
                 
-                axarr[0, p].imshow(model,
-                          cmap = plt.get_cmap('brg'),
-                          vmin = np.amin(model)-np.amax(model)/2,
-                          vmax = np.amax(model)+np.amax(model)/2,
+                axarr[0, p].imshow(model.astype('int'),
+                          #cmap = plt.get_cmap('gist_earth'),
+                          #vmin = np.amin(model)-np.amax(model)/2,
+                          #vmax = np.amax(model)+np.amax(model)/2,
                           alpha = alpha,
                           aspect='auto',
                           extent=[min(xax),max(xax),
@@ -650,8 +665,7 @@ def multi_plot(model, reflectivity, seismic, traces,
                 if wigdata.ndim == 3:
                     wigdata= np.sum(plot_data,axis=-1)
                 wiggle(wigdata, 
-                       tstart = args.twt_range[0], 
-                       tstop = args.twt_range[1],
+                       tstart = int(args.twt_range[0]), 
                        dt = dt,
                        skipt = args.wiggle_skips,
                        gain = args.wiggle_skips + 1,
@@ -690,15 +704,15 @@ def multi_plot(model, reflectivity, seismic, traces,
                 # We should never get here
                 continue   
             
-        axarr[0, p].set_xlabel(xlabel, fontsize=int(args.fs))
-        axarr[0, p].set_ylabel('time [ms]', fontsize=int(args.fs))
-        axarr[0, p].set_title(args.title % locals(), fontsize=int(args.fs))
+        axarr[0, p].set_xlabel(xlabel, fontsize=fs)
+        axarr[0, p].set_ylabel('time [ms]', fontsize=fs)
+        axarr[0, p].set_title(args.title % locals(), fontsize=fs)
         
         for tick in axarr[0,p].xaxis.get_major_ticks():
-            tick.label.set_fontsize(int(args.fs)) 
+            tick.label.set_fontsize(fs) 
         
         for tick in axarr[0,p].yaxis.get_major_ticks():
-            tick.label.set_fontsize(int(args.fs)) 
+            tick.label.set_fontsize(fs) 
                 
         #plot inst. amplitude at 150 ms (every 6 samples, we should parameterize)
         t = args.tslice
@@ -717,7 +731,7 @@ def multi_plot(model, reflectivity, seismic, traces,
         if args.xscale and args.slice=="frequency":    #check for log plot on graphs too
             if args.xscale=='octave':
                 axarr[1, p].set_xscale('log', basex=2)
-        axarr[1,p].set_xlabel(xlabel, fontsize=int(args.fs))
+        axarr[1,p].set_xlabel(xlabel, fontsize=fs)
         
         # horizontal line, plot min, plot max
         axarr[1, p].axhline(y=amin_tune, alpha=0.15, lw=3, color = 'g')
@@ -741,17 +755,17 @@ def multi_plot(model, reflectivity, seismic, traces,
             pass
         #labels
         axarr[1, p].set_title('instantaneous attribute at %s ms' % int(t*1000.0),
-                               fontsize=int(args.fs)
+                               fontsize=fs
                                )
-        axarr[1, p].set_ylabel('amplitude', fontsize=int(args.fs) )
+        axarr[1, p].set_ylabel('amplitude', fs )
         axarr[1,p].grid()
         axarr[1,p].set_xlim(xax[0], xax[-1])
         
         for tick in axarr[1,p].xaxis.get_major_ticks():
-            tick.label.set_fontsize(int(args.fs)) 
+            tick.label.set_fontsize(fs) 
         
         for tick in axarr[1,p].yaxis.get_major_ticks():
-            tick.label.set_fontsize(int(args.fs)) 
+            tick.label.set_fontsize(fs) 
         
         #plot horizontal green line on model image, and steady state
         axarr[0,p].axhline(y=t, alpha=0.5, lw=2, color = 'g')

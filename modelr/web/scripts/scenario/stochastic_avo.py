@@ -280,16 +280,16 @@ def run_script(args):
    # Patches for the Background template AVO plot STARTS here
    #  
       
-    a1 = 0.05    # transparency for AVO background template patches
+    a1 = 0.15    # transparency for AVO background template patches
     rangex = 90  
-    band = 0.02 
+    band = 0.02  # thickness of Class 2 band
     # CLASS 1
     
     Path1 = mpath.Path
     path_data1 = [
-        (Path1.MOVETO, (rangex * 0, 0.1)),
-        (Path1.CURVE4, (rangex *0.25, 0.095)),
-        (Path1.CURVE4, (rangex *0.45, 0.085)),
+        (Path1.MOVETO, (rangex * 0, 0.04)),
+        (Path1.CURVE4, (rangex *0.4, 0.0)),
+        (Path1.CURVE4, (rangex *0.7, -0.015)),
         (Path1.CURVE4, (rangex *1.0, -0.05)),
         (Path1.LINETO, (rangex *1.0, 1.0)),
         (Path1.LINETO, (rangex *0.0, 1.0)),
@@ -297,7 +297,7 @@ def run_script(args):
         ]
     codes1, verts1 = zip(*path_data1)
     path1 = mpath.Path(verts1, codes1)
-    patch1 = mpatches.PathPatch(path1, facecolor='r', alpha=a1, ec = 'none')
+    patch1 = mpatches.PathPatch(path1, facecolor='r', alpha=a1*0.5, ec = 'none')
     ax.add_patch(patch1)
     
     # plot control points and connecting lines
@@ -308,11 +308,11 @@ def run_script(args):
     
     Path2P = mpath.Path
     path_data2P = [
-        (Path2P.MOVETO, (rangex * 0, 0.1)),
-        (Path2P.CURVE4, (rangex * 0.25, 0.095)),
-        (Path2P.CURVE4, (rangex * 0.45, 0.085)),
-        (Path2P.CURVE4, (rangex * 1.0, -0.05)),
-        (Path2P.LINETO, (rangex * 1.0, -0.1)),
+        (Path2P.MOVETO, (rangex * 0, 0.04)),
+        (Path2P.CURVE4, (rangex * 0.4, 0.0)),
+        (Path2P.CURVE4, (rangex * 0.7, -0.015)),
+        (Path2P.CURVE4, (rangex * 1.0, -0.035)),
+        (Path2P.LINETO, (rangex * 1.0, -0.060)),
         (Path2P.CURVE4, (rangex * 0.6, -0.03)),
         (Path2P.CURVE4, (rangex * 0.4, -0.015)),
         (Path2P.CURVE4, (rangex * 0.0, 0.0)),
@@ -334,8 +334,8 @@ def run_script(args):
         (Path2.MOVETO, (rangex * 0.0, 0.0)),
         (Path2.CURVE4, (rangex * 0.4, -0.015)),
         (Path2.CURVE4, (rangex * 0.6, -0.03)),
-        (Path2.CURVE4, (rangex * 1.0, -0.1)),
-        (Path2.LINETO, (rangex * 1.0, -0.1 - band)),
+        (Path2.CURVE4, (rangex * 1.0, -0.06)),
+        (Path2.LINETO, (rangex * 1.0,  -0.1 - band)),
         (Path2.CURVE4, (rangex * 0.6, -0.03 - band)),
         (Path2.CURVE4, (rangex * 0.4, -0.015 - band)),
         (Path2.CURVE4, (rangex * 0.0, - band - 0.01)),
@@ -395,7 +395,7 @@ def run_script(args):
     # Class 1 label  
     
     # y-values for class labels 1,2p, 2, 3, and 4 respectively
-    ylabelcntrs = [ 0.35, 0.05, -0.05, -0.4, -0.2  ]
+    ylabelcntrs = [ 0.35, 0.025, -0.025, -0.4, -0.2  ]
     xctrs = 10
     # fontsize for AVO curve class annotation
     fs = 10 
@@ -412,12 +412,14 @@ def run_script(args):
     ax.text( xctrs, ylabelcntrs[1], 'CLASS 2p',
                 verticalalignment='center',
                 horizontalalignment='left',
+                rotation = -3,
                 color='#EEC900', fontsize=fs, fontweight = 'bold', alpha=a2 * 1.5)
                 
     # Class 2 label     
     ax.text( xctrs, ylabelcntrs[2], 'CLASS 2',
                 verticalalignment='center',
                 horizontalalignment='left',
+                rotation = -3,
                 color='green', fontsize=fs, fontweight = 'bold', alpha=a2)
                 
     # Class 3 label     
