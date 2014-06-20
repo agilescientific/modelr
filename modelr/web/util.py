@@ -147,8 +147,11 @@ model to physical rock properties.
         f = args.f
 
 
+    tstart = args.twt_range[0]
+    fs = int(args.fs)
+     
     model = model[:, traces, :]
-    model = np.reshape( model, (model.shape[0], np.size(traces),3) )
+    model = np.reshape(model, (model.shape[0], np.size(traces),3))
 
     
     ############################
@@ -333,19 +336,6 @@ model to physical rock properties.
                            )
 
             elif layer == 'wiggle':
-                
-                if hasattr(args, 'twt_range'):
-                    tstart = args.twt_range[0]
-                    
-                else:
-                    tstart = 0.0
-                
-                if hasattr(args, 'fs'): #if has fontsize
-                    fs = int(args.fs)
-                else:
-                    fs = 10
-
-           
                 
                 wigdata=plot_data
                 if wigdata.ndim == 3:

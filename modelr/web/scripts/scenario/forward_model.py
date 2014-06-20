@@ -113,14 +113,6 @@ def run_script(args):
     
     x = (np.arange(0, model.shape[0]) * ds) + args.twt_range[0] 
     
-<<<<<<< HEAD
-    print "::::MAX OF X:::::", np.amax(x)
-    print ":::LENGTH OF X:::", len(x)
-    print ":::DT = :::", dt
-    
-    y = model
-=======
->>>>>>> df8a05949c9387f320bff32a81cdcfa1989c5d52
 
     f = interp1d(x, model.astype("float"), axis=0, kind="nearest")
 
@@ -130,12 +122,6 @@ def run_script(args):
 
     xnew = xnew[np.where(xnew < np.amax(x))] 
     
-<<<<<<< HEAD
-    print "::::MAX OF XNEW:::::", np.amax(xnew)
-    print "::::shape of XNEW:::", len(xnew)
-=======
-
->>>>>>> df8a05949c9387f320bff32a81cdcfa1989c5d52
     
     model_new = f(xnew)
     
@@ -148,8 +134,7 @@ def run_script(args):
     args.ntraces =  model_new.shape[1]
                                              
     return modelr_plot(model_new, mapping, args)
-
-    
+ 
 def main():
     parser = ArgumentParser(usage=short_description,
                             description=__doc__
