@@ -1,3 +1,6 @@
+modelr-0.5.2.1 June 20
+Updated avo plots, upgraded agilegeo build, fixed slider bar plots
+
 modelr-0.5.1
 turned off the profiler
 
