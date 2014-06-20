@@ -311,7 +311,6 @@ class MyHandler(BaseHTTPRequestHandler):
                 available_scripts.append((script, short_doc))
             except Exception, e:
                 print script, e
-                pass
             
         return available_scripts
             

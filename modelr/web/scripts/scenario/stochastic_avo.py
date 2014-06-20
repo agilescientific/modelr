@@ -71,17 +71,17 @@ def make_normal_dist( rock, sample_size, correlation=.8 ):
     r = np.matrix( np.random.randn(3,sample_size ) )
 
     # Define a covariance matrix
-    co_var = np.linalg.cholesky( np.matrix( [ [1.0,cor,cor],
-                                              [cor,1.0,cor],
-                                              [cor,cor,1.0]]))
+    co_var = np.linalg.cholesky(np.matrix([[1.0,cor,cor],
+                                           [cor,1.0,cor],
+                                           [cor,cor,1.0]]))
 
     # Apply it to the distributions to add dependence
     data = co_var * r
-    d1 = ( np.array(data[0,:].flat) ) * rock.vp_sig  + rock.vp
-    d2 = ( np.array(data[1,:].flat)) * rock.vs_sig + rock.vs
-    d3 = ( np.array( data[2,:].flat) ) * rock.rho_sig + rock.rho
+    d1 = (np.array(data[0,:].flat)) * rock.vp_sig  + rock.vp
+    d2 = (np.array(data[1,:].flat)) * rock.vs_sig + rock.vs
+    d3 = (np.array( data[2,:].flat)) * rock.rho_sig + rock.rho
 
-    return( d1,d2,d3 )
+    return (d1,d2,d3)
     
 def run_script(args): 
     
@@ -124,14 +124,15 @@ def run_script(args):
     
     for i in range( args.iterations ):
         
-        reflect.append( args.reflectivity_method( vp0[i], vs0[i], rho0[i],
-                                                  vp1[i], vs1[i], rho1[i],
-                                                  theta) )
+        reflect.append(args.reflectivity_method(vp0[i], vs0[i],
+                                                rho0[i], vp1[i],
+                                                vs1[i], rho1[i],
+                                                theta))
     reflect = np.array(reflect)
-    
+    reflect = np.nan_to_num(reflect)
     #temp = np.concatenate( (vp0, rho0, vs0, vp1, rho1, vs1,), axis=0)
     
-    temp = np.concatenate( (vp0, vs0, rho0, vp1, vs1, rho1), axis=0)
+    temp = np.concatenate((vp0, vs0, rho0, vp1, vs1, rho1), axis=0)
     
     prop_samples = np.reshape(temp, (6, args.iterations))
     ave_reflect = np.mean(reflect,axis=0)
