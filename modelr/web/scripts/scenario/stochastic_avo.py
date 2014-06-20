@@ -281,24 +281,24 @@ def run_script(args):
    # Patches for the Background template AVO plot STARTS here
    #  
       
-    a1 = 0.15    # transparency for AVO background template patches
+    a1 = 0.10    # transparency for AVO background template patches
     rangex = 90  
-    band = 0.02  # thickness of Class 2 band
+    band = 0.04  # thickness of Class 2 band
     # CLASS 1
     
     Path1 = mpath.Path
     path_data1 = [
         (Path1.MOVETO, (rangex * 0, 0.04)),
-        (Path1.CURVE4, (rangex *0.4, 0.0)),
-        (Path1.CURVE4, (rangex *0.7, -0.015)),
-        (Path1.CURVE4, (rangex *1.0, -0.05)),
+        (Path1.CURVE4, (rangex *0.4, 0.05)),
+        (Path1.CURVE4, (rangex *0.6, -0.015)),
+        (Path1.CURVE4, (rangex *1.0, -band)),
         (Path1.LINETO, (rangex *1.0, 1.0)),
         (Path1.LINETO, (rangex *0.0, 1.0)),
         (Path1.CLOSEPOLY, (rangex *0.0, 1.0)),
         ]
     codes1, verts1 = zip(*path_data1)
     path1 = mpath.Path(verts1, codes1)
-    patch1 = mpatches.PathPatch(path1, facecolor='r', alpha=a1*0.5, ec = 'none')
+    patch1 = mpatches.PathPatch(path1, facecolor='r', alpha=a1, ec = 'none')
     ax.add_patch(patch1)
     
     # plot control points and connecting lines
@@ -309,13 +309,13 @@ def run_script(args):
     
     Path2P = mpath.Path
     path_data2P = [
-        (Path2P.MOVETO, (rangex * 0, 0.04)),
-        (Path2P.CURVE4, (rangex * 0.4, 0.0)),
-        (Path2P.CURVE4, (rangex * 0.7, -0.015)),
-        (Path2P.CURVE4, (rangex * 1.0, -0.035)),
-        (Path2P.LINETO, (rangex * 1.0, -0.060)),
-        (Path2P.CURVE4, (rangex * 0.6, -0.03)),
-        (Path2P.CURVE4, (rangex * 0.4, -0.015)),
+        (Path2P.MOVETO, (rangex * 0, band)),
+        (Path2P.CURVE4, (rangex * 0.4, 0.05)),
+        (Path2P.CURVE4, (rangex * 0.6, -0.015)),
+        (Path2P.CURVE4, (rangex * 1.0, - band)),
+        (Path2P.LINETO, (rangex * 1.0, - (band + band) )),
+        (Path2P.CURVE4, (rangex * 0.6, -(0.015 + band))),
+        (Path2P.CURVE4, (rangex * 0.4, 0.05 - band)),
         (Path2P.CURVE4, (rangex * 0.0, 0.0)),
         (Path2P.CLOSEPOLY, (rangex * 0.0, 0.0)),
         ]
@@ -333,13 +333,13 @@ def run_script(args):
     Path2 = mpath.Path
     path_data2 = [
         (Path2.MOVETO, (rangex * 0.0, 0.0)),
-        (Path2.CURVE4, (rangex * 0.4, -0.015)),
-        (Path2.CURVE4, (rangex * 0.6, -0.03)),
-        (Path2.CURVE4, (rangex * 1.0, -0.06)),
-        (Path2.LINETO, (rangex * 1.0,  -0.1 - band)),
-        (Path2.CURVE4, (rangex * 0.6, -0.03 - band)),
-        (Path2.CURVE4, (rangex * 0.4, -0.015 - band)),
-        (Path2.CURVE4, (rangex * 0.0, - band - 0.01)),
+        (Path2.CURVE4, (rangex * 0.4, 0.05 - band)),
+        (Path2.CURVE4, (rangex * 0.6, -(0.015 + band))),
+        (Path2.CURVE4, (rangex * 1.0, - (band + band))),
+        (Path2.LINETO, (rangex * 1.0,  - (3 * band))),
+        (Path2.CURVE4, (rangex * 0.6, - (0.015 + 2*band))),
+        (Path2.CURVE4, (rangex * 0.4, 0.05 - (0.0 + 2*band))),
+        (Path2.CURVE4, (rangex * 0.0, - band)),
         (Path2.CLOSEPOLY, (rangex * 0.0, 0.0)),
         ]
     codes2, verts2 = zip(*path_data2)
@@ -355,10 +355,10 @@ def run_script(args):
     # CLASS 3
     Path3 = mpath.Path
     path_data3 = [
-        (Path3.MOVETO, (rangex * 0.0, - band - 0.01)),
-        (Path3.CURVE4, (rangex * 0.4, -0.015 - band)),
-        (Path3.CURVE4, (rangex * 0.6, -0.03 - band)),
-        (Path3.CURVE4, (rangex * 1.0, -0.1 - band)),
+        (Path3.MOVETO, (rangex * 0.0, - band)),
+        (Path3.CURVE4, (rangex * 0.4, 0.05 - (0.0 + 2*band))),
+        (Path3.CURVE4, (rangex * 0.6, - (0.015 + 2*band))),
+        (Path3.CURVE4, (rangex * 1.0, - (3 * band))),
         (Path3.LINETO, (rangex * 1.0, -1.0)),
         (Path3.LINETO, (rangex * 0.0, -1.0)),
         (Path3.CLOSEPOLY, (rangex * 0.0, -1.0)),
@@ -398,18 +398,17 @@ def run_script(args):
     # y-values for class labels 1,2p, 2, 3, and 4 respectively
     ylabelcntrs = [ 0.35, 0.025, -0.025, -0.4, -0.2  ]
     xctrs = 10
-    # fontsize for AVO curve class annotation
-    fs = 10 
-    # transparency value for Gradient vs Intercept text 
     
-    a2 = 0.3   
+    fs = 10 # fontsize 
+    
+    a2 = 0.4   # transparency value for Gradient vs Intercept text 
                 
     ax.text( xctrs, ylabelcntrs[0], 'CLASS 1',
                 verticalalignment='center',
                 horizontalalignment='left',
                 color='red', fontsize=fs, fontweight = 'bold', alpha=a2)
                 
-    # Class 2P label     
+    # Class 2p label     
     ax.text( xctrs, ylabelcntrs[1], 'CLASS 2p',
                 verticalalignment='center',
                 horizontalalignment='left',
@@ -424,17 +423,17 @@ def run_script(args):
                 color='green', fontsize=fs, fontweight = 'bold', alpha=a2)
                 
     # Class 3 label     
-    ax.text( 3 * xctrs, ylabelcntrs[3],  'CLASS 3',
+    ax.text( xctrs, ylabelcntrs[3],  'CLASS 3',
                 verticalalignment='center',
-                horizontalalignment='center',
+                horizontalalignment='left',
                 rotation = -15,
                 color='blue', fontsize=fs, fontweight = 'bold', alpha=a2)   
                 
     # Class 4 label     
-    ax.text( 2 * xctrs, ylabelcntrs[4],  'CLASS 4',
+    ax.text( xctrs, ylabelcntrs[4],  'CLASS 4',
                 verticalalignment='center',
-                horizontalalignment='center',
-                rotation = 25,
+                horizontalalignment='left',
+                rotation = 15,
                 color='#B048B5', fontsize=fs, fontweight = 'bold', alpha=a2)  
     #
     # Patches for background template AVO plot ENDS here
@@ -502,22 +501,20 @@ def run_script(args):
     
     s0 = -x
     
-    shift2 = 0.05 #width for class2 width in plot
-    
-    a = 0.05
+    shift2 = 0.04 #width for class2 width in plot
     
     height_ellipse = 0.05
     width_ellipse = 3.0
     
     # Plot background trend (diagonal line)
-    ax.plot(x, s0, color='black', alpha = a)
+    ax.plot(x, s0, color='black', alpha = a1)
     
     # add a rectangle for class 2 neg
     lowleft2 = (-shift2,-1.0)
     
     class2neg = mpatches.Rectangle( lowleft2, width = abs(lowleft2[0]), height = 1.0,
                                 color = 'green',
-                                alpha = a,
+                                alpha = a1,
                                 ec = "white",
                                 lw = 4)
     ax.add_patch(class2neg)
@@ -526,7 +523,7 @@ def run_script(args):
     lowleft2pos = (0.0, 0.0)
     class2pos = mpatches.Rectangle( lowleft2pos, width = abs(lowleft2[0]), height = 1.0,
                                 color = 'green',
-                                alpha = a,
+                                alpha = a1,
                                 ec="white",
                                 lw = 4)   
     ax.add_patch(class2pos)
@@ -535,7 +532,7 @@ def run_script(args):
     lowleft2Ppos = (-shift2, 0.0)
     class2Ppos = mpatches.Rectangle( lowleft2Ppos, width = abs(lowleft2[0]), height = 1.0,
                                 color = 'yellow',
-                                alpha = a,
+                                alpha = a1,
                                 ec="white",
                                 lw = 4)   
     ax.add_patch(class2Ppos)
@@ -544,7 +541,7 @@ def run_script(args):
     lowleft2Pneg = (0.0, -1.0)
     class2Ppos = mpatches.Rectangle( lowleft2Pneg, width = abs(lowleft2[0]), height = 1.0,
                                 color = 'yellow',
-                                alpha = a,
+                                alpha = a1,
                                 ec="white",
                                 lw = 4)   
     ax.add_patch(class2Ppos)
@@ -553,7 +550,7 @@ def run_script(args):
     lowleft3neg = (-1.0, -1.0)
     class3neg = mpatches.Rectangle(lowleft3neg, width = 1.0 + lowleft2[0], height = 1.0, 
                                     color = 'blue',
-                                    alpha = a,
+                                    alpha = a1,
                                     ec = 'none')
     ax.add_patch(class3neg)
     
@@ -561,7 +558,7 @@ def run_script(args):
     lowleft3pos = (shift2, 0)
     class3pos = mpatches.Rectangle(lowleft3pos, width = 1.0 + lowleft2[0], height = 1.0,
                                     color = 'blue',
-                                    alpha = a,
+                                    alpha = a1,
                                     ec = 'none')
     ax.add_patch(class3pos)
     
@@ -578,7 +575,7 @@ def run_script(args):
     codes4u, verts4u = zip(*path_data4u)
     path4u = mpath.Path(verts4u, codes4u)
     patch4u = mpatches.PathPatch(path4u, facecolor = '#B048B5',    # purple
-                        alpha = a,
+                        alpha = a1,
                         ec = 'none')
     ax.add_patch(patch4u)
     
@@ -595,7 +592,7 @@ def run_script(args):
     codes4l, verts4l = zip(*path_data4l)
     path4l = mpath.Path(verts4l, codes4l)
     patch4l = mpatches.PathPatch(path4l, facecolor = '#B048B5',    # purple
-                        alpha = a,
+                        alpha = a1,
                         ec = 'none')
     ax.add_patch(patch4l)
     
@@ -612,7 +609,7 @@ def run_script(args):
     codes1u, verts1u = zip(*path_data1u)
     path1u = mpath.Path(verts1u, codes1u)
     patch1u = mpatches.PathPatch(path1u, facecolor = 'red',
-                        alpha = a,
+                        alpha = a1,
                         ec = 'none')
     ax.add_patch(patch1u)
     
@@ -627,7 +624,7 @@ def run_script(args):
     codes1l, verts1l = zip(*path_data1l)
     path1l = mpath.Path(verts1l, codes1l)
     patch1l = mpatches.PathPatch(path1l, facecolor = 'red',
-                        alpha = a,
+                        alpha = a1,
                         ec = 'none')
     ax.add_patch(patch1l)
     
@@ -658,14 +655,9 @@ def run_script(args):
     ax.spines['left'].set_position(('data',0))
     ax.spines['left'].set_alpha(0.5)
     
-    # Annotation 
+    # Annotation for Gradient vs Intercept annotation
     
-    # fontsize for Gradient vs Intercept annotation
-    fs = 10 
-    # transparency value for Gradient vs Intercept text 
-    a2 = 0.3   
-    
-    ax.text(0.98, 0.98, 'Gradient vs Intercept',
+    ax.text(0.98, 0.98, 'Gradient vs intercept',
             verticalalignment='top',
             horizontalalignment='right',
             transform=ax.transAxes,
@@ -708,11 +700,14 @@ def run_script(args):
                 horizontalalignment='right',
                 color='#B048B5', fontsize=fs, fontweight = 'bold', alpha=a2)
                 
-    # Background label     
+    # Background label  
+    angle = -45
+          
     ax.text( 0.1 * height_ellipse, 0.1 * height_ellipse, 'background',
                 verticalalignment='center',
                 horizontalalignment='center',
-                rotation = -45,
+                rotation = angle,
+                transform=ax.transData,
                 color='black', fontsize=fs, fontweight = 'bold', alpha=a2/2.0)
                               
     return get_figure_data()
