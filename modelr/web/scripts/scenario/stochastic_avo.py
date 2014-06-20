@@ -280,7 +280,7 @@ def run_script(args):
    # Patches for the Background template AVO plot STARTS here
    #  
       
-    a1 = 0.15    # transparency for AVO background template patches
+    a1 = 0.20    # transparency for AVO background template patches
     rangex = 90  
     band = 0.02  # thickness of Class 2 band
     # CLASS 1
@@ -297,7 +297,7 @@ def run_script(args):
         ]
     codes1, verts1 = zip(*path_data1)
     path1 = mpath.Path(verts1, codes1)
-    patch1 = mpatches.PathPatch(path1, facecolor='r', alpha=a1*0.5, ec = 'none')
+    patch1 = mpatches.PathPatch(path1, facecolor='r', alpha=a1, ec = 'none')
     ax.add_patch(patch1)
     
     # plot control points and connecting lines
@@ -397,18 +397,17 @@ def run_script(args):
     # y-values for class labels 1,2p, 2, 3, and 4 respectively
     ylabelcntrs = [ 0.35, 0.025, -0.025, -0.4, -0.2  ]
     xctrs = 10
-    # fontsize for AVO curve class annotation
-    fs = 10 
-    # transparency value for Gradient vs Intercept text 
     
-    a2 = 0.3   
+    fs = 10 # fontsize 
+    
+    a2 = 0.3   # transparency value for Gradient vs Intercept text 
                 
     ax.text( xctrs, ylabelcntrs[0], 'CLASS 1',
                 verticalalignment='center',
                 horizontalalignment='left',
                 color='red', fontsize=fs, fontweight = 'bold', alpha=a2)
                 
-    # Class 2P label     
+    # Class 2p label     
     ax.text( xctrs, ylabelcntrs[1], 'CLASS 2p',
                 verticalalignment='center',
                 horizontalalignment='left',
@@ -501,7 +500,7 @@ def run_script(args):
     
     s0 = -x
     
-    shift2 = 0.05 #width for class2 width in plot
+    shift2 = 0.04 #width for class2 width in plot
     
     a = 0.05
     
@@ -657,14 +656,9 @@ def run_script(args):
     ax.spines['left'].set_position(('data',0))
     ax.spines['left'].set_alpha(0.5)
     
-    # Annotation 
+    # Annotation for Gradient vs Intercept annotation
     
-    # fontsize for Gradient vs Intercept annotation
-    fs = 10 
-    # transparency value for Gradient vs Intercept text 
-    a2 = 0.3   
-    
-    ax.text(0.98, 0.98, 'Gradient vs Intercept',
+    ax.text(0.98, 0.98, 'Gradient vs intercept',
             verticalalignment='top',
             horizontalalignment='right',
             transform=ax.transAxes,
