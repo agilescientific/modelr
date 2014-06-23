@@ -13,10 +13,12 @@
 	    <li>
 			<form name="input" action="plot.jpeg"
 				method="get">
+			  <input type="hidden" name="type" value="scenario">
 				<input type="hidden" name="script" value="{{script}}" /> <input
 					type="hidden" name="help" value="1" /> <input type="submit"
 					value="{{ script[:-2].title() }}" />
 					 -- {{ doc }}
+			
 			</form>
 	    </li>
 		   
