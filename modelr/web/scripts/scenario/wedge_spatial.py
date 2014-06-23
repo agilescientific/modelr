@@ -59,7 +59,7 @@ def add_arguments(parser):
                         type=float, 
                         help='time [ms] along which to plot instantaneous amplitude ',
                         required=True,
-                        default=0.150
+                        default=150
                         )
                       
     parser.add_argument('scale',
