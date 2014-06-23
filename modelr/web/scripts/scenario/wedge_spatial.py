@@ -57,7 +57,7 @@ def add_arguments(parser):
 
     parser.add_argument('tslice',
                         type=float, 
-                        help='time [s] along which to plot instantaneous amplitude ',
+                        help='time [ms] along which to plot instantaneous amplitude ',
                         required=True,
                         default=0.150
                         )
