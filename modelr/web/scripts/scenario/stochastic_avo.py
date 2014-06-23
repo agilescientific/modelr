@@ -444,14 +444,17 @@ def run_script(args):
     # ax_2 the AB plot
     plt.subplot(G[0+shift:3+shift,:])
     plt.hold(True)
+    
+    max_ang = 30  # Max ang for computing gradient
+
     for i in range( args.iterations -1):
 
-        plt.scatter( reflect[i,0], (reflect[i,50]-reflect[i,0] ),
+        plt.scatter( reflect[i,0], (reflect[i,max_ang]-reflect[i,0] ),
                      color = 'grey' , s = 20,
                      alpha = np.max((30./args.iterations, 0.2)) )
                      
     # Plot the average of the dots
-    plt.scatter( ave_reflect[0], ave_reflect[50]- ave_reflect[0],
+    plt.scatter( ave_reflect[0], ave_reflect[max_ang]- ave_reflect[0],
                  color = 'black' , s = 40, alpha= 0.5 )  
     
     # Annotation and making it nice
@@ -470,7 +473,7 @@ def run_script(args):
     plt.grid()
     
     # axis limits
-    
+        
     ylimits = (np.amin((-.3,np.nanmin(reflect[:,50]-reflect[:,0]))),
               np.amax((.3,np.nanmax(reflect[:,50]-reflect[:,0]))))
     xlimits = (np.amin((-.3,np.nanmin(reflect[:,0]))),
