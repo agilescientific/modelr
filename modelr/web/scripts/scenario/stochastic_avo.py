@@ -445,7 +445,7 @@ def run_script(args):
     plt.subplot(G[0+shift:3+shift,:])
     plt.hold(True)
     
-    max_ang = 40  # Max ang for computing gradient
+    max_ang = 30  # Max ang for computing gradient
 
     for i in range( args.iterations -1):
 
