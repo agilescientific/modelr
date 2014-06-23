@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 =========================
 modelr.EarthModel.py
@@ -30,7 +31,7 @@ class EarthModel(object):
     Class to store earth models.
     '''
     
-    def __init__(self,earth_structure, namespace):
+    def __init__(self, earth_structure, namespace):
         """
         Class for handling earth models.
 
@@ -86,6 +87,17 @@ class EarthModel(object):
                                              
                 self.property_map[colour] = rock
     
+
+    
+    def get_rocks(self):
+
+        # Not actually using this because I think I need
+        # the keys too... or something to tell what the rocks
+        # are later, so I can tabulate them, or whatever.
+
+        return self.property_map.values()
+
+
 
     def time2depth(self, dz):
         
