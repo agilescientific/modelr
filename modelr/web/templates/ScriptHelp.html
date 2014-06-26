@@ -12,26 +12,27 @@
 <form name="input" action="plot.jpeg" method="get">
 
     <input type="hidden" name="script" value="{{script}}"/>
+    <input type="hidden" name="type" value="scenario"/>
     
     
     <table>
     
-    {% for name,arg in parser.arguments.items() %}
+    {% for arg in parser.arguments %}
     
     <tr>
     <td>
-      {{ name.title() }}:
+      {{ arg.name }}:
     </td>
 
     <td>
       {% if arg.choices %}
-        <select name="{{name}}">
+        <select name="{{ arg.name }}">
           {% for c in arg.choices %}
             <option {% if c == arg.default %}selected="selected" {% endif %}value={{ c }}>{{ c }}</option>
           {% endfor %}
         </select>
       {% else %}
-        <input type="text" name="{{name}}" value="{{arg.default if arg.default is not none else parameters.get(name,[''])[0] }}"/>
+        <input type="text" name="{{arg.name}}" value="{{arg.default if arg.default is not none else parameters.get(arg.name,[''])[0] }}"/>
       {% endif %}
     </td>
     <td>

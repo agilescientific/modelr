@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+1# -*- coding: utf-8 -*-
 '''
 ===================
 modelr.web.server
@@ -330,7 +330,7 @@ class MyHandler(BaseHTTPRequestHandler):
 
         html = \
           template.render(msg=msg,
-                    available_scripts=self.get_available_scripts())
+            available_scripts=self.get_available_scripts(['scenario']))
         self.wfile.write(html)
         
 
