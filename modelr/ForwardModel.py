@@ -44,8 +44,8 @@ class ForwardModel(object):
         # from rock.get_moduli(). Planning to pass it to the
         # front end and tabulate.
         metadata["moduli"] = {}
-        for k,v in self.earth_model.property_map.iteritems():
-            metadata["moduli"][k] = v.get_moduli()
+        #for k,v in self.earth_model.property_map.iteritems():
+        #    metadata["moduli"][k] = v.get_moduli()
 
         # --------------------------
         # Resuming normal service
