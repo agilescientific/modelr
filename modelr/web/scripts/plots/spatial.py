@@ -41,7 +41,7 @@ def add_arguments(parser):
                         help='Trace',
                         default=25,
                         interface='slider',
-                        range=[0,75]
+                        range=[0,1000]
                         )
 
     
@@ -70,13 +70,16 @@ def run_script(earth_model,
     axarr[0].axvline(x=args.trace, lw=3, color='b')
     axarr[0].set_title('spatial cross-section')
 
-    axarr[1].plot(seismic_data[:,args.trace,0,0],
-                  t)
+    axarr[1].plot(seismic_data[:,args.trace,0,0],t)
+    
     plt.gca().invert_yaxis()
     axarr[1].axis('tight')
 
     fig.tight_layout()
-        
+
+    # set the frequency options (need to do this more elegantly)
+    seismic_model.f = np.arange(0,50)
+
     return get_figure_data()
         
     
