@@ -74,27 +74,7 @@ def run_script(earth_model,
                   t)
     plt.gca().invert_yaxis()
     axarr[1].axis('tight')
-    """
-    seismic_model.go(earth_model,
-                     traces=[args.trace])
-    seismic_data = seismic_model.seismic
 
-    axarr[1].imshow(seismic_data[:, 0, :, 0],
-                    aspect='auto')
-    axarr[1].axvline(x=args.theta, lw=3, color='b')
-    axarr[1].set_title('angle cross-section')
-
-    seismic_model.go(earth_model,
-                     theta=args.theta,
-                     traces=[args.trace])
-    seismic_data = seismic_model.seismic
-    """
-    """
-    axarr[2].imshow(seismic_data[:,0, 0, :],
-                    aspect='auto')
-    axarr[2].axvline(x=args.f, lw=3, color='b')
-    axarr[2].set_title('wavelet cross-section')
-    """
     fig.tight_layout()
         
     return get_figure_data()

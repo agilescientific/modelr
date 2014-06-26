@@ -29,8 +29,13 @@ class ForwardModel(object):
         self.plots.go(self.seismic_model, self.earth_model)
 
         metadata = {}
+
+        f = self.seismic_model.wavelet_cf()
+
+        if np.ndim(f) == 0:
+            f = [f]
         
-        metadata["f"] = tuple(self.seismic_model.wavelet_cf())
+        metadata["f"] = tuple(f)
         metadata["time"] = \
           tuple(np.arange(self.seismic_model.seismic.shape[0]) *
                 self.seismic_model.dt*1000)
