@@ -85,7 +85,7 @@ def run_script(earth_model,
     axarr[0].set_ylim(top=0,
                          bottom=1000*seismic_model.dt*seismic_data.shape[0])
     axarr[0].grid()
-    axarr[0].axvline(x=args.trace, lw=2, color='k', alpha=0.25)
+    axarr[0].axvline(x=args.trace, lw=1, color='k', alpha=0.25)
     axarr[0].set_title('spatial cross-section')
     axarr[0].set_ylabel('time [ms]')
     axarr[0].set_xlabel('trace')
@@ -111,7 +111,7 @@ def run_script(earth_model,
     ampmin = np.amin(img)
     ampmax = np.amax(img)
     biggest = max(abs(ampmin),abs(ampmax))
-    
+
     # Put wiggle trace on seismic cross-section
     
     trace1 = seismic_data[:,args.trace-1, 0, 0]
@@ -130,21 +130,22 @@ def run_script(earth_model,
     #get y-axis limits, so can reverse y-axis of wiggle plot
     a1ymin, a1ymax = axarr[1].get_ylim()
     axarr[1].plot(trace1,tt,'k')
-    axarr[1].fill_betweenx(tt,0,trace1, 
-                              gain1 * trace1 > 0.01,
+    axarr[1].fill_betweenx(tt, trace1, 0, 
+                              trace1 > 0.01,
                               color = 'k', alpha = 0.5)
+    axarr[1].axvline(x=0, lw=1, color='k', alpha=0.25)
     axarr[1].yaxis.tick_right()
-    axarr[1].set_xlim([-biggest, biggest])
-    axarr[1].set_xticks([0.0])
-    axarr[1].get_xaxis().set_visible(False)
-    axarr[1].set_ylim([a1ymax, a1ymin])
+    axarr[1].set_xticks([-1.0, 0, 1.0])
+    #axarr[1].get_xaxis().set_visible(False)
+    axarr[1].set_ylim((a1ymax, a1ymin))
+    axarr[1].set_xlim((-biggest, biggest))
     axarr[1].set_ylabel('time [ms]')
     axarr[1].yaxis.set_label_position("right")
     axarr[1].grid()
+    axarr[1].axis('tight')
     
     plt.gca().invert_yaxis()
-    axarr[1].axis('tight')
-
+    
     fig.tight_layout()
 
     # set the frequency options (need to do this more elegantly)
