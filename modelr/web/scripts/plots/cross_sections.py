@@ -111,7 +111,7 @@ def run_script(earth_model, seismic_model,
                      alpha = 0.9)
     axarr[0][0].fill_betweenx(x, args.trace+gain1 * trace1,
                               args.trace, 
-                              gain1 * trace1 > 0.01,
+                              gain1 * trace1 >= 0.01,
                               color = 'k', alpha = 0.5)
 
 
@@ -179,7 +179,7 @@ def run_script(earth_model, seismic_model,
     axarr[0][1].plot(args.theta + gain2 * trace2, x, 'k', alpha = 0.9)
     axarr[0][1].fill_betweenx(x, args.theta + gain2 * trace2,
                               args.theta, 
-                              gain2 * trace2 > 0,
+                              gain2 * trace2 >= -0.01,
                               color = 'k', alpha = 0.5)
     axarr[0][1].set_xlim(left=0, right=seismic_data.shape[2])
     
@@ -241,7 +241,7 @@ def run_script(earth_model, seismic_model,
     freq = seismic_model.wavelet_cf()[f]
     axarr[0][2].plot(freq -1 + gain3 * trace3, x, 'k', alpha = 0.9)
     axarr[0][2].fill_betweenx(x, freq -1 + gain3 * trace3, freq -1, 
-                              gain3 * trace3 -1 > 0,
+                              gain3 * trace3 -1 >= -1,
                               color = 'k', alpha = 0.5)
                               
     #
@@ -254,7 +254,7 @@ def run_script(earth_model, seismic_model,
     axarr[1][2].plot(seismic_model.wavelet_cf(),
                      data3, 'g', lw = 3)
     axarr[1][2].set_ylim(-extr1,extr1)
-    axarr[1][2].set_xlabel('center frequency ' + r'$Hz$')
+    axarr[1][2].set_xlabel('centre frequency ' + 'Hz')
     axarr[1][2].set_xscale('log', basex=2)
     axarr[1][2].set_xlim(seismic_model.wavelet_cf()[0],
                          seismic_model.wavelet_cf()[-1])
