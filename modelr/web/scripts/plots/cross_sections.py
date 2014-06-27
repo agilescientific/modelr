@@ -10,9 +10,7 @@ import matplotlib.gridspec as gridspec
 import numpy as np
 from modelr.web.util import get_figure_data
 
-short_description = ('Look at plots '
-                     'across spatial, offset, and frequency '
-                     'cross-sections')
+short_description = ('Spatial, theta, f cross-sections')
 
 
 

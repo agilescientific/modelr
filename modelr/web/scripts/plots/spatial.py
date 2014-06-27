@@ -20,9 +20,7 @@ import modelr.modelbuilder as mb
 from modelr.web.defaults import default_parsers
 from svgwrite import rgb
 
-short_description = ('Look at plots '
-                     'across spatial, offset, and frequency '
-                     'cross-sections')
+short_description = ('Spatial cross-section')
 
 
 def add_arguments(parser):
