@@ -53,7 +53,7 @@ def run_script(earth_model,
                args):
 
     fig =plt.figure()
-    gs = gridspec.GridSpec(1, 2,width_ratios=[4,1])
+    gs = gridspec.GridSpec(1, 2,width_ratios=[19,1])
     axarr = [plt.subplot(gs[0]), plt.subplot(gs[1])]
 
     
@@ -62,15 +62,29 @@ def run_script(earth_model,
     seismic_data = seismic_model.seismic
 
     t = seismic_model.dt * np.arange(seismic_data.shape[0])
+
+    im = seismic_data[:,:, 0, 0]
     
-    axarr[0].imshow(seismic_data[:,:, 0, 0],aspect='auto',
+    axarr[0].imshow(im, aspect='auto',
                     extent=[0, seismic_data.shape[1],
                             t[-1], t[0]],
                     cmap='Greys')
+    axarr[0].grid()
     axarr[0].axvline(x=args.trace, lw=3, color='b')
     axarr[0].set_title('spatial cross-section')
 
-    axarr[1].plot(seismic_data[:,args.trace,0,0],t)
+    # find max and min of section slice
+    ampmin = np.amin(im)
+    ampmax = np.amax(im)
+    biggest = max(abs(ampmin),abs(ampmax))
+
+    
+    axarr[1].plot(seismic_data[:,args.trace,0,0],t,'k')
+    axarr[1].yaxis.tick_right()
+    axarr[1].set_xlim([-biggest, biggest])
+    axarr[1].set_xticks([0.0])
+    axarr[1].get_xaxis().set_visible(False)
+    axarr[1].grid()
     
     plt.gca().invert_yaxis()
     axarr[1].axis('tight')
