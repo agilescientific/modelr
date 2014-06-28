@@ -6,7 +6,7 @@ modelr.rock_properties
 Container for physical rock properties
 '''
 
-import agilegeo.avo as avo
+from agilegeo.avo import moduli
     
 class RockProperties(object):
     '''
@@ -63,5 +63,5 @@ class RockProperties(object):
           (self.vp, self.rho, self.vs)
 
     def get_moduli(self):
-        return avo.moduli(vp=self.vp, vs=self.vs, rho=self.rho)
+        return moduli(vp=self.vp, vs=self.vs, rho=self.rho)
         
