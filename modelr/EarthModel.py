@@ -50,7 +50,8 @@ class EarthModel(object):
             raise SendHelp
         
         self.reflect_file = str(earth_structure["datafile"])
-        
+
+        self.property_map = {}
         # Load the image data
         if earth_structure.get('update_model', None):
             response = requests.get(earth_structure["image"])
@@ -67,7 +68,7 @@ class EarthModel(object):
             self.depth = args.depth
             self.reflectivity_method = args.reflectivity_method
 
-            self.property_map = {}
+ 
 
             # Keep only a direct map for legacy. Input data has name
             # attribute we are going to ignore
@@ -80,7 +81,8 @@ class EarthModel(object):
             for colour in mapping:
                 rock = \
                   rock_properties_type(mapping[colour]["property"])
-
+                rock.name = mapping[colour]["name"]
+                
                 rgb = colour.split('(')[1].split(')')[0].split(',')
                 self.vp_lookup[int(rgb[0]), int(rgb[1]),
                                int(rgb[2])] = rock.vp

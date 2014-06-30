@@ -49,10 +49,12 @@ class ForwardModel(object):
         # We're going to get a dictionary of rock properties back
         # from rock.get_moduli(). Planning to pass it to the
         # front end and tabulate.
+
         metadata["test"] = 'test string'
-        metadata["moduli"] = {"test key":"test value"}
-        #for k,v in self.earth_model.property_map.iteritems():
-        #    metadata["moduli"][k] = v.get_moduli()
+        metadata["moduli"] = {}
+        for rock in self.earth_model.get_rocks():
+            if not rock.name in metadata["moduli"]:
+                metadata["moduli"][rock.name] = rock.get_moduli()
 
         # --------------------------
         # Resuming normal service
