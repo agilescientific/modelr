@@ -35,7 +35,7 @@ def add_arguments(parser):
                         required=True)
                         
     parser.add_argument( 'iterations', type=int, default=50, 
-                         help='number of monte carlo simulations' )
+                         help='Number of Monte Carlo simulations' )
     
                         
     parser.add_argument('reflectivity_method',

@@ -63,7 +63,7 @@ class EarthModel(object):
               Image.open(StringIO(response.content)).convert("RGB")
             image.load()
             self.image = np.asarray(image, dtype="int32")
-
+            
             self.units = args.units
             self.depth = args.depth
             self.reflectivity_method = args.reflectivity_method
