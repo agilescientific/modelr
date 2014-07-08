@@ -5,27 +5,18 @@ Created on Apr 30, 2012
 '''
 import numpy as np
 import matplotlib
-
 import matplotlib.pyplot as plt
-
 from argparse import ArgumentParser
-
 from modelr.web.urlargparse import  wavelet_type
-
 from modelr.constants import WAVELETS 
-
 from modelr.web.defaults import default_parsers
-
-
+from agilegeo.util import noise
 from modelr.reflectivity import do_convolve
 
 short_description = ("Convolution model with synthetic wavelets")
 
 
 def add_arguments(parser):
-
-    
-    
     
     parser.add_argument('f', type=float, default=12,
                         help="Frequency",
@@ -37,10 +28,10 @@ def add_arguments(parser):
                         interface='slider',
                         range=[-180,180])
 
-    #parser.add_argument('noise', type=float, default=0.0,
-    #                    help="noise",
-    #                    interface='slider',
-    #                    range=[0,100])
+    parser.add_argument('noise', type=float, default=50,
+                        help="Signal:noise (dB)",
+                        interface='slider',
+                        range=[-50,50])
     
     parser.add_argument('wavelet',
                         type=wavelet_type,
@@ -73,7 +64,7 @@ def add_arguments(parser):
     return parser
 
 def run_script(earth_model, seismic_model, theta=None,
-               traces=None):
+               traces=None, noise=50):
 
     if earth_model.reflectivity() is None:
 
@@ -91,13 +82,13 @@ def run_script(earth_model, seismic_model, theta=None,
     wavelets = seismic_model.wavelets()
 
     ref = earth_model.reflectivity(theta=theta)
-    #noise = np.random.randn(ref.shape[0], ref.shape[1],
-    #                        ref.shape[2]) * seismic_model.noise
-    
         
     seismic = do_convolve(wavelets,
                           ref,
                           traces=traces,
                           theta=theta)
+
+    noise = noise_db(seismic, noise)
+    seismic += noise
 
     return seismic
