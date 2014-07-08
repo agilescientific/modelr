@@ -44,13 +44,8 @@ class ForwardModel(object):
         metadata["trace"] = \
           tuple(range(1,self.seismic_model.n_sensors +1))
 
-        # --------------------------
-        # Added June 2014 by Matt
-        # We're going to get a dictionary of rock properties back
-        # from rock.get_moduli(). Planning to pass it to the
-        # front end and tabulate.
+        metadata["dyn_range"] = tuple(np.linspace(1.0,100.0, 1000))
 
-        metadata["test"] = 'test string'
         metadata["moduli"] = {}
         for rock in self.earth_model.get_rocks():
             if not rock.name in metadata["moduli"]:

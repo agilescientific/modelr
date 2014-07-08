@@ -32,6 +32,13 @@ def add_arguments(parser):
                         default=50,
                         interface='slider',
                         help='TWT')
+
+    parser.add_argument('dyn_range',
+                        type=float,
+                        range=[0,1000],
+                        default=500,
+                        interface='slider',
+                        help='dynamic range')
                         
     parser.add_argument('theta',
                         type=float,
@@ -51,7 +58,7 @@ def run_script(earth_model, seismic_model,
     matplotlib.interactive(False)
     cmap = 'seismic_r'
     #max/min amplitude for plot and colorbar scaling
-    extr1 = 1.0
+    extr1 = args.dyn_range / 1000.0
 
     # Define the figure layout
     fig = plt.figure(figsize=[15,10], facecolor = 'white')

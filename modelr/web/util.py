@@ -16,18 +16,19 @@ import numpy as np
 from scipy.signal import hilbert
 from modelr.reflectivity import get_reflectivity, do_convolve
 
+import StringIO
         
 def get_figure_data(transparent=False):
     '''
     Return the current plot as a binary blob. 
     '''
-    fig_path = tempfile.SpooledTemporaryFile(suffix='.png')
+    fig_path = StringIO.StringIO()
     plt.savefig(fig_path, transparent=transparent)
     plt.close()
 
     fig_path.seek(0)
-    with fig_path as fd:
-        data = fd.read()
+
+    data = fig_path.buf
 
         
     # Alternative approach to do it in memory rather than on disk
