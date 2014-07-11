@@ -13,6 +13,9 @@ def add_arguments(parser):
 
     parser.add_argument('depth', type=float, default=1000.0,
                        help="z-range of model")
+
+    parser.add_argument('range', type=float, default=1000.0,
+                        help="x-range of model")
     
     parser.add_argument('reflectivity_method',
                         type=reflectivity_type,

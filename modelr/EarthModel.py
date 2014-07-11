@@ -11,6 +11,8 @@ from agilegeo.avo import time_to_depth, depth_to_time, zoeppritz
 import urllib
 import requests
 
+import json
+
 from modelr.reflectivity import get_reflectivity
 
 import numpy as np
@@ -54,6 +56,7 @@ class EarthModel(object):
         self.property_map = {}
         # Load the image data
         if earth_structure.get('update_model', None):
+
             response = requests.get(earth_structure["image"])
 
             if os.path.exists(self.reflect_file):
@@ -66,6 +69,8 @@ class EarthModel(object):
 
             self.units = args.units
             self.depth = args.depth
+            self.range = args.range
+            
             self.reflectivity_method = args.reflectivity_method
 
  
@@ -168,6 +173,16 @@ class EarthModel(object):
 
 
 
+    def json_data(self):
+
+        data = self.vp_data()
+        
+        dx = self.range / data.shape[1]
+        dz = self.depth / data.shape[0]
+
+        return json.dumps({'data': tuple(map(tuple, data)),
+                           'dx': dx, 'dz': dz})
+        
     def update_reflectivity(self, offset_angles,
                             samples=None):
 

@@ -194,10 +194,15 @@ class MyHandler(BaseHTTPRequestHandler):
                 #self.run_json(plot_generator)
                 return
 
-            
+
+           
+
+
+                
             if uri.path != '/plot.jpeg':
                 self.send_error(404, 'File Not Found: %s' % self.path)
                 return
+
             
             script = parameters.pop('script', None)
             script_type = parameters.pop('type', None)
@@ -440,7 +445,39 @@ class MyHandler(BaseHTTPRequestHandler):
             os.remove(str(parameters["filename"]))
 
             return
+
+        elif uri.path == '/model_data.json':
+
+            print "WTF"
             
+            # Set the response headers for json
+            self.send_response(200)
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Headers',
+                             'X-Request, X-Requested-With')
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+
+
+            content_len = int(self.headers.getheader('content-length'))
+            raw_json = self.rfile.read(content_len)
+
+            parameters = json.loads(raw_json)
+
+            
+            earth_script = parameters["earth_model"].pop("script",
+                                                         None)
+            earth_namespace = self.eval_script([earth_script],
+                                               ['earth'])
+
+            earth_model = EarthModel(parameters["earth_model"],
+                                     earth_namespace)
+
+
+            data = earth_model.json_data()
+
+            self.wfile.write(data)
+            return
         self.send_error(404, 'Post request not supportd yet: %s'
                         % self.path)
 
