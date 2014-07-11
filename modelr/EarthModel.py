@@ -83,6 +83,9 @@ class EarthModel(object):
             # inefficient for memory, but quicker than looping
             # dictionaries. There is for sure a better way
             self.vp_lookup = np.zeros((256,256,256))
+            self.vs_lookup = np.zeros((256,256,256))
+            self.rho_lookup = np.zeros((256,256,256))
+            
             for colour in mapping:
                 rock = \
                   rock_properties_type(mapping[colour]["property"])
@@ -91,6 +94,10 @@ class EarthModel(object):
                 rgb = colour.split('(')[1].split(')')[0].split(',')
                 self.vp_lookup[int(rgb[0]), int(rgb[1]),
                                int(rgb[2])] = rock.vp
+                self.vs_lookup[int(rgb[0]), int(rgb[1]),
+                               int(rgb[2])] = rock.vs
+                self.rho_lookup[int(rgb[0]), int(rgb[1]),
+                               int(rgb[2])] = rock.rho
                                              
                 self.property_map[colour] = rock
     
@@ -173,14 +180,32 @@ class EarthModel(object):
 
 
 
+    def vs_data(self, samples=None):
+        data = self.get_data(samples=samples).astype(int)   
+        vs_data = self.vs_lookup[data[:,:,0],
+                                 data[:,:,1],
+                                 data[:,:,2]]
+        return vs_data
+
+    def rho_data(self, samples=None):
+        data = self.get_data(samples=samples).astype(int)   
+        rho_data = self.rho_lookup[data[:,:,0],
+                                 data[:,:,1],
+                                 data[:,:,2]]
+        return rho_data
+        
     def json_data(self):
 
-        data = self.vp_data()
+        vp = self.vp_data()
+        vs = self.vs_data()
+        rho = self.rho_data()
         
-        dx = self.range / data.shape[1]
-        dz = self.depth / data.shape[0]
+        dx = self.range / vp.shape[1]
+        dz = self.depth / vp.shape[0]
 
-        return json.dumps({'data': tuple(map(tuple, data)),
+        return json.dumps({'vp': tuple(map(tuple, vp)),
+                           'vs': tuple(map(tuple,vs)),
+                           'rho': tuple(map(tuple,rho)),
                            'dx': dx, 'dz': dz})
         
     def update_reflectivity(self, offset_angles,

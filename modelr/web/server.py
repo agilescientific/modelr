@@ -450,14 +450,7 @@ class MyHandler(BaseHTTPRequestHandler):
 
             print "WTF"
             
-            # Set the response headers for json
-            self.send_response(200)
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.send_header('Access-Control-Allow-Headers',
-                             'X-Request, X-Requested-With')
-            self.send_header('Content-Type', 'application/json')
-            self.end_headers()
-
+            
 
             content_len = int(self.headers.getheader('content-length'))
             raw_json = self.rfile.read(content_len)
@@ -475,6 +468,15 @@ class MyHandler(BaseHTTPRequestHandler):
 
 
             data = earth_model.json_data()
+
+            # Set the response headers for json
+            self.send_response(200)
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Headers',
+                             'X-Request, X-Requested-With')
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+
 
             self.wfile.write(data)
             return
@@ -516,7 +518,7 @@ def main():
                                             keyfile=KEYFILE,
                                             server_side=True
                                             )
-            server.socket.settimeout(8.0)
+            server.socket.settimeout(25.0)
 
         else:
             server = HTTPServer((args.host, args.port), MyHandler)
