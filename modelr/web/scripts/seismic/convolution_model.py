@@ -10,7 +10,7 @@ from argparse import ArgumentParser
 from modelr.web.urlargparse import  wavelet_type
 from modelr.constants import WAVELETS 
 from modelr.web.defaults import default_parsers
-from agilegeo.util import noise
+from agilegeo.util import noise_db
 from modelr.reflectivity import do_convolve
 
 short_description = ("Convolution model with synthetic wavelets")
@@ -28,7 +28,7 @@ def add_arguments(parser):
                         interface='slider',
                         range=[-180,180])
 
-    parser.add_argument('noise', type=float, default=50,
+    parser.add_argument('snr', type=float, default=50.0,
                         help="Signal:noise (dB)",
                         interface='slider',
                         range=[-50,50])
@@ -64,7 +64,7 @@ def add_arguments(parser):
     return parser
 
 def run_script(earth_model, seismic_model, theta=None,
-               traces=None, noise=50):
+               traces=None, snr=50):
 
     if earth_model.reflectivity() is None:
 
@@ -82,13 +82,16 @@ def run_script(earth_model, seismic_model, theta=None,
     wavelets = seismic_model.wavelets()
 
     ref = earth_model.reflectivity(theta=theta)
-        
+    
+    noise = noise_db(ref, snr)
+    ref += noise
+
     seismic = do_convolve(wavelets,
                           ref,
                           traces=traces,
                           theta=theta)
 
-    noise = noise_db(seismic, noise)
-    seismic += noise
+    #noise = noise_db(seismic, snr)
+    #seismic += noise
 
     return seismic

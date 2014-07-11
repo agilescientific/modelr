@@ -47,8 +47,8 @@ class SeismicModel(object):
         self.args = args
         self.script = namespace['run_script']
 
-        self.noise = args.noise
-        
+        self.snr = args.snr
+
         self.wavelet_model = args.wavelet
 
         self.f_res = 'octave' #args.f_res
@@ -114,7 +114,8 @@ class SeismicModel(object):
 
         self.seismic = self.script(earth_model, self,
                                    theta=theta,
-                                   traces=traces)
+                                   traces=traces,
+                                   snr=self.snr)
 
     
 
