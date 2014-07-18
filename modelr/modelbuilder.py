@@ -182,6 +182,44 @@ def web2array(url,colours):
 ###########################################
 # Code to generate geometries
 
+def spectral_wedge(depth, length, width, subwedges):
+    """
+    Makes a spectral wedge.
+
+    Takes depth, length, width and the number of subwedges.
+
+    Returns a NumPy array of RGB triples ranging 0-1
+    of dimension: (depth, length, width, 3)
+
+    """
+
+    colours = {1: np.array([1.,0,0]),
+               2: np.array([0,1.,0]),
+               3: np.array([0,0,1.]),
+               4: np.array([1.,1.,0])
+               }
+
+    model = np.empty((depth,length,width,3))
+    model[..., :] = colours[1]
+
+    for xslice in range(int(length)):
+        thickness = (depth/3) * (xslice/length)
+        model[depth/3:(depth/3 + thickness),xslice,:,:] = colours[2]
+       
+        for (z,y,x),rgb in np.ndenumerate(model[depth/3:(depth/3 + thickness),xslice,:,:]):
+            for i in range(subwedges):
+                bottom = (depth/3) + (thickness) * (1 - (2*i+1)/(2.*subwedges) + y/(2.*subwedges*width))
+                top    = (depth/3) + (thickness) * (1 - (2*i+1)/(2.*subwedges) - y/(2.*subwedges*width))
+                
+                model[top:bottom,xslice,y,:] = colours[3]
+
+    model[:depth/3,:,:,:] = colours[4]
+
+    return model
+
+###########################################
+# Code to generate geometries
+
 def channel_svg(pad, thickness, traces, layers):
     """
     Makes a rounded channel.

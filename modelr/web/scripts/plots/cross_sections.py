@@ -17,8 +17,6 @@ short_description = ('Spatial, theta, f cross-sections')
 
 def add_arguments(parser):
 
-    
-                        
     parser.add_argument('trace',
                         type=int,
                         help='Trace',
