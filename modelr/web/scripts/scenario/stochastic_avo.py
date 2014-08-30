@@ -34,9 +34,11 @@ def add_arguments(parser):
                         default = '3200, 1900, 2500, 32, 19, 25',
                         required=True)
                         
-    parser.add_argument( 'iterations', type=int, default=50, 
+    parser.add_argument('iterations', type=int, default=50, 
                          help='Number of Monte Carlo simulations' )
-    
+
+    parser.add_argument('max_angle', type=float, default=30.0,
+                        help="Max. angle for gradient calculation")
                         
     parser.add_argument('reflectivity_method',
                         type=reflectivity_type,
@@ -219,7 +221,8 @@ def run_script(args):
                     horizontalalignment = 'left', verticalalignment = 'center' )  
             
                     
-            ax.text( x = float(mean_props[i][0]), y = hist_max / 5.0, s = which_label[0],
+            ax.text( x=float(mean_props[i][0]),
+                     y=hist_max / 5.0, s = which_label[0],
                          alpha=0.75, color=upper_color,
                          fontsize = '9',
                          horizontalalignment = 'center',
@@ -445,7 +448,7 @@ def run_script(args):
     plt.subplot(G[0+shift:3+shift,:])
     plt.hold(True)
     
-    max_ang = 30  # Max ang for computing gradient
+    max_ang = args.max_angle  # Max ang for computing gradient
 
     for i in range( args.iterations -1):
 
