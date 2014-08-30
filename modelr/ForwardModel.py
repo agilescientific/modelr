@@ -44,7 +44,9 @@ class ForwardModel(object):
         metadata["trace"] = \
           tuple(range(1,self.seismic_model.n_sensors +1))
 
-        metadata["dyn_range"] = tuple(np.linspace(1.0,100.0, 1000))
+        metadata["gain"] = tuple(np.linspace(0.0,2.0, 1000))
+
+        metadata["snr"] = tuple(np.linspace(-50.0, 50.0, 1000))
 
         metadata["moduli"] = {}
         for rock in self.earth_model.get_rocks():

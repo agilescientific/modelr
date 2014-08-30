@@ -33,12 +33,12 @@ def add_arguments(parser):
                         interface='slider',
                         help='TWT')
 
-    parser.add_argument('dyn_range',
+    parser.add_argument('gain',
                         type=float,
                         range=[0,1000],
                         default=500,
                         interface='slider',
-                        help='dynamic range')
+                        help='gain')
                         
     parser.add_argument('theta',
                         type=float,
@@ -58,7 +58,7 @@ def run_script(earth_model, seismic_model,
     matplotlib.interactive(False)
     cmap = 'seismic_r'
     #max/min amplitude for plot and colorbar scaling
-    extr1 = args.dyn_range / 1000.0
+    extr1 = 1 / (2.0 * (args.gain + 0.0001) / 1000.0)
 
     # Define the figure layout
     fig = plt.figure(figsize=[15,10], facecolor = 'white')
@@ -125,11 +125,11 @@ def run_script(earth_model, seismic_model,
     # Put colorbar legend on spatial cross section
     colorbar_ax = fig.add_axes([0.565,0.825,0.010,0.08])
     fig.colorbar(im, cax=colorbar_ax)
-    colorbar_ax.text( 0.5, -0.1, '%3.1f' % -extr1,
+    colorbar_ax.text( 0.5, -0.1, '%3.1f' % -1,
                       transform=colorbar_ax.transAxes,
                       horizontalalignment='center',
                       verticalalignment='top')
-    colorbar_ax.text(0.5, 1.1, '%3.1f' % extr1,
+    colorbar_ax.text(0.5, 1.1, '%3.1f' % 1,
                      transform=colorbar_ax.transAxes,
                      horizontalalignment='center')
     
@@ -220,8 +220,7 @@ def run_script(earth_model, seismic_model,
                          seismic_data.shape[0]*seismic_model.dt*1000,
                         0],
                        vmin = -extr1, vmax = extr1,
-                       interpolation='spline16'
-                       )
+                       interpolation='spline16')
 
     axarr[0][2].set_xlim(left=0, right=seismic_data.shape[3])
     axarr[0][2].set_ylim(top=0,
@@ -230,8 +229,6 @@ def run_script(earth_model, seismic_model,
     axarr[0][2].axhline(y=args.time*seismic_model.dt*1000.0,
                         lw=3, color='g')
     axarr[0][2].set_xscale('log', basex=2)
-    
-    #print "CENTER FREQS: " , seismic_model.wavelet_cf()
     
     axarr[0][2].set_title('wavelet gather')
     axarr[0][2].set_yticklabels(' ')

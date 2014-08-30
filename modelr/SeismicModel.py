@@ -112,6 +112,7 @@ class SeismicModel(object):
     def go(self,earth_model, theta=None, traces=None,
            wavelet=None):
 
+
         self.seismic = self.script(earth_model, self,
                                    theta=theta,
                                    traces=traces,

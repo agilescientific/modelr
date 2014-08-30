@@ -42,6 +42,12 @@ def add_arguments(parser):
                         range=[0,1000]
                         )
 
+    parser.add_argument('gain',
+                        type=float,
+                        range=[0,1000],
+                        default=500,
+                        interface='slider',
+                        help='gain')
     
 
     return parser
@@ -52,7 +58,7 @@ def run_script(earth_model,
     # Hard code colormap
     cmap='seismic_r'  
     # min / max scaling for colormap and wiggles
-    extr1 = 1.0 
+    extr1 = 1.0 / (2.0 * args.gain / 1000.0)
     # decimate number of columns in synthetic
     dec = 5
     
@@ -96,11 +102,11 @@ def run_script(earth_model,
     
     fig.colorbar(im, cax=colorbar_ax)
     colorbar_ax.invert_yaxis()
-    colorbar_ax.text( 0.5, -0.1, '%3.1f' % -extr1,
+    colorbar_ax.text( 0.5, -0.1, '%3.1f' % -1,
                       transform=colorbar_ax.transAxes,
                       horizontalalignment='center',
                       verticalalignment='top')
-    colorbar_ax.text(0.5, 1.1, '%3.1f' % extr1,
+    colorbar_ax.text(0.5, 1.1, '%3.1f' % 1,
                      transform=colorbar_ax.transAxes,
                      horizontalalignment='center')
     
