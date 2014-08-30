@@ -24,7 +24,7 @@ Modelr server is a Google-Charts-like API for geophysics! Submit tasks via a URL
 
 Example: 
 
-* `<https://www.modelr.org:8081/plot.jpeg?script=stochastic_avo.py&Rock0=2375.0%2C1000.0%2C2075.0%2C%0A%0950.0%2C50.0%2C50.0&Rock1=3400.0%2C2055.0%2C2300.0%2C%0A%0950.0%2C50.0%2C50.0&iterations=50&reflectivity_method=zoeppritz&type=scenario>`_
+* `<https://www.modelr.org/plot.jpeg?script=wedge_spatial.py&theta=0&f=25&colourmap=Greys&base1=variable-density&overlay1=none&base2=earth-model&overlay2=wiggle&opacity=0.5&Rock0=3000.0%2C1600.0%2C2500.0%2C%0A%09%20%2050.0%2C%2050.0%2C%2050.0&Rock1=2770.0%2C1780.0%2C2185.0%2C%0A%09%20%2050.0%2C%2050.0%2C%2050.0&Rock2=3000.0%2C1600.0%2C2500.0%2C%0A%09%20%2050.0%2C%2050.0%2C%2050.0&tslice=0.15&scale=1.0%2C99&type=scenario>`_
 
 Full interface
 +++++++++++++
