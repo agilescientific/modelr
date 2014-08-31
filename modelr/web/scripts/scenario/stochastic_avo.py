@@ -34,9 +34,11 @@ def add_arguments(parser):
                         default = '3200, 1900, 2500, 32, 19, 25',
                         required=True)
                         
-    parser.add_argument( 'iterations', type=int, default=50, 
-                         help='number of monte carlo simulations' )
-    
+    parser.add_argument('iterations', type=int, default=50, 
+                         help='Number of Monte Carlo simulations' )
+
+    parser.add_argument('max_angle', type=float, default=30.0,
+                        help="Max. angle for gradient calculation")
                         
     parser.add_argument('reflectivity_method',
                         type=reflectivity_type,
@@ -219,7 +221,8 @@ def run_script(args):
                     horizontalalignment = 'left', verticalalignment = 'center' )  
             
                     
-            ax.text( x = float(mean_props[i][0]), y = hist_max / 5.0, s = which_label[0],
+            ax.text( x=float(mean_props[i][0]),
+                     y=hist_max / 5.0, s = which_label[0],
                          alpha=0.75, color=upper_color,
                          fontsize = '9',
                          horizontalalignment = 'center',
@@ -444,14 +447,17 @@ def run_script(args):
     # ax_2 the AB plot
     plt.subplot(G[0+shift:3+shift,:])
     plt.hold(True)
+    
+    max_ang = args.max_angle  # Max ang for computing gradient
+
     for i in range( args.iterations -1):
 
-        plt.scatter( reflect[i,0], (reflect[i,50]-reflect[i,0] ),
+        plt.scatter( reflect[i,0], (reflect[i,max_ang]-reflect[i,0] ),
                      color = 'grey' , s = 20,
                      alpha = np.max((30./args.iterations, 0.2)) )
                      
     # Plot the average of the dots
-    plt.scatter( ave_reflect[0], ave_reflect[50]- ave_reflect[0],
+    plt.scatter( ave_reflect[0], ave_reflect[max_ang]- ave_reflect[0],
                  color = 'black' , s = 40, alpha= 0.5 )  
     
     # Annotation and making it nice
@@ -470,7 +476,7 @@ def run_script(args):
     plt.grid()
     
     # axis limits
-    
+        
     ylimits = (np.amin((-.3,np.nanmin(reflect[:,50]-reflect[:,0]))),
               np.amax((.3,np.nanmax(reflect[:,50]-reflect[:,0]))))
     xlimits = (np.amin((-.3,np.nanmin(reflect[:,0]))),

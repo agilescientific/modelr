@@ -1,3 +1,4 @@
+1# -*- coding: utf-8 -*-
 '''
 ===================
 modelr.web.server
@@ -329,7 +330,7 @@ class MyHandler(BaseHTTPRequestHandler):
 
         html = \
           template.render(msg=msg,
-                    available_scripts=self.get_available_scripts())
+            available_scripts=self.get_available_scripts(['scenario']))
         self.wfile.write(html)
         
 
@@ -412,16 +413,16 @@ class MyHandler(BaseHTTPRequestHandler):
             forward_model = ForwardModel(earth_model, seismic_model,
                                          plots)
 
-            #prof.runctx('self.run_json(forward_model)',
-            #            {'self': self, 'forward_model':forward_model},
-            #            {},
-            #            'profile.test')
+            prof.runctx('self.run_json(forward_model)',
+                        {'self': self, 'forward_model':forward_model},
+                        {},
+                        'profile.test')
 
-            p = mp.Process(target=self.run_json,
-                           args=(forward_model,))
+            #p = mp.Process(target=self.run_json,
+            #               args=(forward_model,))
 
-            p.start()
-            p.join()
+            #p.start()
+            #p.join()
 
             return
 

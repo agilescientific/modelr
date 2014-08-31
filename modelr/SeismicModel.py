@@ -30,7 +30,7 @@ class SeismicModel(object):
         :param namespace: Name space of the modeling script
         """
 
-                # Parse additional arguments that may be required by the
+        # Parse additional arguments that may be required by the
         # script
         
         add_arguments = namespace['add_arguments']
@@ -47,7 +47,8 @@ class SeismicModel(object):
         self.args = args
         self.script = namespace['run_script']
 
-        #self.noise = args.noise / 1000.0
+        self.snr = args.snr
+
         self.wavelet_model = args.wavelet
 
         self.f_res = 'octave' #args.f_res
@@ -111,9 +112,11 @@ class SeismicModel(object):
     def go(self,earth_model, theta=None, traces=None,
            wavelet=None):
 
+
         self.seismic = self.script(earth_model, self,
                                    theta=theta,
-                                   traces=traces)
+                                   traces=traces,
+                                   snr=self.snr)
 
     
 

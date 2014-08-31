@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 =========================
 modelr.EarthModel.py
@@ -30,7 +31,7 @@ class EarthModel(object):
     Class to store earth models.
     '''
     
-    def __init__(self,earth_structure, namespace):
+    def __init__(self, earth_structure, namespace):
         """
         Class for handling earth models.
 
@@ -49,7 +50,8 @@ class EarthModel(object):
             raise SendHelp
         
         self.reflect_file = str(earth_structure["datafile"])
-        
+
+        self.property_map = {}
         # Load the image data
         if earth_structure.get('update_model', None):
             response = requests.get(earth_structure["image"])
@@ -61,12 +63,12 @@ class EarthModel(object):
               Image.open(StringIO(response.content)).convert("RGB")
             image.load()
             self.image = np.asarray(image, dtype="int32")
-
+            
             self.units = args.units
             self.depth = args.depth
             self.reflectivity_method = args.reflectivity_method
 
-            self.property_map = {}
+ 
 
             # Keep only a direct map for legacy. Input data has name
             # attribute we are going to ignore
@@ -79,13 +81,25 @@ class EarthModel(object):
             for colour in mapping:
                 rock = \
                   rock_properties_type(mapping[colour]["property"])
-
+                rock.name = mapping[colour]["name"]
+                
                 rgb = colour.split('(')[1].split(')')[0].split(',')
                 self.vp_lookup[int(rgb[0]), int(rgb[1]),
                                int(rgb[2])] = rock.vp
                                              
                 self.property_map[colour] = rock
     
+
+    
+    def get_rocks(self):
+
+        # Not actually using this because I think I need
+        # the keys too... or something to tell what the rocks
+        # are later, so I can tabulate them, or whatever.
+
+        return self.property_map.values()
+
+
 
     def time2depth(self, dz):
         

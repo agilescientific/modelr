@@ -7,13 +7,13 @@ short_description = ('Define the physical limits, domain, and reflectivity model
 def add_arguments(parser):
 
     
-    parser.add_argument('depth', type=float, default=1000.0,
-                       help="Z range of the model")
-    
     parser.add_argument('units', type=str, default='depth',
-                        help="Model domain",
+                        help="z-axis domain",
                         choices=['time', 'depth'])
 
+    parser.add_argument('depth', type=float, default=1000.0,
+                       help="z-range of model")
+    
     parser.add_argument('reflectivity_method',
                         type=reflectivity_type,
                         help='Reflectivity model',
