@@ -40,7 +40,7 @@ def main():
         description='Web Service like google charts API',
         long_description=long_description,
         license='BSD',
-        install_requires=['agilegeo==0.1.3','jinja2', 'pypng', 'requests',
+        install_requires=['agilegeo==0.1.4','jinja2', 'pypng', 'requests',
                           'svgwrite'],
         entry_points={
                     'console_scripts': [
