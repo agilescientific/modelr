@@ -45,7 +45,7 @@ def add_arguments(parser):
     parser.add_argument('gain',
                         type=float,
                         range=[0,1000],
-                        default=500,
+                        default=100,
                         interface='slider',
                         help='gain')
     
@@ -58,7 +58,7 @@ def run_script(earth_model,
     # Hard code colormap
     cmap='seismic_r'  
     # min / max scaling for colormap and wiggles
-    extr1 = 1.0 / (2.0 * args.gain / 1000.0)
+    extr1 = 1.0 / (10.0 * args.gain / 1000.0)
     # decimate number of columns in synthetic
     dec = 5
     

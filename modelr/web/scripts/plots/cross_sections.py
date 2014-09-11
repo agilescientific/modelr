@@ -36,7 +36,7 @@ def add_arguments(parser):
     parser.add_argument('gain',
                         type=float,
                         range=[0,1000],
-                        default=500,
+                        default=100,
                         interface='slider',
                         help='gain')
                         
@@ -58,7 +58,7 @@ def run_script(earth_model, seismic_model,
     matplotlib.interactive(False)
     cmap = 'seismic_r'
     #max/min amplitude for plot and colorbar scaling
-    extr1 = 1 / (2.0 * (args.gain + 0.0001) / 1000.0)
+    extr1 = 1 / (10.0 * (args.gain + 0.0001) / 1000.0)
 
     # Define the figure layout
     fig = plt.figure(figsize=[15,10], facecolor = 'white')
