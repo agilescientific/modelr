@@ -716,7 +716,7 @@ def run_script(args):
                 transform=ax.transData,
                 color='black', fontsize=fs, fontweight = 'bold', alpha=a2/2.0)
                               
-    return get_figure_data()
+    return get_figure_data(), {"critical_angle": 45.0} 
     
     
 def main():

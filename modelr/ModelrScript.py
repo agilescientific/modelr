@@ -24,6 +24,6 @@ class ModelrScript(object):
     
     def go(self):
 
-        self.plot = self.script(self.args)
-        metadata = {}
+        self.plot, metadata = self.script(self.args)
+        
         return self.plot, metadata

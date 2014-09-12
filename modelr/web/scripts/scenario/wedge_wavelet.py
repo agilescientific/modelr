@@ -113,8 +113,7 @@ def run_script(args):
                      layers = layers
                    )
 
-    
-    return modelr_plot( model, colourmap, args )
+    return modelr_plot(model, colourmap, args)
   
 
 def main():

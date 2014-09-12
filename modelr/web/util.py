@@ -451,8 +451,13 @@ model to physical rock properties.
 
     fig.tight_layout()
 
+    metadata = {"steady_state": steady_state,
+                "tuning_max": amax_tune,
+                "tuning_min": amin_tune,
+                "tuning_avg": aun_tuned}
+                
     
-    return get_figure_data()
+    return get_figure_data(), metadata
 
 def multi_plot(model, reflectivity, seismic, traces,
                f, theta, args):

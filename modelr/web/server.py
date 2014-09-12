@@ -273,7 +273,7 @@ class MyHandler(BaseHTTPRequestHandler):
             self.wfile.write(parser.help_html)
             return
         
-        jpeg_data = script_main(args) 
+        jpeg_data = script_main(args)[0]
         
         self.send_response(200)
         self.send_header('Content-type', 'image/jpeg')
