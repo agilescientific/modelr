@@ -17,7 +17,18 @@ from scipy.signal import hilbert
 from modelr.reflectivity import get_reflectivity, do_convolve
 
 import StringIO
-        
+
+
+def np_float(value):
+    """
+    Checks to make sure the value is a float and not a 1D numpy array
+    """
+    if np.ndim(value)==1:
+        return value[0]
+    else:
+        return value
+
+    
 def get_figure_data(transparent=False):
     '''
     Return the current plot as a binary blob. 
@@ -417,10 +428,12 @@ model to physical rock properties.
         axarr[1, p].axhline(y=aun_tuned, alpha=0.15, lw=3, color = 'g')
         
         # vertical line
-        axarr[1, p].axvline(x=xax[np.argmax(y)], alpha=0.15, lw=3, color='b' )
-        axarr[1, p].axvline(x=xax[np.argmin(y)], alpha=0.15, lw=3, color='b' )
-        axarr[0, p].axvline(x=xax[np.argmax(y)], alpha=0.15, lw=3, color='b' )
-        axarr[0, p].axvline(x=xax[np.argmin(y)], alpha=0.15, lw=3, color='b' )
+        max_loc = xax[np.argmax(y)]
+        min_loc = xax[np.argmin(y)]
+        axarr[1, p].axvline(x=max_loc, alpha=0.15, lw=3, color='b' )
+        axarr[1, p].axvline(x=min_loc, alpha=0.15, lw=3, color='b' )
+        axarr[0, p].axvline(x=max_loc, alpha=0.15, lw=3, color='b' )
+        axarr[0, p].axvline(x=min_loc, alpha=0.15, lw=3, color='b' )
         # draw vertical line at onset of steady state
         y_r = np.array(y[::-1])
     
@@ -451,10 +464,12 @@ model to physical rock properties.
 
     fig.tight_layout()
 
-    metadata = {"steady_state": steady_state,
-                "tuning_max": amax_tune,
-                "tuning_min": amin_tune,
-                "tuning_avg": aun_tuned}
+    metadata = {"steady state": np_float(xax[-steady_state]),
+                "tuning max. loc.": np.float(max_loc),
+                "tuning min. loc.": np.float(min_loc),
+                "tuning max. amp.": np_float(amax_tune),
+                "tuning min. amp.": np_float(amin_tune),
+                "tuning avg. amp.": np_float(aun_tuned)}
                 
     
     return get_figure_data(), metadata

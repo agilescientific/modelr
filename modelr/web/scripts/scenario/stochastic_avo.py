@@ -241,6 +241,7 @@ def run_script(args):
     #
     plt.subplot(G[0:3,:])
     plt.hold(True)
+    critical_angles = []
     for i in range( args.iterations -1):
         # Do the AVO template as an underlay
         # HERE        
@@ -250,7 +251,13 @@ def run_script(args):
         if vp1[i] > vp0[i]:
             theta_crit = arcsin( vp0[i] / vp1[i] )*180/np.pi
             plt.axvline( x= theta_crit , color='black', lw = 1.0, alpha = np.min((30./args.iterations, 0.5)))
-            
+            critical_angles.append(theta_crit)
+
+    if len(critical_angles) > 0:
+        critical_angle = np.mean(critical_angles)
+    else:
+        critical_angle = 'N/A'
+    
     plt.plot( theta, ave_reflect, color='black', alpha = 0.5, lw= 1.5 )
     plt.grid()
     
@@ -714,9 +721,10 @@ def run_script(args):
                 horizontalalignment='center',
                 rotation = angle,
                 transform=ax.transData,
-                color='black', fontsize=fs, fontweight = 'bold', alpha=a2/2.0)
+                color='black', fontsize=fs, fontweight = 'bold',
+                alpha=a2/2.0)
                               
-    return get_figure_data(), {"critical_angle": 45.0} 
+    return get_figure_data(), {"mean critical angle": critical_angle} 
     
     
 def main():
