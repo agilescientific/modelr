@@ -473,10 +473,16 @@ def main():
         
         if not args.local:
             server = ThreadedHTTPServer((args.host, args.port), MyHandler)
-        
-            server.socket = ssl.wrap_socket(server.socket,
-                                            certfile=CERTFILE,
-                                            keyfile=KEYFILE,
+            
+            # Force TLS v1.2. Not important per se, but the 
+            # main point is to disallow SSL v3, which is insecure.
+            # I think we're supposed to load certs to the context,
+            # but if this doesn't work we can put that bit back
+            # in the socket wrapping part. 
+            context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+            context.load_cert_chain(certfile=CERTFILE, keyfile=KEYFILE)
+
+            server.socket = context.wrap_socket(server.socket,
                                             server_side=True
                                             )
             server.socket.settimeout(8.0)
@@ -489,6 +495,7 @@ def main():
                                         
         print 'started httpserver...'
         server.serve_forever()
+
     except KeyboardInterrupt:
         print '^C received, shutting down server'
         server.socket.close()
