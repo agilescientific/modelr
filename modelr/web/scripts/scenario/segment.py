@@ -113,4 +113,13 @@ def image_segment(img_location):
     for x,y in zip(index[0], index[1]):
         newest[x,y] = closest(x,y, dilated, 50,[1,2,3])
 
+
+    fig = plt.figure(figsize=(7, 7))
+    ax = fig.add_subplot(1, 1, 1)
+
+    plt.imshow(newest, cmap='Dark2')
+
+    ax.set_xticks([])
+    ax.set_yticks([])
+
     return newest
