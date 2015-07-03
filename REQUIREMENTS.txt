@@ -1,0 +1,5 @@
+agilegeo
+jinja2
+pypng
+requests
+svgwrite
