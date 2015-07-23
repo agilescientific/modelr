@@ -1,8 +1,15 @@
+sudo: False
 language: python
 python:
-   - "2.7"
+   - 2.7
+
+before_install:
+   - pip install coverage
 
 install: "pip install -r REQUIREMENTS.txt"
 
-script: python run_tests.py
+script: coverage run run_tests.py
+
+after_success:
+   - coveralls
 
