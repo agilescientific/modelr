@@ -256,7 +256,7 @@ class FluidSub1D(modelrAPI):
             # TODO use a generator
             i = j
 
-        return output
+        self.data = output
 
     def get(self, keys):
         """
@@ -297,12 +297,60 @@ class FluidSub1D(modelrAPI):
 
     @property
     def vp(self):
-        return self._get_data("vp")
+        return self.data["vp"]
 
     @property
     def rho(self):
-        return self._get_data("rho")
+        return self.data["rho"]
 
     @property
     def vs(self):
-        return self._get_data("vs")
+        return self.data["vs"]
+
+    @property
+    def phi(self):
+        return self.data["phi"]
+
+    @property
+    def vclay(self):
+        return self.data["vclay"]
+
+    @property
+    def rhow(self):
+        return self.data["rhow"]
+
+    @property
+    def rhohc(self):
+        return self.data["rhohc"]
+
+    @property
+    def Kw(self):
+        return self.data["Kw"]
+
+    @property
+    def Khc(self):
+        return self.data["Khc"]
+
+    @property
+    def Sw(self):
+        return self.data["Sw"]
+
+    @property
+    def rhow_sub(self):
+        return self.data["rhow_sub"]
+
+    @property
+    def rhohc_sub(self):
+        return self.data["rhohc_sub"]
+
+    @property
+    def Kw_sub(self):
+        return self.data["Kw_sub"]
+
+    @property
+    def Khc_sub(self):
+        return self.data["Khc_sub"]
+
+    @property
+    def Sw_sub(self):
+        return self.data["Sw_sub"]
