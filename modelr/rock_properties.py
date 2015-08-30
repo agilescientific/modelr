@@ -6,32 +6,32 @@ modelr.rock_properties
 Container for physical rock properties
 '''
 
-from agilegeo.avo import moduli
-    
+from bruges.rockphysics import moduli_dict as moduli
+
+
 class RockProperties(object):
     '''
     Class to store rock properties.
-    
+
     :param vp: pressure wave velocity
     :param vs: shear wave velocity
     :param rho: bulk density
-    
+
     '''
-    
+
     def __init__(self, vp, vs=None, rho=None, vp_sig=0,
                  vs_sig=0, rho_sig=0, units='si'):
 
         # Deal with Imperial units
 
         if units != 'si':
-            vp  = vp  * 0.30480
-            vs  = vs  * 0.30480
+            vp = vp * 0.30480
+            vs = vs * 0.30480
             rho = rho * 1000.0
 
-            vp_sig  = vp_sig  * 0.30480
-            vs_sig  = vs_sig  * 0.30480
+            vp_sig = vp_sig * 0.30480
+            vs_sig = vs_sig * 0.30480
             rho_sig = rho_sig * 1000.0
-
 
         # Deal with missing values
 
@@ -40,13 +40,12 @@ class RockProperties(object):
             vs = vp / 2.0
         else:
             vs = vs
-            
+
         # Gardner equation
         if rho is None:
             rho = 1000 * 0.23 * (vp * 3.28084)**0.25
         else:
             rho = rho
-            
 
         # Set properties
 
@@ -57,10 +56,10 @@ class RockProperties(object):
         self.vp_sig = vp_sig
         self.vs_sig = vs_sig
         self.rho_sig = rho_sig
-        
+
     def __repr__(self):
         return 'RockProperties(vp=%r, rho=%r, vs=%r)' % \
-          (self.vp, self.rho, self.vs)
+            (self.vp, self.rho, self.vs)
 
     def get_moduli(self):
         return moduli(vp=self.vp, vs=self.vs, rho=self.rho)

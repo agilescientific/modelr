@@ -8,21 +8,17 @@ import matplotlib
 from scipy.interpolate import interp1d
 
 import urllib2
-import matplotlib.pyplot as plt
 
 from argparse import ArgumentParser
 from modelr.web.defaults import default_parsers
 from modelr.web.urlargparse import rock_properties_type,\
-     earth_model_type
+    earth_model_type
 from modelr.constants import dt
-from agilegeo.avo import zoeppritz
+from bruges.reflection import zoeppritz
 
 from modelr.web.util import modelr_plot
-from agilegeo.wavelet import ricker
+from bruges.filter import ricker
 
-import modelr.modelbuilder as mb
-
-from svgwrite import rgb
 from StringIO import StringIO
 
 from PIL import Image

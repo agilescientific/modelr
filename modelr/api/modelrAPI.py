@@ -295,6 +295,11 @@ class FluidSub1D(modelrAPI):
 
         return cls(layer_dict, data["dz"])
 
+    def smith_sub(self):
+        """
+        Returns vp, vs, rho using smith fluid substition
+        """
+        
     @property
     def vp(self):
         return self.data["vp"]

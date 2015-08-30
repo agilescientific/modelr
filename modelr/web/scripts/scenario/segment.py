@@ -2,7 +2,7 @@ import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
 from skimage import io, color, segmentation, exposure
-from skimage.morphology import disk, opening, dilation, erosion, skeletonize
+from skimage.morphology import disk,  dilation, erosion, skeletonize
 from skimage.measure import label
 
 

@@ -7,11 +7,10 @@ Created on May 3, 2012
 
 @author: sean
 '''
-import gc
-import tempfile
-import matplotlib as mpl
+
+
 import matplotlib.pyplot as plt
-from agilegeo.wavelet import ricker
+from bruges.filter import ricker
 import numpy as np
 from scipy.signal import hilbert
 from modelr.reflectivity import get_reflectivity, do_convolve
@@ -23,16 +22,17 @@ def np_float(value):
     """
     Checks to make sure the value is a float and not a 1D numpy array
     """
-    if np.ndim(value)==1:
+    if np.ndim(value) == 1:
         return value[0]
     else:
         return value
 
-    
+
 def get_figure_data(transparent=False):
     '''
-    Return the current plot as a binary blob. 
+    Return the current plot as a binary blob.
     '''
+
     fig_path = StringIO.StringIO()
     plt.savefig(fig_path, transparent=transparent)
     plt.close()
@@ -41,49 +41,47 @@ def get_figure_data(transparent=False):
 
     data = fig_path.buf
 
-        
     # Alternative approach to do it in memory rather than on disk
-    #image_file = tempfile.SpooledTemporaryFile(suffix='.png')
-    #plt.savefig(image_file, format='png') 
-    #data = image_file.read()
-    #image_file.close()
+    # image_file = tempfile.SpooledTemporaryFile(suffix='.png')
+    # plt.savefig(image_file, format='png')
+    # data = image_file.read()
+    # image_file.close()
     return data
 
 
-def wiggle(data, tstart,dt=1, line_colour='black',
+def wiggle(data, tstart, dt=1, line_colour='black',
            fill_colour='blue',
-           opacity= 0.5, skipt=0, gain=1, lwidth=.5, xax=1,
+           opacity=0.5, skipt=0, gain=1, lwidth=.5, xax=1,
            quadrant=plt):
     """
     Make a wiggle trace and plots it on the current figure.
-    
-    :param data: as a 2D array indexed as [samples, traces]      
+
+    :param data: as a 2D array indexed as [samples, traces]
     :param dt: sample interval of the data [seconds].
     :param skipt: number of traces to skip
     :param gain: scaling factor for the traces
     :param lwidth: width of line
     :param xax: scaler of axis to match image plot
-    """  
-  
-
+    """
     t = (np.arange(data.shape[0]) * dt * 1000) + tstart
 
     # Need to resample this time axis to the same size as data.shape[1]
 
-    for i in range(0,data.shape[1],skipt+1):
+    for i in range(0, data.shape[1], skipt + 1):
 
-        trace = data[:,i]
-        
-        trace[0]=0      # make trace start at zero
-        trace[-1]=0     # make trace end at zero
-        
-        new_trace = gain*(trace/np.amax(data))   # gain
+        trace = data[:, i]
 
-        scaler = (np.amax(xax)-np.amin(xax))/float( len(xax)) # scale for window     
-        
-        quadrant.plot( (i + new_trace) * scaler + min(xax), t, color=line_colour, 
-                  linewidth = lwidth, alpha = opacity)
-                
+        trace[0] = 0      # make trace start at zero
+        trace[-1] = 0     # make trace end at zero
+        new_trace = gain * (trace / np.amax(data))   # gain
+
+        scaler = ((np.amax(xax) - np.amin(xax)) /
+                  float(len(xax))) # scale for window
+
+        quadrant.plot((i + new_trace) * scaler + min(xax),
+                      t, color=line_colour,
+                      linewidth=lwidth, alpha=opacity)
+
         quadrant.fill_betweenx(t, ((i + new_trace) * scaler)+min(xax), (i * scaler)+min(xax) ,  new_trace > 0,
                          color=fill_colour, alpha=opacity, lw=0)
                 
