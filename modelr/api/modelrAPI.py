@@ -238,6 +238,8 @@ class FluidSub1D(modelrAPI):
         for layer in self.layers:
 
             j = i + np.ceil(layer["thickness"] / self.dz)
+            if j > n_samps:
+                j = n_samps
 
             rock = layer["rock"]
             output["vp"][i:j] = randn(j - i) * rock.vp_std + rock.vp
@@ -264,8 +266,8 @@ class FluidSub1D(modelrAPI):
                 # fill in the substitution fluids
                 k = i
                 for subfluid in layer["subfluids"]:
-                    l = k + np.ceil(subfluid.thickness / subfluid.dz)
-                    fluid = subfluid.fluid
+                    l = k + np.ceil(subfluid["thickness"] / self.dz)
+                    fluid = subfluid["fluid"]
                     output["rhow_sub"][k:l] = fluid.rho_w
                     output["rhohc_sub"][k:l] = fluid.rho_hc
                     output["Kw_sub"][k:l] = fluid.Kw
@@ -306,7 +308,7 @@ class FluidSub1D(modelrAPI):
 
             rock = Rock.from_json(layer["rock"])
             thickness = float(layer["thickness"])
-            subfluids = [{"fluid": Fluid.from_json(subfluid.fluid),
+            subfluids = [{"fluid": Fluid.from_json(subfluid["fluid"]),
                           "thickness": float(subfluid["thickness"])}
                          for subfluid in layer["subfluids"]]
 
