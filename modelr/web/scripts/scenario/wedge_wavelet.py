@@ -13,7 +13,7 @@ from modelr.web.util import modelr_plot
 
 import modelr.modelbuilder as mb
 from bruges.reflection import zoeppritz
-from bruges.filter import ricker
+from bruges.filters import ricker
 from svgwrite import rgb
 
 # This is required for Script help

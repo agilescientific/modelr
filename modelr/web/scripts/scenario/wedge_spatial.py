@@ -11,7 +11,7 @@ from modelr.web.urlargparse import rock_properties_type
 from bruges.reflection import zoeppritz
 
 from modelr.web.util import modelr_plot
-from bruges.filter import ricker
+from bruges.filters import ricker
 
 import modelr.modelbuilder as mb
 

@@ -9,7 +9,7 @@ from modelr.constants import WAVELETS, wavelet_duration
 import numpy as np
 from modelr.web.urlargparse import SendHelp, URLArgumentParser
 
-from bruges.filter import rotate_phase
+from bruges.filters import rotate_phase
 
 
 class SeismicModel(object):

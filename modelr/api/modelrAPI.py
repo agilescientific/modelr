@@ -3,6 +3,8 @@ from StringIO import StringIO
 import numpy as np
 from PIL import Image
 from numpy.random import randn
+from bruges.rockphysics import smith_fluidsub
+from modelr.constants import WAVELETS
 
 
 class modelrAPIException(Exception):
@@ -83,20 +85,33 @@ class Rock(modelrAPI):
 
     handler = 'rock'
 
-    def __init__(self, vp, vs, rho, porosity,
-                 vclay, vp_std=0.0,
-                 vs_std=0.0, rho_std=0.0, **kwargs):
+    def __init__(self, vp=3500, vs=2000, rho=3000,
+                 porosity=.2, vclay=None, kclay=None,
+                 kqtz=None, vp_std=0.0,
+                 vs_std=0.0, rho_std=0.0,
+                 fluid=None, *args, **kwargs):
 
         self.vp = vp
         self.vs = vs
         self.rho = rho
         self.porosity = porosity
         self.vclay = vclay
+        self.kclay = kclay
+        self.kqtz = kqtz
+
+        if type(fluid) is dict:
+            self.fluid = Fluid.from_json(fluid)
+        else:
+            self.fluid = fluid
 
         # uncertainties
         self.vp_std = vp_std
         self.rho_std = rho_std
         self.vs_std = vs_std
+
+    @property
+    def phi(self):
+        return self.porosity
 
 
 class Fluid(modelrAPI):
@@ -109,6 +124,13 @@ class Fluid(modelrAPI):
         self.Kw = Kw
         self.Khc = Khc
         self.Sw = Sw
+
+    @classmethod
+    def from_json(cls, data):
+
+        return cls(data["rho_w"], data["rho_hc"],
+                   data["k_w"], data["k_hc"],
+                   data["sw"])
 
 
 class ImageModel(modelrAPI):
@@ -198,10 +220,13 @@ class FluidSub1D(modelrAPI):
 
     def _set_data(self):
 
-        depth = sum([layer.thickness for layer in self.layers])
+        depth = sum([layer["thickness"] for layer in self.layers])
         n_samps = int(depth / self.dz)
 
+        self.z = np.arange(n_samps) * self.dz
+
         names = ['vp', 'vs', 'rho', 'phi', 'vclay',
+                 'Kclay', 'Kqtz',
                  'rhow', 'rhohc', 'Kw', 'Khc', 'Sw',
                  'rhow_sub', 'rhohc_sub', 'Kw_sub',
                  'Khc_sub', 'Sw_sub']
@@ -220,38 +245,35 @@ class FluidSub1D(modelrAPI):
             output["rho"][i:j] = randn(j - i) * rock.rho_std + rock.rho
             output["phi"][i:j] = rock.phi
             output["vclay"][i:j] = rock.vclay
+            output["Kclay"] = rock.kclay
+            output["Kqtz"] = rock.kqtz
 
-            output["rhow"][i:j] = rock.fluid.rhow
-            output["rhohc"][i:j] = rock.fluid.rhohc
-            output["Kw"][i:j] = rock.fluid.Kw
-            output["Khc"][i:j] = rock.fluid.Khc
-            output["Sw"][i:j] = rock.fluid.Sw
+            if rock.fluid:
+                output["rhow"][i:j] = rock.fluid.rho_w
+                output["rhohc"][i:j] = rock.fluid.rho_hc
+                output["Kw"][i:j] = rock.fluid.Kw
+                output["Khc"][i:j] = rock.fluid.Khc
+                output["Sw"][i:j] = rock.fluid.Sw
 
-            output["rhow"][i:j] = rock.fluid.rhow
-            output["rhohc"][i:j] = rock.fluid.rhohc
-            output["Kw"][i:j] = rock.fluid.Kw
-            output["Khc"][i:j] = rock.fluid.Khc
-            output["Sw"][i:j] = rock.fluid.Sw
+                output["rhow"][i:j] = rock.fluid.rho_w
+                output["rhohc"][i:j] = rock.fluid.rho_hc
+                output["Kw"][i:j] = rock.fluid.Kw
+                output["Khc"][i:j] = rock.fluid.Khc
+                output["Sw"][i:j] = rock.fluid.Sw
 
-            if layer["subfluids"]:
+                # fill in the substitution fluids
                 k = i
                 for subfluid in layer["subfluids"]:
                     l = k + np.ceil(subfluid.thickness / subfluid.dz)
                     fluid = subfluid.fluid
-                    output["rhow_sub"][k:l] = fluid.rhow
-                    output["rhohc_sub"][k:l] = fluid.rhohc
+                    output["rhow_sub"][k:l] = fluid.rho_w
+                    output["rhohc_sub"][k:l] = fluid.rho_hc
                     output["Kw_sub"][k:l] = fluid.Kw
                     output["Khc_sub"][k:l] = fluid.Khc
                     output["Sw_sub"][k:l] = fluid.Sw
 
                     # TODO use a generator
                     k = l
-            else:
-                output["rhow"][i:j] = rock.fluid.rhow
-                output["rhohc"][i:j] = rock.fluid.rhohc
-                output["Kw"][i:j] = rock.fluid.Kw
-                output["Khc"][i:j] = rock.fluid.Khc
-                output["Sw"][i:j] = rock.fluid.Sw
 
             # TODO use a generator
             i = j
@@ -271,35 +293,51 @@ class FluidSub1D(modelrAPI):
 
         example
        {"dz": 1.0,
-        "layers": [{"rock_key": ROCKDBKEY, "thickness": 100.0,
-                    "subfluids": [{'fluid_key': FLUIDDBKEY, "thickness": 50.0},
-                      {'fluid_key': FLUIDDBKEY, "thickness": 50.0}]},
-                   {"rock_key": ROCKDBKEY, "thickness": 100.0,
-                    "subfluids":[{'fluid_key': FLUIDDBKEY, "thickness": 50.0},
-                               {'fluid_key': FLUIDDBKEY, "thickness": 50.0}]}]}
+        "layers": [{"rock": rock_json, "thickness": 100.0,
+                    "subfluids": [{'fluid': fluid_json, "thickness": 50.0},
+                      {'fluid_key': fluid_json, "thickness": 50.0}]},
+                   {"rock_key": rock_json, "thickness": 100.0,
+                    "subfluids":[{'fluid_key': fluid_json, "thickness": 50.0},
+                              {'fluid_key': fluid_json, "thickness": 50.0}]}]}
         """
 
         layers = []
         for layer in data["layers"]:
 
-            layer_dict = {}
-            rock = Rock.get(layer["rock_key"])
-            thickness = layer["thickness"]
-            subfluids = [{"fluid": Fluid.get(fluid["fluid_key"]),
-                          "thickness": fluid["thickness"]}
-                         for fluid in layer["subfluids"]]
+            rock = Rock.from_json(layer["rock"])
+            thickness = float(layer["thickness"])
+            subfluids = [{"fluid": Fluid.from_json(subfluid.fluid),
+                          "thickness": float(subfluid["thickness"])}
+                         for subfluid in layer["subfluids"]]
 
-            layer_dict.update(rock=rock, thickness=thickness,
-                              subfluids=subfluids)
+            layer_dict = {"rock": rock,
+                          "thickness": thickness,
+                          "subfluids": subfluids}
             layers.append(layer_dict)
 
-        return cls(layer_dict, data["dz"])
+        return cls(layers, data["dz"])
 
     def smith_sub(self):
         """
         Returns vp, vs, rho using smith fluid substition
         """
-        
+
+        vp, vs, rho = smith_fluidsub(
+            self.vp, self.vs, self.rho, self.phi,
+            self.rhow, self.rhohc, self.Sw,
+            self.Sw_sub, self.Kw, self.Khc,
+            self.Kclay, self.Kqtz,
+            vclay=self.vclay,
+            rhownew=self.rhow_sub,
+            rhohcnew=self.rhohc_sub,
+            kwnew=self.Kw_sub, khcnew=self.Khc_sub)
+
+        vp[~np.isfinite(vp)] = self.vp[~np.isfinite(vp)]
+        vs[~np.isfinite(vs)] = self.vs[~np.isfinite(vs)]
+        rho[~np.isfinite(rho)] = self.rho[~np.isfinite(rho)]
+
+        return (vp, vs, rho)
+
     @property
     def vp(self):
         return self.data["vp"]
@@ -319,6 +357,14 @@ class FluidSub1D(modelrAPI):
     @property
     def vclay(self):
         return self.data["vclay"]
+
+    @property
+    def Kclay(self):
+        return self.data["Kclay"]
+
+    @property
+    def Kqtz(self):
+        return self.data["Kqtz"]
 
     @property
     def rhow(self):
@@ -359,3 +405,24 @@ class FluidSub1D(modelrAPI):
     @property
     def Sw_sub(self):
         return self.data["Sw_sub"]
+
+
+class Seismic(modelrAPI):
+
+    @classmethod
+    def get(self, keys):
+        pass
+
+    def __init__(self, wavelet='ricker', dt=0.001,
+                 frequency=20.0, theta=range(0, 30, 2)):
+
+        self.wavelet = WAVELETS[wavelet]
+        self.dt = dt
+        self.f = float(frequency)
+        self.theta = theta
+
+    @property
+    def src(self):
+
+        return self.wavelet(.1, self.dt, self.f)
+    

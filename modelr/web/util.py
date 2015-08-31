@@ -10,7 +10,7 @@ Created on May 3, 2012
 
 
 import matplotlib.pyplot as plt
-from bruges.filter import ricker
+from bruges.filters import ricker
 import numpy as np
 from scipy.signal import hilbert
 from modelr.reflectivity import get_reflectivity, do_convolve

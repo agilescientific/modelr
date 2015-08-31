@@ -4,7 +4,7 @@ import numpy as np
 from modelr.rock_properties import RockProperties
 from modelr.reflectivity import rock_reflectivity, get_reflectivity, \
     do_convolve, get_boundaries
-from bruges.filter import ricker
+from bruges.filters import ricker
 
 from svgwrite import rgb
 

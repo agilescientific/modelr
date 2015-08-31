@@ -195,12 +195,15 @@ class MyHandler(BaseHTTPRequestHandler):
                 script = parameters.pop("script", None)
                 script_type = parameters.pop("type", None)
 
+                print "running", script, script_type
+                payload = json.loads(parameters.pop("payload")[0])
+
                 # Get the namespace
                 namespace = self.eval_script(script, script_type)
                 if namespace is None:
                     return
 
-                payload = json.parse(parameters["payload"])
+                # payload = json.parse(parameters["payload"])
                 script_main = namespace["run_script"]
 
                 # Run in sub-process to prevent memory hogging

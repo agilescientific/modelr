@@ -1,5 +1,5 @@
 from bruges import reflection
-from bruges import filter as wavelet
+import bruges.filters as wavelet
 
 """
 This file holds data strctures and constants used in the modelr

@@ -17,7 +17,7 @@ from modelr.constants import dt
 from bruges.reflection import zoeppritz
 
 from modelr.web.util import modelr_plot
-from bruges.filter import ricker
+from bruges.filters import ricker
 
 from StringIO import StringIO
 
