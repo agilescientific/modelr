@@ -36,11 +36,11 @@ class modelrAPI(object):
                "key": "DATABASEKEY"}]
         """
 
-        payload = {"ls": True, "auth": cls.auth}
-        r = requests.get(cls.url, params=payload)
+        # payload = {"ls": True, "auth": cls.auth}
+        r = requests.get(cls.url() + "?ls")
 
         if r.status_code == 200:
-            return r.json
+            return r.json()
         else:
             raise modelrAPIException
 
@@ -61,14 +61,15 @@ class modelrAPI(object):
         r = requests.get(cls.url(), params=payload)
 
         if r.status_code == 200:
-            output = []
-        for data in r.json():
-            output.append(cls.from_json(data))
+            data = r.json()
+            
+            if type(data) is list:
+                output = [cls.from_json(d) for d in data]
+            else:
+                output = cls.from_json(data)
         else:
             raise modelrAPIException
-
-        if len(output) == 1:
-            output = output[0]
+        
         return output
 
     @classmethod
