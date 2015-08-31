@@ -52,23 +52,25 @@ def run_script(json_payload):
     sub_traces = np.squeeze(do_convolve(seismic.src,
                                         rpp_sub[:, np.newaxis, :]))
 
-    traces = np.concatenate((np.expand_dims(t, 1),
-                             traces), 1).squeeze()
-    sub_traces = np.concatenate((np.expand_dims(t, 1),
-                                 sub_traces), 1).squeeze()
-
-    # for the output json
-    log_data = np.dstack([z, vp, vp_sub, vs,
-                          vs_sub, rho, rho_sub]).squeeze()
-    rpp_data = np.dstack([t, rpp[:, 0],
-                          rpp_sub[:, 0]]).squeeze()
-
-    output = {"log_data": log_data.tolist(),
+    output = {"vp": vp.tolist(), "vs": vs.tolist(),
+              "rho": rho.tolist(), "vp_sub": vp_sub.tolist(),
+              "vs_sub": vs_sub.tolist(), "rho_sub": rho_sub.tolist(),
               "synth": np.nan_to_num(traces).tolist(),
               "synth_sub": np.nan_to_num(sub_traces).tolist(),
               "theta": seismic.theta,
-              "rpp": rpp_data.tolist(),
-              "t": t.tolist(),
-              "z": z.tolist()}
+              "rpp": rpp.tolist(),
+              "rpp_sub": rpp_sub.tolist(),
+              "t_lim": [float(np.amin(t)), float(np.amax(t))],
+              "z_lim": [float(np.amin(z)), float(np.amax(z))],
+              "vp_lim": [float(np.amin((vp, vp_sub))),
+                         float(np.amax((vp, vp_sub)))],
+              "vs_lim": [float(np.amin((vs, vs_sub))),
+                         float(np.amax((vs, vs_sub)))],
+              "rho_lim": [float(np.amin((rho, rho_sub))),
+                          float(np.amax((rho, rho_sub)))],
+              "rpp_lim": [float(np.amin((rpp, rpp_sub))),
+                          float(np.amax((rpp, rpp_sub)))],
+              "synth_lim": [float(np.amin((traces, sub_traces))),
+                            float(np.amax((traces, sub_traces)))]}
 
     return json.dumps(output)
