@@ -71,6 +71,8 @@ def run_script(json_payload):
               "rpp_lim": [float(np.amin((rpp, rpp_sub))),
                           float(np.amax((rpp, rpp_sub)))],
               "synth_lim": [float(np.amin((traces, sub_traces))),
-                            float(np.amax((traces, sub_traces)))]}
+                            float(np.amax((traces, sub_traces)))],
+              "dt": dt,
+              "dz": dz}
 
     return json.dumps(output)
