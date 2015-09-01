@@ -42,7 +42,6 @@ def run_script(json_payload):
 
     # trim to be the same size
     n = min(rpp.shape[0], rpp_sub.shape[0])
-    print n, rpp.shape, np.amax(rpp)
     rpp = rpp[:n, :]
     rpp_sub = rpp_sub[:n, :]
     t = np.arange(n) * dt
@@ -55,8 +54,8 @@ def run_script(json_payload):
     output = {"vp": vp.tolist(), "vs": vs.tolist(),
               "rho": rho.tolist(), "vp_sub": vp_sub.tolist(),
               "vs_sub": vs_sub.tolist(), "rho_sub": rho_sub.tolist(),
-              "synth": np.nan_to_num(traces).tolist(),
-              "synth_sub": np.nan_to_num(sub_traces).tolist(),
+              "synth": np.nan_to_num(traces).T.tolist(),
+              "synth_sub": np.nan_to_num(sub_traces).T.tolist(),
               "theta": seismic.theta,
               "rpp": rpp[:, 0].tolist(),
               "rpp_sub": rpp_sub[:, 0].tolist(),
