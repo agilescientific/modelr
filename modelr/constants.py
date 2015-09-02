@@ -8,6 +8,7 @@ application
 
 REFLECTION_MODELS = {
     'zoeppritz': reflection.zoeppritz,
+    'zoeppritz_rpp': reflection.zoeppritz_rpp,
     'akirichards': reflection.akirichards,
     'akirichards_alt': reflection.akirichards_alt,
     'fatti': reflection.fatti,
