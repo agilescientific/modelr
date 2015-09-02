@@ -60,6 +60,23 @@ def rock_reflectivity(Rp0, Rp1, theta=0.0,
     return np.nan_to_num(ref)
 
 
+def reflectivity_array(vp, vs, rho, theta,
+                       reflectivity_method=reflection.zoeppritz_rpp):
+    if np.ndim(theta) > 0:
+        ref = np.array([reflectivity_method(vp[:-1, ...], vs[:-1, ...],
+                                            rho[:-1, ...],
+                                            vp[1:, ...], vs[:1, ...],
+                                            rho[1:, ...], angle)
+                        for angle in theta])
+        ref = np.rollaxis(ref, 0, np.ndim(vp) + 1)
+    else:
+        ref = reflectivity_method(vp[:-1, ...], vs[:-1, ...],
+                                  rho[:-1, ...],
+                                  vp[1:, ...], vs[:1, ...],
+                                  rho[1:, ...], theta)
+    return np.nan_to_num(ref)
+
+
 def get_reflectivity(data,
                      colourmap,
                      theta=0,

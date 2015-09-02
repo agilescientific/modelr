@@ -1,7 +1,5 @@
 import requests
-from StringIO import StringIO
 import numpy as np
-from PIL import Image
 from numpy.random import randn
 from bruges.rockphysics import smith_fluidsub
 from modelr.constants import WAVELETS
@@ -62,14 +60,14 @@ class modelrAPI(object):
 
         if r.status_code == 200:
             data = r.json()
-            
+
             if type(data) is list:
                 output = [cls.from_json(d) for d in data]
             else:
                 output = cls.from_json(data)
         else:
             raise modelrAPIException
-        
+
         return output
 
     @classmethod
@@ -132,81 +130,6 @@ class Fluid(modelrAPI):
         return cls(data["rho_w"], data["rho_hc"],
                    data["k_w"], data["k_hc"],
                    data["sw"])
-
-
-class ImageModel(modelrAPI):
-    handler = 'earth_model'
-
-    def __init__(self, image, mapping,
-                 extents=(0.0, 0.0, 0.0, 0.0),
-                 units="SI"):
-
-        self.units = units
-        self.extents = extents
-
-        # Change the mapping from RGB to index
-        image = Image.open(image)
-        index_mapping = {}
-        for colour, rock in mapping.iteritems():
-            rgb = np.array([[colour.split('(')[1].split(')')[0].split(',')]],
-                           'uint8')
-
-            index = np.asarray(Image.fromarray(rgb)
-                               .quantize(palette=image)).flatten()[0]
-            index_mapping[index] = rock
-
-        self.map = index_mapping
-        self.image = np.asarray(image.convert("P"))
-
-    @classmethod
-    def from_json(cls, data):
-        """
-        Inputs:
-          data: JSON structure
-            fields:
-              image: Link to rgb formatted png
-              mapping: Mapping from rgb colour string to a database key for the
-                       corresponding rock.
-
-            example:
-                    {"image": "https://www.modelr.io/_gh/testimg.png,
-                     "mapping": {"rgb(100,120,150)": ROCKDBKEY,
-                                 "rgb(110,160,150)": ROCKDBKEY}}
-        """
-
-        response = requests.get(data["image"])
-        image = StringIO(response.content)
-
-        # Change from rock keys to rock objects in the mapping
-        mapping = data["mapping"]
-        for colour, data in mapping.iteritems():
-            rock = Rock.get(data["key"])
-            mapping[colour] = rock
-
-        return cls(image, mapping)
-
-    def _get_data(self, var):
-
-        data = np.zeros(self.image.shape)
-        for i, rock in self.map.iteritems():
-            index = self.image == 1
-            layer = (randn(np.sum(index)) *
-                     getattr(rock, var + "_std") + getattr(rock, var))
-
-            np.place(data, index, layer)
-        return data
-
-    @property
-    def vp(self):
-        return self._get_data("vp")
-
-    @property
-    def rho(self):
-        return self._get_data("rho")
-
-    @property
-    def vs(self):
-        return self._get_data("vs")
 
 
 class FluidSub1D(modelrAPI):
@@ -428,4 +351,4 @@ class Seismic(modelrAPI):
     def src(self):
 
         return self.wavelet(.1, self.dt, self.f)
-    
+

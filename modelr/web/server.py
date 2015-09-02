@@ -309,7 +309,7 @@ class MyHandler(BaseHTTPRequestHandler):
         data = script(payload)
 
         # Write response
-        self.wfile.write(data)
+        self.wfile.write(json.dumps(data))
 
     def run_script_jpg_json(self, plot_generator):
         """

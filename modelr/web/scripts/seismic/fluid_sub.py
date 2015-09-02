@@ -74,4 +74,4 @@ def run_script(json_payload):
               "dt": dt,
               "dz": dz}
 
-    return json.dumps(output)
+    return output
