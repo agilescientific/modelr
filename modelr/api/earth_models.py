@@ -28,9 +28,9 @@ class ImageModel(modelrAPI):
         return mapping
     
     def __init__(self, image, mapping,
-                 extents=(0.0, 5000.0, 0, 1000.0),
+                 extents=(0.0, 5000.0, 0, 200.0),
                  units="SI", datafile=None,
-                 theta=np.arange(0, 30, 3)):
+                 theta=np.arange(0, 10, 3)):
 
         self.theta = theta
         self.units = units
