@@ -12,7 +12,7 @@ def run_script(json_payload):
 
     data = do_convolve(seismic.src, earth_model.rpp_t(seismic.dt)).squeeze()
 
-    payload = {"seismic": data[..., 0].tolist(), "dt": seismic.dt,
+    payload = {"seismic": data[..., 0].T.tolist(), "dt": seismic.dt,
                "min": float(np.amin(data)), "max": float(np.amax(data)),
                "dx": earth_model.dx}
 
