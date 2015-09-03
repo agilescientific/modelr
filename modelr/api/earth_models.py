@@ -22,7 +22,7 @@ class ImageModel(modelrAPI):
 
         # Change from rock keys to rock objects in the mapping
         for colour, data in mapping.iteritems():
-            rock = Rock.get(data["key"])
+            rock = Rock.from_json(data)
             mapping[colour] = rock
 
         return mapping
