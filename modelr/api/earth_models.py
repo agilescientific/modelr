@@ -28,14 +28,17 @@ class ImageModel(modelrAPI):
         return mapping
     
     def __init__(self, image, mapping,
-                 extents=(0.0, 5000.0, 0, 200.0),
-                 units="SI", datafile=None,
+                 zrange=1000, xrange=1000,
+                 units="SI",
+                 domain='depth',
                  theta=np.arange(0, 10, 3)):
 
         self.theta = theta
         self.units = units
-        self.extents = extents
-        self.datafile = datafile
+        self.zrange = zrange
+        self.domain = domain
+        
+        self.xrange = xrange
 
         # Change the mapping from RGB to index
         image = Image.open(image)
@@ -52,8 +55,8 @@ class ImageModel(modelrAPI):
         self.map = index_mapping
         self.image = np.asarray(image.convert("P"))
 
-        self.dz = (self.extents[3] - self.extents[0]) / self.image.shape[0]
-        self.dx = (self.extents[1] - self.extents[0]) / self.image.shape[1]
+        self.dz = self.zrange / self.image.shape[0]
+        self.dx = self.xrange / self.image.shape[1]
 
     @classmethod
     def from_json(cls, data):
@@ -68,13 +71,16 @@ class ImageModel(modelrAPI):
             example:
                     {"image": "https://www.modelr.io/_gh/testimg.png,
                      "mapping": {"rgb(100,120,150)": ROCKDBKEY,
-                                 "rgb(110,160,150)": ROCKDBKEY}}
+                                 "rgb(110,160,150)": ROCKDBKEY},
+                     "z": }
         """
 
         response = requests.get(data["image"])
         image = StringIO(response.content)
 
-        mapping = cls.fill_mapping(image, data["mapping"])
+        mapping = cls.fill_mapping(image, data["mapping"],
+                                   zrange=data["zrange"],
+                                   theta=data["theta"])
 
         return cls(image, mapping)
 
@@ -186,4 +192,5 @@ class ImageModelPersist(ImageModel):
         image = StringIO(response.content)
         mapping = cls.fill_mapping(image, data["mapping"])
 
-        return cls(datafile, image, mapping)
+        return cls(datafile, image, mapping, zrange=data["zrange"],
+                   theta=data["theta"])
