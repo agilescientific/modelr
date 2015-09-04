@@ -34,11 +34,11 @@ def run_script(json_payload):
         seismic.src, earth_model.rpp_t(seismic.dt)[..., trace, :]
         [..., np.newaxis, ...]).squeeze()
     
-    payload = {"seismic": data[..., 0].T.tolist(), "dt": seismic.dt,
+    payload = {"seismic": data.T.tolist(), "dt": seismic.dt,
                "min": float(np.amin(data)), "max": float(np.amax(data)),
                "dx": earth_model.dx,
                "wavelet_gather": wavelet_gather.T.tolist(),
                "offset_gather": offset_gather.T.tolist()}
 
-    print offset_gather.shape, wavelet_gather.shape
+    print offset_gather.shape, wavelet_gather.shape, data.shape
     return payload
