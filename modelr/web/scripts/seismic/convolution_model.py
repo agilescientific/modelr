@@ -28,12 +28,11 @@ def run_script(json_payload):
                                  earth_model.rpp_t(seismic.dt)[...,
                                                                trace, offset]
                                  [..., np.newaxis,
-                                  np.newaxis]).reshape(data.shape[0],
-                                                       f.size)
+                                  np.newaxis]).squeeze()
 
     offset_gather = do_convolve(
         seismic.src, earth_model.rpp_t(seismic.dt)[..., trace, :]
-        [..., np.newaxis, ...]).reshape(data.shape[0], len(earth_model.theta))
+        [..., np.newaxis, ...]).squeeze()
     
     payload = {"seismic": data[..., 0].T.tolist(), "dt": seismic.dt,
                "min": float(np.amin(data)), "max": float(np.amax(data)),
