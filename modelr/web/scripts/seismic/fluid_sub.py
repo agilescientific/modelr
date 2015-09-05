@@ -28,6 +28,7 @@ def run_script(json_payload):
                                      vs_sub[sub_t_index],
                                      rho_sub[sub_t_index])
 
+
     # calculate reflectivities
     rpp = np.nan_to_num(np.array([zoep(vp_t[:-1], vs_t[:-1], rho_t[:-1],
                                        vp_t[1:], vs_t[1:], rho_t[1:],

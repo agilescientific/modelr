@@ -122,6 +122,9 @@ class ImageModel(modelrAPI):
 
     def rpp_t(self, dt):
 
+        if self.domain == 'time':
+            return self.rpp
+        
         vpt = depth_to_time(self.vp, self.vp, self.dz, dt)
         times = np.arange(vpt.shape[0]) * dt
         vst = depth_to_time(self.vs, self.vp, self.dz, times)
