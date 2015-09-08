@@ -20,6 +20,7 @@ def run_script(json_payload):
     dt = seismic.dt
     dz = fs_model.dz
     z = fs_model.z
+    # use indices so we only run the algorithm once
     index = np.arange(vp.size, dtype=int)
     t_index = depth_to_time(index, vp, dz, dt).astype(int)
     sub_t_index = depth_to_time(index, vp_sub, dz, dt).astype(int)
@@ -27,7 +28,6 @@ def run_script(json_payload):
     vp_sub_t, vs_sub_t, rho_sub_t = (vp_sub[sub_t_index],
                                      vs_sub[sub_t_index],
                                      rho_sub[sub_t_index])
-
 
     # calculate reflectivities
     rpp = np.nan_to_num(np.array([zoep(vp_t[:-1], vs_t[:-1], rho_t[:-1],

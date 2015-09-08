@@ -5,6 +5,18 @@ import numpy as np
 
 
 def run_script(json_payload):
+    """
+    Calculates synthetic seismic data from a convolution model.
+    Creates data for a cross section, angle gather, and wavelet gather.
+
+    Inputs
+    json_payload = {"earth_model": See ImageModel in modelr.api,
+                    "seismic": See SeismicModel in modelr.api,
+                    "trace": The trace number to use for the angle and
+                             wavelet gathers.
+                    "offset": The offset index to use for the wavelet
+                              and seismic cross section.}
+    """
 
     try:
 
@@ -40,8 +52,10 @@ def run_script(json_payload):
                    "min": float(np.amin(data)), "max": float(np.amax(data)),
                    "dx": earth_model.dx,
                    "wavelet_gather": wavelet_gather.T.tolist(),
-                   "offset_gather": offset_gather.T.tolist()}
+                   "offset_gather": offset_gather.T.tolist(),
+                   "f": f.tolist(), "theta": earth_model.theta}
 
         return payload
+    
     except Exception as e:
-        print 'KLFSJDKLJSDL', e
+        print e

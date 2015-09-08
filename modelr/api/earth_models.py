@@ -190,7 +190,7 @@ class ImageModelPersist(ImageModel):
         m = md5.new()
         m.update(json.dumps(data))
 
-        datafile = m.hexdigest()
+        datafile = m.hexdigest() + '.tmp'
         response = requests.get(data["image"])
         image = StringIO(response.content)
         mapping = cls.fill_mapping(image, data["mapping"])
