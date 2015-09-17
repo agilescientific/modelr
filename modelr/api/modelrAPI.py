@@ -3,6 +3,7 @@ import numpy as np
 from numpy.random import randn
 from bruges.rockphysics import smith_fluidsub
 from modelr.constants import WAVELETS
+from bruges.filters import rotate_phase
 
 
 class modelrAPIException(Exception):
@@ -340,15 +341,18 @@ class Seismic(modelrAPI):
         pass
 
     def __init__(self, wavelet='ricker', dt=0.001,
-                 frequency=20.0, theta=range(0, 30, 2)):
+                 frequency=20.0,
+                 phase=0.0, snr=40.0, **kwargs):
 
         self.wavelet = WAVELETS[wavelet]
         self.dt = dt
         self.f = float(frequency)
-        self.theta = theta
+        self.snr = snr
+        self.phase = phase
 
     @property
     def src(self):
 
-        return self.wavelet(.1, self.dt, self.f)
+        return rotate_phase(
+            self.wavelet(.1, self.dt, self.f), self.phase)
 

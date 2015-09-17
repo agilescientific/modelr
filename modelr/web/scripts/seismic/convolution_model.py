@@ -1,6 +1,6 @@
 from modelr.reflectivity import do_convolve
 from modelr.api import ImageModelPersist, Seismic
-
+from bruges.noise import noise_db
 import numpy as np
 
 
@@ -47,7 +47,12 @@ def run_script(json_payload):
         offset_gather = do_convolve(
             seismic.src, earth_model.rpp_t(seismic.dt)[..., trace, :]
             [..., np.newaxis, ...]).squeeze()
-    
+
+        if seismic.snr:
+            wavelet_gather += noise_db(wavelet_gather, seismic.snr)
+            offset_gather += noise_db(offset_gather, seismic.snr)
+            data += noise_db(data, seismic.snr)
+        
         payload = {"seismic": data.T.tolist(), "dt": seismic.dt,
                    "min": float(np.amin(data)), "max": float(np.amax(data)),
                    "dx": earth_model.dx,
