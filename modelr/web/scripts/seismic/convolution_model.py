@@ -1,6 +1,7 @@
 from modelr.reflectivity import do_convolve
 from modelr.api import ImageModelPersist, Seismic
 from bruges.noise import noise_db
+from bruges.filters import rotate_phase
 import numpy as np
 
 
@@ -38,7 +39,8 @@ def run_script(json_payload):
         f = np.logspace(max(np.log2(f0), np.log2(7)),
                         np.log2(f1), 50,
                         endpoint=True, base=2.0)
-        wavelets = seismic.wavelet(.1, seismic.dt, f)
+        wavelets = rotate_phase(seismic.wavelet(.1, seismic.dt, f),
+                                seismic.phase)
         wavelet_gather = do_convolve(wavelets,
                                      earth_model.rpp_t(seismic.dt)
                                      [..., trace, offset]
