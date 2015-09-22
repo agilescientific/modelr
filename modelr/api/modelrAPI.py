@@ -4,7 +4,7 @@ from numpy.random import randn
 from bruges.rockphysics import smith_fluidsub
 from modelr.constants import WAVELETS
 from bruges.filters import rotate_phase
-
+from bruges.rockphysics import moduli_dict as moduli
 
 class modelrAPIException(Exception):
     pass
@@ -89,7 +89,7 @@ class Rock(modelrAPI):
                  porosity=.2, vclay=None, kclay=None,
                  kqtz=None, vp_std=0.0,
                  vs_std=0.0, rho_std=0.0,
-                 fluid=None, *args, **kwargs):
+                 fluid=None, name="", *args, **kwargs):
 
         self.vp = vp
         self.vs = vs
@@ -98,6 +98,7 @@ class Rock(modelrAPI):
         self.vclay = vclay
         self.kclay = kclay
         self.kqtz = kqtz
+        self.name = name
 
         if type(fluid) is dict:
             self.fluid = Fluid.from_json(fluid)
@@ -113,6 +114,9 @@ class Rock(modelrAPI):
     def phi(self):
         return self.porosity
 
+    @property
+    def moduli(self):
+        return moduli(self.vp, self.vs, self.rho)
 
 class Fluid(modelrAPI):
     handler = 'fluid'

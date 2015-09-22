@@ -27,6 +27,9 @@ class ImageModel(modelrAPI):
 
         return mapping
     
+    def get_rocks(self):
+        return self.map.values()
+    
     def __init__(self, image, mapping,
                  zrange=1000, xrange=1000,
                  units="SI",
@@ -155,6 +158,7 @@ class ImageModelPersist(ImageModel):
 
             return data
 
+    
     @property
     def rpp(self):
         

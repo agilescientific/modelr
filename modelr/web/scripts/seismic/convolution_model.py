@@ -54,14 +54,27 @@ def run_script(json_payload):
             wavelet_gather += noise_db(wavelet_gather, seismic.snr)
             offset_gather += noise_db(offset_gather, seismic.snr)
             data += noise_db(data, seismic.snr)
+
+
+        # METADATA
+        metadata = {}
+        metadata["moduli"] = {}
+        for rock in earth_model.get_rocks():
+            if not rock.name in metadata["moduli"]:
+                metadata["moduli"][rock.name] = rock.moduli
+
+
         
         payload = {"seismic": data.T.tolist(), "dt": seismic.dt,
                    "min": float(np.amin(data)), "max": float(np.amax(data)),
                    "dx": earth_model.dx,
                    "wavelet_gather": wavelet_gather.T.tolist(),
                    "offset_gather": offset_gather.T.tolist(),
-                   "f": f.tolist(), "theta": earth_model.theta}
+                   "f": f.tolist(), "theta": earth_model.theta,
+                   "metadata": metadata}
 
+
+        
         return payload
     
     except Exception as e:
