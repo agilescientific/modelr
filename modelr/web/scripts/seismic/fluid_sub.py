@@ -2,7 +2,6 @@ from modelr.api import Seismic, FluidSub1D
 from bruges.reflection import zoeppritz_rpp as zoep
 from bruges.transform import depth_to_time
 from modelr.reflectivity import do_convolve
-import json
 import numpy as np
 
 
@@ -20,6 +19,7 @@ def run_script(json_payload):
     dt = seismic.dt
     dz = fs_model.dz
     z = fs_model.z
+    
     # use indices so we only run the algorithm once
     index = np.arange(vp.size, dtype=int)
     t_index = depth_to_time(index, vp, dz, dt).astype(int)

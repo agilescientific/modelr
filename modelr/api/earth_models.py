@@ -158,7 +158,6 @@ class ImageModelPersist(ImageModel):
 
             return data
 
-    
     @property
     def rpp(self):
         

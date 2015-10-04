@@ -118,6 +118,7 @@ class Rock(modelrAPI):
     def moduli(self):
         return moduli(self.vp, self.vs, self.rho)
 
+
 class Fluid(modelrAPI):
     handler = 'fluid'
 
@@ -346,13 +347,15 @@ class Seismic(modelrAPI):
 
     def __init__(self, wavelet='ricker', dt=0.001,
                  frequency=20.0,
-                 phase=0.0, snr=40.0, **kwargs):
+                 phase=0.0, snr=40.0, theta=[0],
+                 **kwargs):
 
         self.wavelet = WAVELETS[wavelet]
         self.dt = dt
         self.f = float(frequency)
         self.snr = snr
         self.phase = phase
+        self.theta = theta
 
     @property
     def src(self):
