@@ -133,7 +133,6 @@ class ImageModel(modelrAPI):
         vst = depth_to_time(self.vs, self.vp, self.dz, times)
         rhot = depth_to_time(self.rho, self.vp, self.dz, times)
 
-        print vpt.shape, vst.shape, rhot.shape
         return reflectivity_array(vpt, vst, rhot, self.theta)
 
 
@@ -199,4 +198,11 @@ class ImageModelPersist(ImageModel):
         mapping = cls.fill_mapping(image, data["mapping"])
 
         return cls(datafile, image, mapping, zrange=data["zrange"],
-                   theta=data["theta"])
+                   theta=data["theta"], domain=data["domain"])
+
+
+
+
+
+
+
