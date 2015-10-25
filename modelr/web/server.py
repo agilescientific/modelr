@@ -495,7 +495,7 @@ def main():
 
             server.socket = context.wrap_socket(server.socket,
                                                 server_side=True)
-            server.socket.settimeout(8.0)
+            server.socket.settimeout(0.0)
 
         else:
             server = HTTPServer((args.host, args.port), MyHandler)
