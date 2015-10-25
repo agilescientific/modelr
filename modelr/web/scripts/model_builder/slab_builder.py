@@ -46,7 +46,7 @@ def run_script(args):
         data = f.read()
     
 
-    return data
+    return data, {}
 
 
 
