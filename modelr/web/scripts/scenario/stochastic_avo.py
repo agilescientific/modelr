@@ -5,14 +5,13 @@ import matplotlib.path as mpath
 import matplotlib.patches as mpatches
 import matplotlib.collections as collections
 from modelr.web.urlargparse import rock_properties_type,\
-      reflectivity_type
-from modelr.web.defaults import default_parsers
+    reflectivity_type
+
 from modelr.constants import REFLECTION_MODELS as MODELS
 
 from modelr.web.util import get_figure_data
 import numpy as np
 from scipy import arcsin
-import multiprocessing as mp
 
 short_description = (
     "Make a stochastic avo plot using monte carlo " +

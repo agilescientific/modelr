@@ -3,18 +3,15 @@ Created on Apr 30, 2012
 
 @author: Sean Ross-Ross, Matt Hall, Evan Bianco
 '''
-import numpy as np
 import matplotlib
-
-import matplotlib.pyplot as plt
 
 from argparse import ArgumentParser
 from modelr.web.defaults import default_parsers
 from modelr.web.urlargparse import rock_properties_type
-from agilegeo.avo import zoeppritz
+from bruges.reflection import zoeppritz
 
 from modelr.web.util import modelr_plot
-from agilegeo.wavelet import ricker
+from bruges.filters import ricker
 
 import modelr.modelbuilder as mb
 
