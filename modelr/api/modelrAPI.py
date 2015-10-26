@@ -348,10 +348,12 @@ class Seismic(modelrAPI):
     def __init__(self, wavelet='ricker', dt=0.001,
                  frequency=20.0,
                  phase=0.0, snr=40.0, theta=[0],
+                 wavelet_duration=0.5,
                  **kwargs):
 
         self.wavelet = WAVELETS[wavelet]
         self.dt = dt
+        self.wavelet_duration = wavelet_duration
         self.f = float(frequency)
         self.snr = snr
         self.phase = phase
@@ -361,5 +363,5 @@ class Seismic(modelrAPI):
     def src(self):
 
         return rotate_phase(
-            self.wavelet(.1, self.dt, self.f), self.phase)
+            self.wavelet(self.wavelet_duration, self.dt, self.f), self.phase)
 

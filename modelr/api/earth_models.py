@@ -58,8 +58,8 @@ class ImageModel(modelrAPI):
         self.map = index_mapping
         self.image = np.asarray(image.convert("P"))
 
-        self.dz = self.zrange / self.image.shape[0]
-        self.dx = self.xrange / self.image.shape[1]
+        self.dz = self.zrange / float(self.image.shape[0])
+        self.dx = self.xrange / float(self.image.shape[1])
 
     @classmethod
     def from_json(cls, data):
@@ -133,7 +133,8 @@ class ImageModel(modelrAPI):
         vst = depth_to_time(self.vs, self.vp, self.dz, times)
         rhot = depth_to_time(self.rho, self.vp, self.dz, times)
 
-        return reflectivity_array(vpt, vst, rhot, self.theta)
+        rpp = reflectivity_array(vpt, vst, rhot, self.theta)
+        return rpp
 
 
 class ImageModelPersist(ImageModel):

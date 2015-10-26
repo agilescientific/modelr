@@ -39,8 +39,11 @@ def run_script(json_payload):
         f = np.logspace(max(np.log2(f0), np.log2(7)),
                         np.log2(f1), 50,
                         endpoint=True, base=2.0)
-        wavelets = rotate_phase(seismic.wavelet(.1, seismic.dt, f),
+
+        duration = .3
+        wavelets = rotate_phase(seismic.wavelet(duration, seismic.dt, f),
                                 seismic.phase)
+
         wavelet_gather = do_convolve(wavelets,
                                      earth_model.rpp_t(seismic.dt)
                                      [..., trace, offset]
