@@ -21,11 +21,9 @@ class ImageModel(modelrAPI):
     def fill_mapping(cls, image, mapping):
 
         # Change from rock keys to rock objects in the mapping
-        for colour, data in mapping.iteritems():
-            rock = Rock.from_json(data)
-            mapping[colour] = rock
+        new_map = {i["colour"]: Rock.from_json(i['rock']) for i in mapping}
 
-        return mapping
+        return new_map
     
     def get_rocks(self):
         return self.map.values()
@@ -34,7 +32,8 @@ class ImageModel(modelrAPI):
                  zrange=1000, xrange=1000,
                  units="SI",
                  domain='depth',
-                 theta=np.arange(0, 10, 3)):
+                 theta=np.arange(0, 10, 3),
+                 resample=None):
 
         self.theta = theta
         self.units = units
@@ -45,6 +44,9 @@ class ImageModel(modelrAPI):
 
         # Change the mapping from RGB to index
         image = Image.open(image)
+        if resample is not None:
+            image = image.resize(resample, Image.NEAREST)
+        
         index_mapping = {}
         for colour, rock in mapping.iteritems():
             rgb = np.array([[colour.split('(')[1].split(')')[0]
@@ -81,9 +83,7 @@ class ImageModel(modelrAPI):
         response = requests.get(data["image"])
         image = StringIO(response.content)
 
-        mapping = cls.fill_mapping(image, data["mapping"],
-                                   zrange=data["zrange"],
-                                   theta=data["theta"])
+        mapping = cls.fill_mapping(image, data["mapping"])
 
         return cls(image, mapping)
 
