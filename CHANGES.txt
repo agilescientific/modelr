@@ -1,3 +1,6 @@
+modelr-0.6.1 Nov 15 2015
+fixed axis scaling on 2D model
+
 modelr-0.6 October 26 2015
 Added cleaner API linking to front end.
 
