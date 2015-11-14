@@ -32,7 +32,7 @@ class ImageModel(modelrAPI):
                  zrange=1000, xrange=1000,
                  units="SI",
                  domain='depth',
-                 theta=np.arange(0, 10, 3),
+                 theta=np.linspace(0, 45, 15),
                  resample=None):
 
         self.theta = theta
