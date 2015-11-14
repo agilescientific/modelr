@@ -2,8 +2,11 @@ from modelr.reflectivity import do_convolve
 from modelr.api import ImageModelPersist, Seismic
 from bruges.noise import noise_db
 from bruges.filters import rotate_phase
-import numpy as np
 
+import traceback
+
+import numpy as np
+import sys
 
 def run_script(json_payload):
     """
@@ -21,10 +24,13 @@ def run_script(json_payload):
 
     try:
 
+        seismic = Seismic.from_json(json_payload["seismic"])
+        
         # parse json
         earth_model = ImageModelPersist.from_json(json_payload["earth_model"])
-        seismic = Seismic.from_json(json_payload["seismic"])
-
+        if earth_model.domain == 'time':
+            earth_model.resample(seismic.dt)
+       
         trace = json_payload["trace"]
         offset = json_payload["offset"]
 
@@ -68,7 +74,7 @@ def run_script(json_payload):
         if earth_model.domain == "time":
             dt = earth_model.zrange / float(data.shape[0])
         else:
-            dt = seismic.dt
+            dt = seismic.dt * 1000.0
             
         payload = {"seismic": data.T.tolist(), "dt": dt,
                    "min": float(np.amin(data)),
@@ -82,4 +88,5 @@ def run_script(json_payload):
         return payload
     
     except Exception as e:
-        print e
+        traceback.print_exc(file=sys.stdout)
+        

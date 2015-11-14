@@ -4,7 +4,7 @@ from PIL import Image
 import numpy as np
 from numpy.random import randn
 import requests
-
+from scipy.interpolate import interp1d
 import h5py
 from StringIO import StringIO
 import md5
@@ -21,7 +21,8 @@ class ImageModel(modelrAPI):
     def fill_mapping(cls, image, mapping):
 
         # Change from rock keys to rock objects in the mapping
-        new_map = {i["colour"]: Rock.from_json(i['rock']) for i in mapping}
+        new_map = {colour: Rock.from_json(rock) for
+                   colour, rock in mapping.iteritems()}
 
         return new_map
     
@@ -32,7 +33,7 @@ class ImageModel(modelrAPI):
                  zrange=1000, xrange=1000,
                  units="SI",
                  domain='depth',
-                 theta=np.arange(0, 10, 3),
+                 theta=np.linspace(0, 45, 15),
                  resample=None):
 
         self.theta = theta
@@ -123,10 +124,28 @@ class ImageModel(modelrAPI):
 
         return rpp
 
+    def resample(self, dz):
+
+        z1 = np.arange(self.image.shape[0]) * self.dz / 1000.0
+        z2 = np.arange(0, self.zrange / 1000.0, dz)
+
+        # Don't interpolate beyond the model
+        z2 = z2[z2 < np.amax(z1)]
+
+        f = interp1d(z1, self.image, kind='nearest',
+                     axis=0)
+        self.image = f(z2)
+        self.dz = dz
+
+        
     def rpp_t(self, dt):
 
         if self.domain == 'time':
-            return self.rpp
+            if dt == self.dz:
+                return self.rpp
+            else:
+                raise Exception('sampling mismatch')
+            
         
         vpt = depth_to_time(self.vp, self.vp, self.dz, dt)
         times = np.arange(vpt.shape[0]) * dt
