@@ -182,7 +182,7 @@ def do_convolve(wavelets, data,
         data = np.pad(data, ((wavelets.shape[0], 0),
                              (0, 0), (0, 0)),
                       mode='constant',
-                      constant_values=((0, 0), (0, 0), (0, 0)))
+                      constant_values=np.array(((0, 0), (0, 0), (0, 0))))
     else:
         pad = 0
 

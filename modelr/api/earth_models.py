@@ -9,6 +9,7 @@ import h5py
 from StringIO import StringIO
 import md5
 import json
+import os
 
 from bruges.transform import depth_to_time
 
@@ -212,17 +213,16 @@ class ImageModelPersist(ImageModel):
         m = md5.new()
         m.update(json.dumps(data))
 
-        datafile = "/opt/data/" + m.hexdigest() + '.tmp'
+        directory = "/mnt/modelr/"
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        datafile = directory + m.hexdigest() + '.tmp'
+
         response = requests.get(data["image"])
         image = StringIO(response.content)
         mapping = cls.fill_mapping(image, data["mapping"])
 
         return cls(datafile, image, mapping, zrange=data["zrange"],
                    theta=data["theta"], domain=data["domain"])
-
-
-
-
-
-
 

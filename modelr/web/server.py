@@ -1,3 +1,15 @@
+# -*- coding: utf-8 -*-
+'''
+===================
+modelr.web.server
+===================
+
+Main program to start a web server.
+
+Created on Apr 30, 2012
+
+@author: sean
+'''
 from jinja2 import Environment, PackageLoader
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from argparse import ArgumentParser
@@ -15,6 +27,7 @@ import multiprocessing as mp
 import ssl
 import socket
 from SocketServer import ThreadingMixIn
+from SocketServer import ThreadingTCPServer
 
 from modelr.EarthModel import EarthModel
 from modelr.SeismicModel import SeismicModel
@@ -25,19 +38,6 @@ from modelr.ModelrScript import ModelrScript
 import base64
 
 # import cProfile as prof
-
-1# -*- coding: utf-8 -*-
-'''
-===================
-modelr.web.server
-===================
-
-Main program to start a web server.
-
-Created on Apr 30, 2012
-
-@author: sean
-'''
 
 socket.setdefaulttimeout(6)
 
@@ -110,7 +110,7 @@ class MyHandler(BaseHTTPRequestHandler):
         '''
         handle a get request.
         '''
-        # "my do GET"
+
         try:
             uri = urlparse(self.path)
             parameters = parse_qs(uri.query)
@@ -170,7 +170,6 @@ class MyHandler(BaseHTTPRequestHandler):
 
             # Outputs a base64 image and an auxillary json structure
             elif uri.path == '/plot.json':
-
                 parameters = parse_qs(uri.query)
                 script = parameters.pop("script", None)
                 script_type = parameters.pop("type", None)
@@ -194,9 +193,10 @@ class MyHandler(BaseHTTPRequestHandler):
                 parameters = parse_qs(uri.query)
                 script = parameters.pop("script", None)
                 script_type = parameters.pop("type", None)
+                print "Running", script, script_type
 
-                print "running", script, script_type
                 payload = json.loads(parameters.pop("payload")[0])
+                print payload
 
                 # Get the namespace
                 namespace = self.eval_script(script, script_type)
@@ -233,7 +233,8 @@ class MyHandler(BaseHTTPRequestHandler):
                 p.join()
 
             else:
-                self.send_error(404, 'File Not Found: %s' % self.path)
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_error(404, 'File or Path Not Found: %s' % self.path)
                 return
 
         except Exception:
@@ -267,6 +268,7 @@ class MyHandler(BaseHTTPRequestHandler):
             args = parser.parse_params(parameters)
         except SendHelp:
             self.send_response(200)
+            self.send_header('Access-Control-Allow-Origin', '*')
             self.send_header('Content-type', 'text/html')
             self.end_headers()
 
@@ -279,6 +281,7 @@ class MyHandler(BaseHTTPRequestHandler):
             return
         except ArgumentError as err:
             self.send_response(400)
+            self.send_header('Access-Control-Allow-Origin', '*')
             self.send_header('Content-type', 'text/html')
             self.end_headers()
 
@@ -290,6 +293,7 @@ class MyHandler(BaseHTTPRequestHandler):
         jpeg_data = script_main(args)[0]
 
         self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Content-type', 'image/jpeg')
         self.end_headers()
 
@@ -483,6 +487,7 @@ def main():
         # will satisfy the browser and that's enough.
 
         if not args.local:
+            ThreadingTCPServer.allow_reuse_address = True
             server = ThreadedHTTPServer((args.host, args.port), MyHandler)
 
             # Force TLS v1.2. Not important per se, but the
@@ -496,14 +501,13 @@ def main():
             server.socket = context.wrap_socket(server.socket,
                                                 server_side=True)
             server.socket.settimeout(0.0)
-
         else:
             server = HTTPServer((args.host, args.port), MyHandler)
 
         server.jenv = Environment(loader=PackageLoader('modelr',
                                                        'web/templates'))
 
-        print 'started httpserver...'
+        print 'Welcome to modelr. Started httpserver...'
         server.serve_forever()
 
     except KeyboardInterrupt:
