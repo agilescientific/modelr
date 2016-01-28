@@ -8,25 +8,22 @@ import matplotlib
 from scipy.interpolate import interp1d
 
 import urllib2
-import matplotlib.pyplot as plt
 
 from argparse import ArgumentParser
 from modelr.web.defaults import default_parsers
-from modelr.web.urlargparse import rock_properties_type,\
-     earth_model_type
+from modelr.web.urlargparse import earth_model_type
+from modelr.api import Rock
 from modelr.constants import dt
-from agilegeo.avo import zoeppritz
+from bruges.reflection import zoeppritz
 
 from modelr.web.util import modelr_plot
-from agilegeo.wavelet import ricker
+from bruges.filters import ricker
 
-import modelr.modelbuilder as mb
-
-from svgwrite import rgb
 from StringIO import StringIO
 
 from PIL import Image
 short_description = 'Spatial view of an image-based model'
+
 
 def add_arguments(parser):
     
@@ -97,8 +94,8 @@ def run_script(args):
     args.reflectivity_method = zoeppritz
     args.title = 'Forward model - spatial cross section'
     args.wavelet = ricker
-    args.margin=1
-    args.slice='spatial'
+    args.margin = 1
+    args.slice = 'spatial'
     args.trace = 0
     
     model = urllib2.urlopen(args.model["image"]).read()
@@ -109,27 +106,21 @@ def run_script(args):
     
     ds = float(args.twt_range[1] - args.twt_range[0]) / float(model.shape[0])
     
-
+    x = (np.arange(0, model.shape[0]) * ds) + args.twt_range[0]
     
-    x = (np.arange(0, model.shape[0]) * ds) + args.twt_range[0] 
-    
-
     f = interp1d(x, model.astype("float"), axis=0, kind="nearest")
 
+    xnew = np.arange(args.twt_range[0], args.twt_range[1], dt * 1000.0)
 
-    
-    xnew = np.arange(args.twt_range[0],args.twt_range[1], dt * 1000.0)
+    xnew = xnew[np.where(xnew < np.amax(x))]
 
-    xnew = xnew[np.where(xnew < np.amax(x))] 
-    
-    
     model_new = f(xnew)
     
-    mapping = args.model["mapping"]
-
-    for colour in mapping:
-        rock = rock_properties_type(mapping[colour]["property"])
-        mapping[colour] = rock
+    mapping_in = args.model["mapping"]
+    mapping = {}
+    for cmap in mapping_in:
+        rock = Rock.from_json(cmap["rock"])
+        mapping[cmap["colour"]] = rock
 
     args.ntraces =  model_new.shape[1]
                                              

@@ -1,97 +1,92 @@
-'''
-Created on Apr 30, 2012
-
-@author: Sean Ross-Ross, Matt Hall, Evan Bianco
-'''
-import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
-from argparse import ArgumentParser
-from modelr.web.urlargparse import  wavelet_type
-from modelr.constants import WAVELETS 
-from modelr.web.defaults import default_parsers
-from agilegeo.util import noise_db, rms
 from modelr.reflectivity import do_convolve
+from modelr.api import ImageModelPersist, Seismic
+from bruges.noise import noise_db
+from bruges.filters import rotate_phase
 
-short_description = ("Convolution model with synthetic wavelets")
+import traceback
 
+import numpy as np
+import sys
 
-def add_arguments(parser):
-    
-    parser.add_argument('f', type=float, default=12,
-                        help="Frequency",
-                        interface='slider',
-                        range=[0,1000])
-    
-    parser.add_argument('phase', type=float, default=0.0,
-                        help="Phase",
-                        interface='slider',
-                        range=[-180,180])
+def run_script(json_payload):
+    """
+    Calculates synthetic seismic data from a convolution model.
+    Creates data for a cross section, angle gather, and wavelet gather.
 
-    parser.add_argument('snr', type=float, default=900,
-                        help="Signal:noise (dB)",
-                        interface='slider',
-                        range=[0,1000])
-    
-    parser.add_argument('wavelet',
-                        type=wavelet_type,
-                        help='Wavelet',
-                        default='ricker',
-                        choices=WAVELETS.keys())
-
-    """parser.add_argument('f2', type=float, default=15.0,
-                        help="Last center frequency of the wavelet bank")
-    parser.add_argument('f_res', type=str, default="octave",
-                        choices=["linear", "octave"],
-                        help="Wavelet bank resolution")
+    Inputs
+    json_payload = {"earth_model": See ImageModel in modelr.api,
+                    "seismic": See SeismicModel in modelr.api,
+                    "trace": The trace number to use for the angle and
+                             wavelet gathers.
+                    "offset": The offset index to use for the wavelet
+                              and seismic cross section.}
     """
 
-    """
-    parser.add_argument('theta1', type=float, default=0.0,
-                       help="First offset angle of the experiment")
-    parser.add_argument('theta2', type=float, default=0.0,
-                        help="Last offset angle of the experiment")
-    parser.add_argument('stack', type=int, default=1,
-                        help="Number of offset measurements")
-    """
-    """
-    parser.add_argument("sensor_spacing", type=float, default=1,
-                        help="Spacing of the sensors")
-    parser.add_argument("dt", type=float, default=0.001,
-                        help="Sampling rate of the experiment")
-    """
- 
-    return parser
+    try:
 
-def run_script(earth_model, seismic_model, theta=None,
-               traces=None, snr=50):
+        seismic = Seismic.from_json(json_payload["seismic"])
+        
+        # parse json
+        earth_model = ImageModelPersist.from_json(json_payload["earth_model"])
+        if earth_model.domain == 'time':
+            earth_model.resample(seismic.dt)
+       
+        trace = json_payload["trace"]
+        offset = json_payload["offset"]
 
-    if earth_model.reflectivity() is None:
+        # seismic
+        data = do_convolve(seismic.src,
+                           earth_model.rpp_t(seismic.dt)[..., offset]
+                           [..., np.newaxis]).squeeze()
 
-        if earth_model.units == "depth":
-            earth_model.depth2time(seismic_model.dt,
-                                   samples=seismic_model.n_sensors)
+        # Hard coded, could be changed to be part of the seismic object
+        f0 = 4.0
+        f1 = 100.0
+        f = np.logspace(max(np.log2(f0), np.log2(7)),
+                        np.log2(f1), 50,
+                        endpoint=True, base=2.0)
 
+        duration = .3
+        wavelets = rotate_phase(seismic.wavelet(duration, seismic.dt, f),
+                                seismic.phase)
+
+        wavelet_gather = do_convolve(wavelets,
+                                     earth_model.rpp_t(seismic.dt)
+                                     [..., trace, offset]
+                                     [..., np.newaxis, np.newaxis]).squeeze()
+        
+        offset_gather = do_convolve(
+            seismic.src, earth_model.rpp_t(seismic.dt)[..., trace, :]
+            [..., np.newaxis, ...]).squeeze()
+
+        if seismic.snr:
+            wavelet_gather += noise_db(wavelet_gather, seismic.snr)
+            offset_gather += noise_db(offset_gather, seismic.snr)
+            data += noise_db(data, seismic.snr)
+
+        # METADATA
+        metadata = {}
+        metadata["moduli"] = {}
+        for rock in earth_model.get_rocks():
+            if rock.name not in metadata["moduli"]:
+                metadata["moduli"][rock.name] = rock.moduli
+
+        if earth_model.domain == "time":
+            dt = earth_model.zrange / float(data.shape[0])
         else:
-            earth_model.resample(seismic_model.dt)
+            dt = seismic.dt * 1000.0
+            
+        payload = {"seismic": data.T.tolist(), "dt": dt,
+                   "min": float(np.amin(data)),
+                   "max": float(np.amax(data)),
+                   "dx": earth_model.dx,
+                   "wavelet_gather": wavelet_gather.T.tolist(),
+                   "offset_gather": offset_gather.T.tolist(),
+                   "f": f.tolist(), "theta": earth_model.theta,
+                   "metadata": metadata}
 
-        earth_model.update_reflectivity(seismic_model.offset_angles(),
-                                        seismic_model.n_sensors)
-
-
-    snr_scale = np.linspace(-50,50,1000)
-    wavelets = seismic_model.wavelets()
-
-    ref = earth_model.reflectivity(theta=theta)
+        return payload
     
-    noise = noise_db(ref, snr_scale[snr])
-
-    
-    ref += noise
-
-    seismic = do_convolve(wavelets,
-                          ref,
-                          traces=traces,
-                          theta=theta)
-
-    return seismic
+    except Exception as e:
+        traceback.print_exc(file=sys.stdout)
+        

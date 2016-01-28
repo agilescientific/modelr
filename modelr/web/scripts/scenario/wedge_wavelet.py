@@ -3,9 +3,7 @@ Created on Apr 30, 2012
 
 @author: Sean Ross-Ross, Matt Hall, Evan Bianco
 '''
-import numpy as np
 import matplotlib
-import matplotlib.pyplot as plt
 
 from argparse import ArgumentParser
 from modelr.web.defaults import default_parsers
@@ -14,61 +12,65 @@ from modelr.web.urlargparse import rock_properties_type
 from modelr.web.util import modelr_plot
 
 import modelr.modelbuilder as mb
-from agilegeo.avo import zoeppritz
-from agilegeo.wavelet import ricker
+from bruges.reflection import zoeppritz
+from bruges.filters import ricker
 from svgwrite import rgb
 
 # This is required for Script help
 short_description = 'Wavelet bank in a wedge model.'
+
+
 def add_arguments(parser):
     default_parser_list = [
-                           'base1','base2','overlay1','overlay2',
-                           'opacity','theta', 'colourmap'
-                           ]
-    
-    default_parsers(parser,default_parser_list)
-    
+        'base1', 'base2', 'overlay1', 'overlay2',
+        'opacity', 'theta', 'colourmap'
+    ]
+
+    default_parsers(parser, default_parser_list)
+
     parser.add_argument('Rock0',
-                        type=rock_properties_type, 
+                        type=rock_properties_type,
                         help='Upper rock type',
                         required=True,
                         default='2000,1000,2200'
                         )
-                        
+
     parser.add_argument('Rock1',
-                        type=rock_properties_type, 
+                        type=rock_properties_type,
                         help='Channel rock type',
                         required=True,
                         default='2200,1100,2300'
                         )
-    
+
     parser.add_argument('Rock2',
-                        type=rock_properties_type, 
+                        type=rock_properties_type,
                         help='Lower rock type',
                         required=False,
                         default='2500,1200,2600'
                         )
     parser.add_argument('trace',
-                        type=int, 
+                        type=int,
                         help='Trace location',
                         required=False,
                         default=150
                         )
-                                                                      
+
     parser.add_argument('xscale',
-                        type=int, 
-                        help='0 for linear, 2 for log base 2, 10 for log Base 10', 
+                        type=int,
+                        help=('0 for linear, 2 for log base 2, ' +
+                              '10 for log Base 10'),
                         required=True,
                         default='0'
                         )
 
     parser.add_argument('tslice',
-                        type=float, 
-                        help='time [ms] along which to plot instantaneous amplitude ',
+                        type=float,
+                        help=('time [ms] along which to plot ' +
+                              'instantaneous amplitude'),
                         required=True,
                         default=150
                         )
-                        
+
     return parser
 
 def run_script(args):
