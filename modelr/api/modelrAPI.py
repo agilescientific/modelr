@@ -253,7 +253,6 @@ class FluidSub1D(modelrAPI):
         """
         Returns vp, vs, rho using smith fluid substition
         """
-
         vp, vs, rho = smith_fluidsub(
             self.vp, self.vs, self.rho, self.phi,
             self.rhow, self.rhohc, self.Sw,
@@ -267,7 +266,6 @@ class FluidSub1D(modelrAPI):
         vp[~np.isfinite(vp)] = self.vp[~np.isfinite(vp)]
         vs[~np.isfinite(vs)] = self.vs[~np.isfinite(vs)]
         rho[~np.isfinite(rho)] = self.rho[~np.isfinite(rho)]
-
         return (vp, vs, rho)
 
     @property
