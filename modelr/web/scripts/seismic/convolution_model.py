@@ -46,6 +46,8 @@ def run_script(json_payload):
                         np.log2(f1), 50,
                         endpoint=True, base=2.0)
 
+        seismic.phase = np.pi * seismic.phase / 180
+
         duration = .3
         wavelets = rotate_phase(seismic.wavelet(duration, seismic.dt, f),
                                 seismic.phase)
