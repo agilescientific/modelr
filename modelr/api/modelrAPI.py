@@ -354,7 +354,7 @@ class Seismic(modelrAPI):
         self.wavelet_duration = wavelet_duration
         self.f = float(frequency)
         self.snr = snr
-        self.phase = phase
+        self.phase = phase * np.pi / 180.0
         self.theta = theta
 
     @property
