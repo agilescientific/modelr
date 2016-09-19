@@ -354,12 +354,13 @@ class Seismic(modelrAPI):
         self.wavelet_duration = wavelet_duration
         self.f = float(frequency)
         self.snr = snr
-        self.phase = phase * np.pi / 180.0
+        self.phase = phase
         self.theta = theta
 
     @property
     def src(self):
 
         return rotate_phase(
-            self.wavelet(self.wavelet_duration, self.dt, self.f), self.phase)
-
+            self.wavelet(self.wavelet_duration, self.dt, self.f),
+            self.phase,
+            degrees=True)

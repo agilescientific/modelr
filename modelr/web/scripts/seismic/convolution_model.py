@@ -46,11 +46,11 @@ def run_script(json_payload):
                         np.log2(f1), 50,
                         endpoint=True, base=2.0)
 
-        seismic.phase = np.pi * seismic.phase / 180.0
 
         duration = .3
         wavelets = rotate_phase(seismic.wavelet(duration, seismic.dt, f),
-                                seismic.phase)
+                                seismic.phase,
+                                degrees=True)
 
         wavelet_gather = do_convolve(wavelets,
                                      earth_model.rpp_t(seismic.dt)

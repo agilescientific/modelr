@@ -48,7 +48,7 @@ class SeismicModel(object):
         self.f_res = 'octave' # args.f_res
         self.stack = 50 # args.stack
 
-        self.phase = args.phase * np.pi / 180.0
+        self.phase = args.phase
         self.n_sensors = 350 # args.sensor_spacing
         self.dt = 0.002 # args.dt
 
@@ -72,7 +72,7 @@ class SeismicModel(object):
             wavelet = self.wavelet_model(wavelet_duration,
                                          self.dt, f)
 
-        return rotate_phase(wavelet, self.phase)
+        return rotate_phase(wavelet, self.phase, degrees=True)
 
     def offset_angles(self):
         return np.linspace(self.theta1, self.theta2, self.stack)
