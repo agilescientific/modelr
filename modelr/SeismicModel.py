@@ -19,8 +19,6 @@ class SeismicModel(object):
 
     def __init__(self, seismic_params, namespace):
         """
-        Class for handling seismic models.
-
         :param seismic_params: A SeismicModel JSON dictionary.
         :param namespace: Name space of the modeling script
         """

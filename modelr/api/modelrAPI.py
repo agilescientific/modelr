@@ -339,10 +339,6 @@ class FluidSub1D(modelrAPI):
 
 class Seismic(modelrAPI):
 
-    @classmethod
-    def get(self, keys):
-        pass
-
     def __init__(self, wavelet='ricker', dt=0.001,
                  frequency=20.0,
                  phase=0.0, snr=40.0, theta=[0],
@@ -356,6 +352,10 @@ class Seismic(modelrAPI):
         self.snr = snr
         self.phase = phase
         self.theta = theta
+
+    @classmethod
+    def get(self, keys):
+        pass
 
     @property
     def src(self):

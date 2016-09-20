@@ -30,26 +30,32 @@ def run_script(json_payload):
         earth_model = ImageModelPersist.from_json(json_payload["earth_model"])
         if earth_model.domain == 'time':
             earth_model.resample(seismic.dt)
-       
+
         trace = json_payload["trace"]
         offset = json_payload["offset"]
 
+        ph = seismic.phase
+        src = seismic.src
+
         # seismic
-        data = do_convolve(seismic.src,
+        data = do_convolve(src,
                            earth_model.rpp_t(seismic.dt)[..., offset]
                            [..., np.newaxis]).squeeze()
 
-        # Hard coded, could be changed to be part of the seismic object
+        # angle gather
+        offset_gather = do_convolve(src,
+                                    earth_model.rpp_t(seismic.dt)[..., trace, :]
+                                    [..., np.newaxis, ...]).squeeze()
+
+        # frequency gather
         f0 = 4.0
         f1 = 100.0
         f = np.logspace(max(np.log2(f0), np.log2(7)),
                         np.log2(f1), 50,
                         endpoint=True, base=2.0)
 
-
-        duration = .3
-        wavelets = rotate_phase(seismic.wavelet(duration, seismic.dt, f),
-                                seismic.phase,
+        wavelets = rotate_phase(seismic.wavelet(seismic.wavelet_duration, seismic.dt, f),
+                                ph,
                                 degrees=True)
 
         wavelet_gather = do_convolve(wavelets,
@@ -57,14 +63,11 @@ def run_script(json_payload):
                                      [..., trace, offset]
                                      [..., np.newaxis, np.newaxis]).squeeze()
         
-        offset_gather = do_convolve(
-            seismic.src, earth_model.rpp_t(seismic.dt)[..., trace, :]
-            [..., np.newaxis, ...]).squeeze()
-
+        # add noise if required
         if seismic.snr:
-            wavelet_gather += noise_db(wavelet_gather, seismic.snr)
-            offset_gather += noise_db(offset_gather, seismic.snr)
             data += noise_db(data, seismic.snr)
+            offset_gather += noise_db(offset_gather, seismic.snr)
+            wavelet_gather += noise_db(wavelet_gather, seismic.snr)
 
         # METADATA
         metadata = {}
@@ -78,13 +81,15 @@ def run_script(json_payload):
         else:
             dt = seismic.dt * 1000.0
             
-        payload = {"seismic": data.T.tolist(), "dt": dt,
+        payload = {"seismic": data.T.tolist(),
+                   "dt": dt,
                    "min": float(np.amin(data)),
                    "max": float(np.amax(data)),
                    "dx": earth_model.dx,
                    "wavelet_gather": wavelet_gather.T.tolist(),
                    "offset_gather": offset_gather.T.tolist(),
-                   "f": f.tolist(), "theta": earth_model.theta,
+                   "f": f.tolist(),
+                   "theta": earth_model.theta,
                    "metadata": metadata}
 
         return payload
