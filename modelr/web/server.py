@@ -462,8 +462,8 @@ class MyHandler(BaseHTTPRequestHandler):
 # If this doesn't work, an alternative would be to store the
 # full chain including the private key, as described here:
 # http://www.digicert.com/ssl-support/pem-ssl-creation.htm
-CERTFILE = '/etc/ssl/modelr/public.pem'
-KEYFILE = '/etc/ssl/private/private.pem'
+CERTFILE = '/etc/letsencrypt/live/www.modelr.org/cert.pem'
+KEYFILE = '/etc/letsencrypt/live/www.modelr.org/privkey.pem'
 
 
 def main():
