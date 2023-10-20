@@ -1,4 +1,4 @@
-from modelrAPI import modelrAPI, Rock
+from .modelrAPI import modelrAPI, Rock
 from modelr.reflectivity import reflectivity_array
 from PIL import Image
 import numpy as np
@@ -6,8 +6,8 @@ from numpy.random import randn
 import requests
 from scipy.interpolate import interp1d
 import h5py
-from StringIO import StringIO
-import md5
+from io import StringIO
+from hashlib import md5
 import json
 
 from bruges.transform import depth_to_time

@@ -16,7 +16,7 @@ import numpy as np
 from scipy.interpolate import interp1d
 
 from PIL import Image
-from StringIO import StringIO
+from io import StringIO
 
 from modelr.web.urlargparse import SendHelp,\
     URLArgumentParser, rock_properties_type

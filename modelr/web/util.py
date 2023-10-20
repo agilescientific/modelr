@@ -15,7 +15,8 @@ import numpy as np
 from scipy.signal import hilbert
 from modelr.reflectivity import get_reflectivity, do_convolve
 
-import StringIO
+import tempfile
+import io
 
 
 def np_float(value):
@@ -32,20 +33,21 @@ def get_figure_data(transparent=False):
     '''
     Return the current plot as a binary blob.
     '''
-
-    fig_path = StringIO.StringIO()
-    plt.savefig(fig_path, transparent=transparent)
+    from io import BytesIO
+    fig_path = BytesIO()
+    plt.savefig(fig_path, transparent=transparent, format='png')
     plt.close()
 
     fig_path.seek(0)
 
-    data = fig_path.buf
+    data = fig_path.getvalue()
 
-    # Alternative approach to do it in memory rather than on disk
+    # # Alternative approach to do it in memory rather than on disk
     # image_file = tempfile.SpooledTemporaryFile(suffix='.png')
     # plt.savefig(image_file, format='png')
     # data = image_file.read()
     # image_file.close()
+
     return data
 
 
@@ -176,7 +178,7 @@ model to physical rock properties.
     # Do convolution
     if ( ( duration / dt ) > ( reflectivity.shape[0] ) ):
         duration = reflectivity.shape[0] * dt
-    wavelet = args.wavelet( duration, dt, f )
+    wavelet = args.wavelet( duration, dt, f, return_t=False )
     if( wavelet.ndim == 1 ): wavelet = \
       wavelet.reshape( ( wavelet.size, 1 ) )
      
@@ -463,11 +465,11 @@ model to physical rock properties.
     fig.tight_layout()
 
     metadata = {"steady state": np_float(xax[-steady_state]),
-                "tuning max. loc.": np.float(max_loc),
-                "tuning min. loc.": np.float(min_loc),
-                "tuning max. amp.": np_float(amax_tune),
-                "tuning min. amp.": np_float(amin_tune),
-                "tuning avg. amp.": np_float(aun_tuned)}
+                "tuning max. loc.": float(max_loc),
+                "tuning min. loc.": float(min_loc),
+                "tuning max. amp.": float(amax_tune),
+                "tuning min. amp.": float(amin_tune),
+                "tuning avg. amp.": float(aun_tuned)}
                 
     
     return get_figure_data(), metadata
@@ -792,12 +794,12 @@ def multi_plot(model, reflectivity, seismic, traces,
 if __name__ == '__main__':
     dt =0.001
     gain = 1
-    temp = ricker(0.256,dt,25)
+    temp, _ = ricker(0.256,dt,25)
     ntraces=50
     data =np.zeros((temp.shape[0],ntraces))
 
     for i in range(ntraces):
-        temp = ricker(0.256,dt,25+10*i)
+        temp, _ = ricker(0.256,dt,25+10*i)
         data[:,i] = temp
     
     wiggle(data,dt,skipt=1,gain=gain)  

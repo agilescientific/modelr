@@ -1,12 +1,12 @@
 from jinja2 import Environment, PackageLoader
-from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from argparse import ArgumentParser
 from os import listdir
 from os.path import isfile, join, dirname
 
 import os
 
-from urlparse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs
 from modelr.web.urlargparse import SendHelp, ArgumentError, \
     URLArgumentParser
 import traceback
@@ -14,7 +14,7 @@ import json
 import multiprocessing as mp
 import ssl
 import socket
-from SocketServer import ThreadingMixIn
+from socketserver import ThreadingMixIn
 
 from modelr.EarthModel import EarthModel
 from modelr.SeismicModel import SeismicModel
@@ -26,7 +26,7 @@ import base64
 
 # import cProfile as prof
 
-1# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 '''
 ===================
 modelr.web.server
@@ -61,7 +61,7 @@ class MyHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        self.wfile.write("Shutting down...")
+        self.wfile.write("Shutting down...".encode())
 
         self.server._BaseServer__shutdown_request = True
 
@@ -93,7 +93,7 @@ class MyHandler(BaseHTTPRequestHandler):
 
         namespace = {}
         with open(script_path, 'r') as fd:
-            exec fd.read() in namespace
+            exec(fd.read(), namespace)
 
         return namespace
 
@@ -165,7 +165,7 @@ class MyHandler(BaseHTTPRequestHandler):
 
                 data = json.dumps(all_scripts)
 
-                self.wfile.write(data)
+                self.wfile.write(data.encode())
                 return
 
             # Outputs a base64 image and an auxillary json structure
@@ -183,11 +183,11 @@ class MyHandler(BaseHTTPRequestHandler):
                 plot_generator = ModelrScript(parameters, namespace)
 
                 # Run in sub-process to prevent memory hogging
-                p = mp.Process(target=self.run_script_jpg_json,
-                               args=(plot_generator,))
-                p.start()
-                p.join()
-                return
+                # p = mp.Process(target=self.run_script_jpg_json,
+                #                args=(plot_generator,))
+                # p.start()
+                # p.join()
+                self.run_script_jpg_json(plot_generator)
 
             # Outputs json data
             elif uri.path == '/data.json':
@@ -195,7 +195,7 @@ class MyHandler(BaseHTTPRequestHandler):
                 script = parameters.pop("script", None)
                 script_type = parameters.pop("type", None)
 
-                print "running", script, script_type
+                print("running", script, script_type)
                 payload = json.loads(parameters.pop("payload")[0])
 
                 # Get the namespace
@@ -207,10 +207,11 @@ class MyHandler(BaseHTTPRequestHandler):
                 script_main = namespace["run_script"]
 
                 # Run in sub-process to prevent memory hogging
-                p = mp.Process(target=self.run_script_json,
-                               args=(script_main, payload))
-                p.start()
-                p.join()
+                # p = mp.Process(target=self.run_script_json,
+                #                args=(script_main, payload))
+                # p.start()
+                # p.join()
+                self.run_script_json(script_main, payload)
 
             # Output only an image
             elif uri.path == '/plot.jpeg':
@@ -225,12 +226,15 @@ class MyHandler(BaseHTTPRequestHandler):
                 short_description = namespace.get('short_description',
                                                   'No description')
                 # "parameters", parameters
-                p = mp.Process(target=self.run_script_jpg,
-                               args=(script[0], script_main,
+                # p = mp.Process(target=self.run_script_jpg,
+                #                args=(script[0], script_main,
+                #                      add_arguments, short_description,
+                #                      parameters))
+                # p.start()
+                # p.join()
+                self.run_script_jpg(script[0], script_main,
                                      add_arguments, short_description,
-                                     parameters))
-                p.start()
-                p.join()
+                                     parameters)
 
             else:
                 self.send_error(404, 'File Not Found: %s' % self.path)
@@ -245,10 +249,10 @@ class MyHandler(BaseHTTPRequestHandler):
 
             tb = '</br>\n'.join(tb)
 
-            self.wfile.write('<b>Python Error</b></br>')
-            self.wfile.write('<div>')
-            self.wfile.write(tb)
-            self.wfile.write('</div>')
+            self.wfile.write('<b>Python Error</b></br>'.encode())
+            self.wfile.write('<div>'.encode())
+            self.wfile.write(tb.encode())
+            self.wfile.write('</div>'.encode())
             raise
 
     def run_script_jpg(self, script, script_main, add_arguments,
@@ -275,22 +279,22 @@ class MyHandler(BaseHTTPRequestHandler):
             # parameters
             html = template.render(script=script, parser=parser,
                                    parameters=parameters)
-            self.wfile.write(html)
+            self.wfile.write(html.encode())
             return
         except ArgumentError as err:
             self.send_response(400)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
 
-            self.wfile.write('<p><b>Error:</b> %s</p>'
-                             % (err.args[0],))
-            self.wfile.write(parser.help_html)
+            self.wfile.write(('<p><b>Error:</b> %s</p>'
+                             % (err.args[0],)).encode())
+            self.wfile.write(parser.help_html.encode())
             return
 
         jpeg_data = script_main(args)[0]
 
         self.send_response(200)
-        self.send_header('Content-type', 'image/jpeg')
+        self.send_header('Content-type', 'image/png')
         self.end_headers()
 
         self.wfile.write(jpeg_data)
@@ -309,7 +313,7 @@ class MyHandler(BaseHTTPRequestHandler):
         data = script(payload)
 
         # Write response
-        self.wfile.write(json.dumps(data))
+        self.wfile.write(json.dumps(data).encode())
 
     def run_script_jpg_json(self, plot_generator):
         """
@@ -335,7 +339,7 @@ class MyHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
         # Write response
-        self.wfile.write(data)
+        self.wfile.write(data.encode())
 
     def get_available_scripts(self, script_type=None):
         '''
@@ -359,13 +363,15 @@ class MyHandler(BaseHTTPRequestHandler):
 
                 namespace = {}
                 with open(join(scripts_dir, script), 'r') as fd:
-                    exec fd.read() in namespace
+                    exec(fd.read(), namespace)
+
+
                 short_doc = namespace.get('short_description',
                                           'No doc')
                 # script, namespace
                 available_scripts.append((script, short_doc))
-            except Exception, e:
-                print script, e
+            except Exception as e:
+                print(script, e)
 
         return available_scripts
 
@@ -382,7 +388,7 @@ class MyHandler(BaseHTTPRequestHandler):
 
         scripts = self.get_available_scripts(['scenario'])
         html = template.render(msg=msg, available_scripts=scripts)
-        self.wfile.write(html)
+        self.wfile.write(html.encode())
 
     def do_POST(self):
         """
@@ -429,11 +435,12 @@ class MyHandler(BaseHTTPRequestHandler):
             #            {},
             #            'profile.test')
 
-            p = mp.Process(target=self.run_script_jpg_json,
-                           args=(forward_model,))
+            # p = mp.Process(target=self.run_script_jpg_json,
+            #                args=(forward_model,))
 
-            p.start()
-            p.join()
+            # p.start()
+            # p.join()
+            self.run_script_jpg_json(forward_model)
 
             return
 
@@ -458,8 +465,10 @@ class MyHandler(BaseHTTPRequestHandler):
 # If this doesn't work, an alternative would be to store the
 # full chain including the private key, as described here:
 # http://www.digicert.com/ssl-support/pem-ssl-creation.htm
-CERTFILE = '/etc/ssl/modelr/public.pem'
-KEYFILE = '/etc/ssl/private/private.pem'
+# CERTFILE = '/etc/ssl/modelr/public.pem'
+# KEYFILE = '/etc/ssl/private/private.pem'
+CERTFILE = 'cert.pem'
+KEYFILE = 'key.pem'
 
 
 def main():
@@ -503,11 +512,11 @@ def main():
         server.jenv = Environment(loader=PackageLoader('modelr',
                                                        'web/templates'))
 
-        print 'started httpserver...'
+        print('started httpserver...')
         server.serve_forever()
 
     except KeyboardInterrupt:
-        print '^C received, shutting down server'
+        print('^C received, shutting down server')
         server.socket.close()
 
 

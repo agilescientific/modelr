@@ -73,12 +73,12 @@ def add_arguments(parser):
 def run_script(args):
     
     matplotlib.interactive(False)
-
+    from functools import partial
     args.ntraces = 300
     args.pad = 150
     args.reflectivity_method = zoeppritz
     args.title = 'Wedge model - spatial cross section'
-    args.wavelet = ricker
+    args.wavelet = partial(ricker, return_t=False)
     args.wiggle_skips = 10
     args.aspect_ratio = 1
     args.margin=1

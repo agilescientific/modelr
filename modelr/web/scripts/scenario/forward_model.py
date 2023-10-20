@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib
 from scipy.interpolate import interp1d
 
-import urllib2
+from urllib.request import urlopen
 
 from argparse import ArgumentParser
 from modelr.web.defaults import default_parsers
@@ -19,7 +19,7 @@ from bruges.reflection import zoeppritz
 from modelr.web.util import modelr_plot
 from bruges.filters import ricker
 
-from StringIO import StringIO
+from io import StringIO
 
 from PIL import Image
 short_description = 'Spatial view of an image-based model'
@@ -90,15 +90,16 @@ def add_arguments(parser):
 def run_script(args):
     
     matplotlib.interactive(False)
+    from functools import partial
 
     args.reflectivity_method = zoeppritz
     args.title = 'Forward model - spatial cross section'
-    args.wavelet = ricker
+    args.wavelet = partial(ricker, return_t=False)
     args.margin = 1
     args.slice = 'spatial'
     args.trace = 0
     
-    model = urllib2.urlopen(args.model["image"]).read()
+    model = urlopen(args.model["image"]).read()
     model = Image.open(StringIO(model)).convert("RGB")
     model = np.asarray(model)
     

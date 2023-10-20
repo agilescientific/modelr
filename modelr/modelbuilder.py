@@ -12,7 +12,7 @@ import subprocess
 import tempfile
 import urllib
 import time
-from cStringIO import StringIO
+from io import StringIO
 import os
 import requests
 import png
@@ -47,14 +47,13 @@ def png2array(infile):
     :param infile: Path to PNG file
     :returns: a NumPy array.
     """
-    
-    png_reader = png.Reader(filename=infile.name)
-    img = png_reader.asDirect()
+    from PIL import Image
+    img = Image.open(infile)
 
-    im = np.hstack(itertools.imap(np.uint8, img[2]))
-    im = np.reshape(im, (img[1], img[0], 3) )
+    # im = np.hstack(itertools.imap(np.uint8, img[2]))
+    # im = np.reshape(im, (img[1], img[0], 3) )
         
-    return im
+    return np.asarray(img)[..., :3]
     
 def svg2png(infile, layers):
     """
@@ -73,36 +72,41 @@ def svg2png(infile, layers):
     """
 
     # Map the allowed colourmap for the output PNG
-    cmapfile = tempfile.NamedTemporaryFile( suffix='.png',
-                                            delete=True )
-    cmap = png.from_array( layers,mode='RGB' )
-    cmap.save( cmapfile.name )
+    # cmapfile = tempfile.NamedTemporaryFile( suffix='.png',
+    #                                         delete=True )
+    # cmap = png.from_array( layers,mode='RGB' )
+    # cmap.save( cmapfile.name )
 
     # Make the intermediate and output tempfiles
-    tmpfile = tempfile.NamedTemporaryFile( suffix='.png',
-                                           delete=True )
-    outfile = tempfile.NamedTemporaryFile( suffix='.png',
-                                           delete=True )
+    # tmpfile = tempfile.NamedTemporaryFile( suffix='.png',
+    #                                        delete=True )
+    # outfile = tempfile.NamedTemporaryFile( suffix='.png',
+    #                                        delete=True )
+    import io
+    outfile = io.BytesIO()
+    import cairosvg
+    cairosvg.svg2png(infile.getvalue(), write_to=outfile)
 
     # Convert to PNG
-    command = ['convert',
-               '+antialias',
-               '-interpolate', 'integer',
-                infile.name,
-                tmpfile.name]
-    subprocess.call(command)
+    # command = ['convert',
+    #            '+antialias',
+    #            '-interpolate', 'integer',
+    #             infile.name,
+    #             tmpfile.name]
+    # subprocess.call(command)
 
     # Make sure no new colours were added(ie colour interpolation)
-    command = ['convert', tmpfile.name,
-               '+dither','-remap', cmapfile.name,
-                outfile.name]
-    subprocess.call(command)
+    # command = ['convert', tmpfile.name,
+    #            '+dither','-remap', cmapfile.name,
+    #             outfile.name]
+    # subprocess.call(command)
+
 
     outfile.seek(0)
 
     # Cleanup
-    tmpfile.close()
-    cmapfile.close()
+    # tmpfile.close()
+    # cmapfile.close()
     
     return outfile
     
@@ -199,6 +203,8 @@ def channel_svg(pad, thickness, traces, layers):
     """    
     
     outfile = tempfile.NamedTemporaryFile(suffix='.svg', delete=True )
+    import io
+    outfile = io.StringIO()
     
     top_colour = rgb( layers[0][0],layers[0][1], layers[0][2] )
     body_colour = rgb( layers[1][0],layers[1][1], layers[1][2] )
@@ -208,7 +214,7 @@ def channel_svg(pad, thickness, traces, layers):
     width = traces
     height = 2.5*pad + thickness
     
-    dwg = svgwrite.Drawing(outfile.name, size=(width,height),
+    dwg = svgwrite.Drawing('should_not_exist.svg', size=(width,height),
                            profile='tiny')
     
     # Draw the bottom layer
@@ -230,7 +236,9 @@ def channel_svg(pad, thickness, traces, layers):
     dwg.add(top_layer)
     
     # Do this for a file
-    dwg.save()
+    # Doing this way (not dwg.save() after instantiating Drawing with outfile)
+    # lets us use a StringIO instead of a tempfile
+    dwg.write(outfile)
     
     return outfile
      
@@ -266,11 +274,13 @@ def body_svg(pad, margin, left, right, traces, layers):
     
     outfile = tempfile.NamedTemporaryFile(suffix='.svg',
                                           delete=True)
+    import io
+    outfile = io.StringIO()
     
     width = traces
     height = 2 * pad + max(left[1],right[1])
     
-    dwg = svgwrite.Drawing(outfile.name, size=(width,height),
+    dwg = svgwrite.Drawing('should_not_exist.svg', size=(width,height),
                            profile='tiny')
     
     # Draw the first layer
@@ -307,7 +317,7 @@ def body_svg(pad, margin, left, right, traces, layers):
     dwg.add(wedge)
     
     # Do this for a file
-    dwg.save()
+    dwg.write(outfile)
 
     
     return outfile
@@ -369,23 +379,3 @@ def channel(pad, thickness, traces, layers):
     infile.close()
 
     return arr
-
-# No scripts call these, but we'll leave them here for now;
-# they are both just special cases of body. Note, they have not been
-# updated and are likely broken.  
-def wedge(pad, margin, thickness, traces, layers):
-    colours = len(layers)
-    if fluid:
-        colours += 1
-    #We are just usin body_svg for everything
-    return svg2array(body_svg(pad, margin, (0,0), (0,thickness),
-                              traces, layers, fluid),colours)
-    
-def tilted(pad, thickness, traces, layers, fluid=None):
-    colours = len(layers)
-    if fluid:
-        colours += 1
-    return svg2array(body_svg(pad, 0, (0,thickness),
-                              (1.5*thickness,2.5*thickness), traces,
-                              layers, fluid),colours)
-    

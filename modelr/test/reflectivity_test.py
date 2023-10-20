@@ -86,7 +86,7 @@ class ReflectivityTest(unittest.TestCase):
         duration = .2
         f = (20,40,60)
         
-        wavelets = ricker( duration, dt, f )
+        wavelets, _ = ricker( duration, dt, f )
         
         con = do_convolve( wavelets, data )
 

@@ -41,7 +41,7 @@ def main():
         long_description=long_description,
         license='BSD',
         install_requires=['agilegeo==0.1.4','jinja2', 'pypng', 'requests',
-                          'svgwrite'],
+                          'svgwrite', 'cairosvg'],
         entry_points={
                     'console_scripts': [
                             'modelr-server = modelr.web.server:main',

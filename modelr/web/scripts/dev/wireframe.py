@@ -2,7 +2,7 @@ import h5py
 from PIL import Image
 from argparse import ArgumentParser
 import numpy as np
-import StringIO
+import io
 
 from agilegeo.wavelet import ricker
 from modelr.web.scripts.scenario.segment import image_segment
@@ -29,7 +29,7 @@ def add_arguments(parser):
 def run_script(args):
 
     # ## Make a new string buffer
-    # in_buf = StringIO.StringIO()
+    # in_buf = io.StringIO()
 
     # ## Write the decoded string into the buffer
     # buf.write(base64.b64decode(args.wireframe))

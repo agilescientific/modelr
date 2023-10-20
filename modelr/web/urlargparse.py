@@ -6,7 +6,7 @@ modelr.web.urlparse
 .. seealso:: http://docs.python.org/dev/library/argparse.html
 '''
 import sys
-from urlparse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs
 from argparse import Namespace
 import json
 from modelr.constants import WAVELETS

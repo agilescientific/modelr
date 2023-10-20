@@ -67,12 +67,12 @@ def run_script(args):
         transparent = False
     else:
         transparent = True"""
-
+    from functools import partial
     args.ntraces = 300
     args.pad = 150
     args.reflectivity_method = zoeppritz
     args.title = 'Channel Model - Spatial Cross Section'
-    args.wavelet = ricker
+    args.wavelet = partial(ricker, return_t=False)
     args.wiggle_skips = 10
     args.aspect_ratio = 1
     args.thickness = 50

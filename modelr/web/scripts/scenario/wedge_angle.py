@@ -4,6 +4,7 @@ Created on Apr 30, 2012
 @author: Sean Ross-Ross, Matt Hall, Evan Bianco
 '''
 import matplotlib
+from functools import partial
 
 from argparse import ArgumentParser
 from modelr.web.defaults import default_parsers
@@ -35,7 +36,7 @@ def add_arguments(parser):
 
     parser.add_argument('Rock1',
                         type=rock_properties_type,
-                        help='Channel rock type',
+                        help='Wedge rock type',
                         required=True,
                         default='2200,1100,2300'
                         )
@@ -78,7 +79,7 @@ def run_script(args):
     args.reflectivity_method = zoeppritz
     args.title = 'Wedge - AVA gather'
     args.theta = (0.0, 50, .5)
-    args.wavelet = ricker
+    args.wavelet = partial(ricker, return_t=False)
     args.wiggle_skips = 10
     args.aspect_ratio = 1
     args.left = (0, 0)

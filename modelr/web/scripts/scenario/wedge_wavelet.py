@@ -4,6 +4,7 @@ Created on Apr 30, 2012
 @author: Sean Ross-Ross, Matt Hall, Evan Bianco
 '''
 import matplotlib
+from functools import partial
 
 from argparse import ArgumentParser
 from modelr.web.defaults import default_parsers
@@ -85,7 +86,7 @@ def run_script(args):
     args.pad = 150
     args.reflectivity_method = zoeppritz
     args.title = 'Wedge model - wavelet cross section' 
-    args.wavelet = ricker
+    args.wavelet = partial(ricker, return_t=False)
     args.wiggle_skips = 10
     args.aspect_ratio = 1
     args.left = (0,0)

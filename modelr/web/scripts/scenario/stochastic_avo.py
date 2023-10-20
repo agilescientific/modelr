@@ -142,7 +142,6 @@ def run_script(args):
         
     plt.figure(figsize = (5,13))
     plt.subplots_adjust(bottom=0.1, left=0.1, top = 1, right=0.9)
-    plt.hold(True)
     if args.plot_type == 'dashboard':
         G = matplotlib.gridspec.GridSpec(9,2, hspace=0.5)
         shift=3
@@ -171,14 +170,12 @@ def run_script(args):
             plt.hist( prop_samples[i], nbins, 
                      facecolor = upper_color,
                      histtype='stepfilled', 
-                     alpha = 0.25
-                     ,normed = True
+                     alpha = 0.25, density = True
                      )
             plt.hist( prop_samples[i+(3)], nbins, 
                      facecolor = lower_color, 
                      histtype='stepfilled',
-                     alpha = 0.25
-                     ,normed = True
+                     alpha = 0.25,density = True
                      )
             temp = plt.gca()
             
@@ -239,7 +236,6 @@ def run_script(args):
     # ax_1 the AVO plot
     #
     plt.subplot(G[0:3,:])
-    plt.hold(True)
     critical_angles = []
     for i in range( args.iterations -1):
         # Do the AVO template as an underlay
@@ -452,9 +448,8 @@ def run_script(args):
                             
     # ax_2 the AB plot
     plt.subplot(G[0+shift:3+shift,:])
-    plt.hold(True)
     
-    max_ang = args.max_angle  # Max ang for computing gradient
+    max_ang = int(args.max_angle)  # Max ang for computing gradient
 
     for i in range( args.iterations -1):
 
