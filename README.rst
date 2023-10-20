@@ -18,38 +18,32 @@ Welcome to modelr server
     :target: https://github.com/agile-geoscience/modelr
     :alt: GitHub issues
 
-This is the documentation for the back-end modelr server software. You might be looking for `modelr.io <https://www.modelr.io/>`_
+This is the documentation for the back-end modelr server software. Modelr server was a Google-Charts-like API for geophysics; there is no longer a live instance. Submit tasks via a URL, or go to ``https://localhost:8081/plot.jpeg`` for a set of forms.
 
-Modelr server is a Google-Charts-like API for geophysics! Submit tasks via a URL.
+Run:
+
+* ``python setup.py install``
+* ``modelr-server -p 8081 --local True``
 
 Example: 
 
-* `<https://www.modelr.org/plot.jpeg?script=wedge_spatial.py&theta=0&f=25&colourmap=Greys&base1=variable-density&overlay1=none&base2=earth-model&overlay2=wiggle&opacity=0.5&Rock0=3000.0%2C1600.0%2C2500.0%2C%0A%09%20%2050.0%2C%2050.0%2C%2050.0&Rock1=2770.0%2C1780.0%2C2185.0%2C%0A%09%20%2050.0%2C%2050.0%2C%2050.0&Rock2=3000.0%2C1600.0%2C2500.0%2C%0A%09%20%2050.0%2C%2050.0%2C%2050.0&tslice=0.15&scale=1.0%2C99&type=scenario>`_
-
-Full interface
-+++++++++++++
-* There's a full interface for modelr at `modelr.io <https://www.modelr.io/>`_
+``https://localhost:8081/plot.jpeg?script=wedge_spatial.py&theta=0&f=25&colourmap=Greys&base1=variable-density&overlay1=none&base2=earth-model&overlay2=wiggle&opacity=0.5&Rock0=3000.0%2C1600.0%2C2500.0%2C%0A%09%20%2050.0%2C%2050.0%2C%2050.0&Rock1=2770.0%2C1780.0%2C2185.0%2C%0A%09%20%2050.0%2C%2050.0%2C%2050.0&Rock2=3000.0%2C1600.0%2C2500.0%2C%0A%09%20%2050.0%2C%2050.0%2C%2050.0&tslice=0.15&scale=1.0%2C99&type=scenario``
 
 Prerequisites
 ++++++++++++++++
 
-You will need scientific python (numpy, scipy, matplotlib), which come with
-Enthought Canopy:  `<http://www.enthought.com>`_
+You will need to generate a cert file on the server:
 
-They can alternatively be installed via pip, aptitude, ports, or sourced from git.
+``openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout key.pem -out cert.pem``
 
-Additionally, ImageMagick will need to be installed in order to handle conversion of svg to png. Binaries can be downloaded from the ImageMagick website: 
-`<http://www.imagemagick.org/script/binary-releases.php#unix>`_
+You will need scientific python (numpy, scipy, matplotlib). Other python packages that will be automatically installed during setup:
 
-ImageMagick can also be installed via ports or aptitude.
-
-Other python packages that will be automatically installed during setup:
-
-* agilegeo
+* bruges
 * pypng
 * requests
 * jinja2
 * svgwrite
+* cairo
 
 Links
 +++++++++++
